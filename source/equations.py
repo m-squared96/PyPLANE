@@ -106,11 +106,17 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
+    def eval_system(self, t, r):
+        """
+        Evaluates system (dr/dt, r == phase space vector) at time t and position r
+        """
+        return [eqn.eval_rhs(t, r) for eqn in self.equations]
+    
     def solve(self, t, r0):
-        def f(t, r):
-            return [eqn.eval_rhs(t, r) for eqn in self.equations]
-        
-        return odeint(f, r0, t, tfirst=True)
+        """
+        Solves system given a value of r at t=0. Returns 
+        """
+        return odeint(self.eval_system, r0, t, tfirst=True)
 
 def example():
     # 2-D
