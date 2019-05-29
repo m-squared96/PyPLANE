@@ -112,6 +112,21 @@ class SystemOfEquations(object):
         
         return odeint(f, r0, t, tfirst=True)
 
+    def phasespace_eval(self, t, r):
+        """
+        Allows for the phase space to be evaluated using the SOE class.
+        
+        Example:
+        >>> import numpy as np
+        >>> from equations import SystemOfEquations
+        >>> sys = SystemOfEquations(phase_coords, eqns, params=params)
+        >>> X, Y = np.meshgrid(np.arange(-10, 10, 1), np.arange(-10, 10, 1))
+        >>> U, V = sys.phasespace_eval(t=None, r=np.array([X,Y]))
+
+        Added by Mikie on 29/05/2019
+        """
+        return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)
+
 def example():
     # 2-D
     phase_coords = ['x', 'y']
