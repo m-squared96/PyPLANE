@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
 
-from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 from sympy.utilities.lambdify import lambdify
 from sympy import symbols
 from sympy.parsing.sympy_parser import (
@@ -106,11 +106,11 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
-    def solve(self, t, r0):
+    def solve(self, t_span, r0, method="LSODA"):
         def f(t, r):
             return [eqn.eval_rhs(t, r) for eqn in self.equations]
         
-        return odeint(f, r0, t, tfirst=True)
+        return solve_ivp(f, t_span, r0, method="RK45", max_step=0.05)
 
     def phasespace_eval(self, t, r):
         """
