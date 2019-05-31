@@ -106,11 +106,8 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
-    def solve(self, t_span, r0, method="LSODA"):
-        def f(t, r):
-            return [eqn.eval_rhs(t, r) for eqn in self.equations]
-        
-        return solve_ivp(f, t_span, r0, method="RK45", max_step=0.05)
+    def solve(self, t_span, r0, method="LSODA"):        
+        return solve_ivp(self.phasespace_eval, t_span, r0, method="RK45", max_step=0.02)
 
     def phasespace_eval(self, t, r):
         """
