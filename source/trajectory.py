@@ -46,36 +46,35 @@ class PhaseSpacePlotter(object):
         Function called upon mouse click event
         """
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if event.inaxes == self.ax and self.trajectory_count < self.max_trajectories:
+        if not (event.inaxes == self.ax and self.trajectory_count < self.max_trajectories):
+            return
             
-            # Mouse click coordinates
-            x_event = event.xdata
-            y_event = event.ydata
+        # Mouse click coordinates
+        x_event = event.xdata
+        y_event = event.ydata
 
-            self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
+        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
-            # Trajectory production and plotting
-            solution_f = self.system.solve((0, self.time_f), r0=np.array([x_event, y_event]))
-            solution_r = self.system.solve((0, self.time_r), r0=np.array([x_event, y_event]))
+        # Trajectory production and plotting
+        solution_f = self.system.solve((0, self.time_f), r0=np.array([x_event, y_event]))
+        solution_r = self.system.solve((0, self.time_r), r0=np.array([x_event, y_event]))
 
-            for sol in (solution_f, solution_r):
-                # self.trajectory = self.ax.plot(sol[:, 0], sol[:, 1], c="#0066FF")
-                # self.fig.canvas.draw()
-                if sol.success:
-                    # sol.y has shape (2, n_points) for a 2-D system
-                    # print(len(sol.t))
-                    x = sol.y[0,:]
-                    y = sol.y[1,:]
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
-                    self.fig.canvas.draw()
-                else:
-                    print(sol.message)
+        for sol in (solution_f, solution_r):
+            # self.trajectory = self.ax.plot(sol[:, 0], sol[:, 1], c="#0066FF")
+            # self.fig.canvas.draw()
+            if sol.success:
+                # sol.y has shape (2, n_points) for a 2-D system
+                # print(len(sol.t))
+                x = sol.y[0,:]
+                y = sol.y[1,:]
+                self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                self.fig.canvas.draw()
+            else:
+                print(sol.message)
 
 
-            self.trajectory_count += 1
+        self.trajectory_count += 1
 
-        else:
-            pass
 
 
 def example():
