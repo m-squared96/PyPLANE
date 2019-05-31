@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 from equations import SystemOfEquations
 
@@ -56,15 +55,8 @@ class PhaseSpacePlotter(object):
             self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
             # Trajectory production and plotting
-            t1 = time.time()
             solution_f = self.system.solve((0, self.time_f), r0=np.array([x_event, y_event]))
-            t2 = time.time()
-            print(t2 - t1)
-
-            t1 = time.time()
             solution_r = self.system.solve((0, self.time_r), r0=np.array([x_event, y_event]))
-            t2 = time.time()
-            print(t2 - t1)
 
             for sol in (solution_f, solution_r):
                 # self.trajectory = self.ax.plot(sol[:, 0], sol[:, 1], c="#0066FF")
@@ -93,8 +85,8 @@ def example():
         'cx + dy'
     ]
     params = {'a': -1, 'b': 5, 'c': -4, 'd': -2}
-    t_f = 10
-    t_r = -10
+    t_f = 5
+    t_r = -5
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     plotter = PhaseSpacePlotter(sys, t_f, t_r)
