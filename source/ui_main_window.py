@@ -1,7 +1,7 @@
 """
 Draws the main window of the PyPLANE Qt5 interface
 """
-from sys import argv, exit
+import sys
 from PyQt5.QtWidgets import (
     QLineEdit, # Text boxes
     QPushButton, # Buttons
@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QApplication
 )
+from equations import SystemOfEquations
+from trajectory import PhaseSpacePlotter
 
 class MainWindow(QWidget):
     """
@@ -25,8 +27,10 @@ class MainWindow(QWidget):
         Initalizes UI
         TODO: Make this docstring not state the bleedin' obvious
         """
+        
+        self.setWindowTitle("PyPLANE")
         self.show()
 
-PyPLANE = QApplication(argv)
+PyPLANE = QApplication(sys.argv)
 PyPLANE_main_window = MainWindow()
-exit(PyPLANE.exec_())
+sys.exit(PyPLANE.exec_())
