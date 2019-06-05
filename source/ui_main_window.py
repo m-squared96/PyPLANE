@@ -24,8 +24,7 @@ class MainWindow(QWidget):
 
     def init_ui(self):
         """
-        Initalizes UI
-        TODO: Make this docstring not state the bleedin' obvious
+        Adds components (buttons, text boxes, etc.) and draws the window
         """
         
         self.setWindowTitle("PyPLANE")
