@@ -3,12 +3,13 @@ Draws the main window of the PyPLANE Qt5 interface
 """
 import sys
 from PyQt5.QtWidgets import (
-    QLineEdit, # Text boxes
-    QPushButton, # Buttons
-    QVBoxLayout, # For arranging Widgets
-    QHBoxLayout,
+    QApplication,
     QWidget,
-    QApplication
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QHBoxLayout
 )
 from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter
@@ -26,10 +27,34 @@ class MainWindow(QWidget):
         """
         Adds components (buttons, text boxes, etc.) and draws the window
         """
-        
-        self.setWindowTitle("PyPLANE")
+
+        # Window Features
+        self.x_prime_label = QLabel("x' =")
+        self.y_prime_label = QLabel("y' =")
+        self.x_prime_entry = QLineEdit()
+        self.y_prime_entry = QLineEdit()
+
+        # Layouts
+        x_prime_layout = QHBoxLayout()
+        y_prime_layout = QHBoxLayout()
+
+        x_prime_layout.addWidget(self.x_prime_label)
+        x_prime_layout.addWidget(self.x_prime_entry)
+        y_prime_layout.addWidget(self.y_prime_label)
+        y_prime_layout.addWidget(self.y_prime_entry)
+
+        # Arrange Layouts
+        overall_layout = QVBoxLayout()
+        overall_layout.addLayout(x_prime_layout)
+        overall_layout.addLayout(y_prime_layout)
+
+        self.setLayout(overall_layout)
+
+        # Set window title and show
+        self.setWindowTitle("PyPLANE Main Window")
         self.show()
 
-PyPLANE = QApplication(sys.argv)
-PyPLANE_main_window = MainWindow()
-sys.exit(PyPLANE.exec_())
+if __name__ == "__main__":
+    PyPLANE = QApplication(sys.argv)
+    PyPLANE_main_window = MainWindow()
+    sys.exit(PyPLANE.exec_())
