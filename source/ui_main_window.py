@@ -33,20 +33,27 @@ class MainWindow(QWidget):
         self.y_prime_label = QLabel("y' =")
         self.x_prime_entry = QLineEdit()
         self.y_prime_entry = QLineEdit()
+        self.plot_button = QPushButton("Plot")
 
         # Layouts
         x_prime_layout = QHBoxLayout()
         y_prime_layout = QHBoxLayout()
+        button_layout = QHBoxLayout()
 
         x_prime_layout.addWidget(self.x_prime_label)
         x_prime_layout.addWidget(self.x_prime_entry)
         y_prime_layout.addWidget(self.y_prime_label)
         y_prime_layout.addWidget(self.y_prime_entry)
+        
+        button_layout.addStretch()
+        button_layout.addWidget(self.plot_button)
+        button_layout.addStretch()
 
         # Arrange Layouts
         overall_layout = QVBoxLayout()
         overall_layout.addLayout(x_prime_layout)
         overall_layout.addLayout(y_prime_layout)
+        overall_layout.addLayout(button_layout)
 
         self.setLayout(overall_layout)
 
