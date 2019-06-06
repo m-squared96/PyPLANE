@@ -34,14 +34,25 @@ class MainWindow(QWidget):
         # Window Features
         self.x_prime_label = QLabel("x' =")
         self.y_prime_label = QLabel("y' =")
+        self.equals_sign = QLabel("=")
         self.x_prime_entry = QLineEdit()
         self.y_prime_entry = QLineEdit()
         self.plot_button = QPushButton("Plot")
+
+        # Parameter inputs
+        self.param_0_name, self.param_0_val = QLineEdit(), QLineEdit()
 
         # Layouts
         x_prime_layout = QHBoxLayout()
         y_prime_layout = QHBoxLayout()
         button_layout = QHBoxLayout()
+
+        param_0_layout = QHBoxLayout()
+        param_1_layout = QHBoxLayout()
+
+        param_0_layout.addWidget(self.param_0_name)
+        param_0_layout.addWidget(self.equals_sign)
+        param_0_layout.addWidget(self.param_0_val)
 
         x_prime_layout.addWidget(self.x_prime_label)
         x_prime_layout.addWidget(self.x_prime_entry)
@@ -52,11 +63,21 @@ class MainWindow(QWidget):
         button_layout.addWidget(self.plot_button)
         button_layout.addStretch()
 
+
+
         # Arrange Layouts
-        overall_layout = QVBoxLayout()
-        overall_layout.addLayout(x_prime_layout)
-        overall_layout.addLayout(y_prime_layout)
-        overall_layout.addLayout(button_layout)
+        plotting_layout = QVBoxLayout()
+        plotting_layout.addLayout(x_prime_layout)
+        plotting_layout.addLayout(y_prime_layout)
+        plotting_layout.addLayout(button_layout)
+
+        parameters_layout = QVBoxLayout()
+        parameters_layout.addWidget(QLabel("Parameters"))
+        parameters_layout.addLayout(param_0_layout)
+
+        overall_layout = QHBoxLayout()
+        overall_layout.addLayout(parameters_layout)
+        overall_layout.addLayout(plotting_layout)
 
         self.setLayout(overall_layout)
 
@@ -75,9 +96,14 @@ class MainWindow(QWidget):
         f_2 = self.y_prime_entry.text()
         #print(f_1, f_2)
 
-        phase_coords = ['x', 'y']
+        phase_coords = ["x", "y"]
         eqns = [f_1, f_2]
-        params = {'a': -1, 'b': 5, 'c': -4, 'd': -2}
+
+        if self.param_0_name.text():
+            params = {self.param_0_name.text() : float(self.param_0_val.text())}
+        else:
+            params = {}
+
         t_f = 5
         t_r = -5
 
