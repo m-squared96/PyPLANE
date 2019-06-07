@@ -39,8 +39,8 @@ class MainWindow(QWidget):
 
         # Parameter inputs
         self.parameter_input_boxes = {}
-        no_of_params = 4
-        for param_num in range(no_of_params):
+        self.no_of_params = 4
+        for param_num in range(self.no_of_params):
             self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
 
@@ -50,7 +50,7 @@ class MainWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.parameter_layouts = {}
-        for param_num in range(no_of_params):
+        for param_num in range(self.no_of_params):
             self.parameter_layouts["param_"+str(param_num)+"_layout"] = QHBoxLayout()
             self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.parameter_input_boxes["param_"+str(param_num)+"_name"])
             self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.equals_sign)
@@ -73,7 +73,7 @@ class MainWindow(QWidget):
 
         parameters_layout = QVBoxLayout()
         parameters_layout.addWidget(QLabel("Parameters"))
-        for param_num in range(no_of_params):
+        for param_num in range(self.no_of_params):
             parameters_layout.addLayout(self.parameter_layouts["param_"+str(param_num)+"_layout"])
 
         overall_layout = QVBoxLayout()
@@ -95,18 +95,20 @@ class MainWindow(QWidget):
         """
         f_1 = self.x_prime_entry.text()
         f_2 = self.y_prime_entry.text()
-        #print(f_1, f_2)
 
         phase_coords = ["x", "y"]
         eqns = [f_1, f_2]
         
         # Grab parameters
         passed_params = {}
+        for param_num in range(self.no_of_params):
+            if self.parameter_input_boxes["param_"+str(param_num)+"_name"].text():
+                passed_params[self.parameter_input_boxes["param_"+str(param_num)+"_name"].text()] = float(self.parameter_input_boxes["param_"+str(param_num)+"_val"].text())
 
         t_f = 5
         t_r = -5
 
-        system_of_eqns = SystemOfEquations(phase_coords, eqns, params=params)
+        system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
         plotter = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
         
 
