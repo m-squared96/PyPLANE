@@ -1,9 +1,7 @@
 """
 Draws the main window of the PyPLANE Qt5 interface
 """
-# TODO: Take user input for params
-# TODO: Take user input for phase_coords
-# TODO: Take user input for t_f and t_r
+
 import sys
 from PyQt5.QtWidgets import (
     QApplication,
@@ -40,7 +38,10 @@ class MainWindow(QWidget):
         self.plot_button = QPushButton("Plot")
 
         # Parameter inputs
-        self.param_0_name, self.param_0_val = QLineEdit(), QLineEdit()
+        self.parameter_input_boxes = {}
+        for param_num in range(4):
+            self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
+            self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
 
         # Layouts
         x_prime_layout = QHBoxLayout()
@@ -50,9 +51,9 @@ class MainWindow(QWidget):
         param_0_layout = QHBoxLayout()
         param_1_layout = QHBoxLayout()
 
-        param_0_layout.addWidget(self.param_0_name)
+        param_0_layout.addWidget(self.parameter_input_boxes["param_0_name"])
         param_0_layout.addWidget(self.equals_sign)
-        param_0_layout.addWidget(self.param_0_val)
+        param_0_layout.addWidget(self.parameter_input_boxes["param_0_val"])
 
         x_prime_layout.addWidget(self.x_prime_label)
         x_prime_layout.addWidget(self.x_prime_entry)
@@ -98,11 +99,9 @@ class MainWindow(QWidget):
 
         phase_coords = ["x", "y"]
         eqns = [f_1, f_2]
-
-        if self.param_0_name.text():
-            params = {self.param_0_name.text() : float(self.param_0_val.text())}
-        else:
-            params = {}
+        
+        # Grab parameters
+        passed_params = {}
 
         t_f = 5
         t_r = -5
