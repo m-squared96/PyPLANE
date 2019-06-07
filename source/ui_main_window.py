@@ -39,7 +39,8 @@ class MainWindow(QWidget):
 
         # Parameter inputs
         self.parameter_input_boxes = {}
-        for param_num in range(4):
+        no_of_params = 4
+        for param_num in range(no_of_params):
             self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
 
@@ -48,12 +49,12 @@ class MainWindow(QWidget):
         y_prime_layout = QHBoxLayout()
         button_layout = QHBoxLayout()
 
-        param_0_layout = QHBoxLayout()
-        param_1_layout = QHBoxLayout()
-
-        param_0_layout.addWidget(self.parameter_input_boxes["param_0_name"])
-        param_0_layout.addWidget(self.equals_sign)
-        param_0_layout.addWidget(self.parameter_input_boxes["param_0_val"])
+        self.parameter_layouts = {}
+        for param_num in range(no_of_params):
+            self.parameter_layouts["param_"+str(param_num)+"_layout"] = QHBoxLayout()
+            self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.parameter_input_boxes["param_"+str(param_num)+"_name"])
+            self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.equals_sign)
+            self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.parameter_input_boxes["param_"+str(param_num)+"_val"])
 
         x_prime_layout.addWidget(self.x_prime_label)
         x_prime_layout.addWidget(self.x_prime_entry)
@@ -64,21 +65,20 @@ class MainWindow(QWidget):
         button_layout.addWidget(self.plot_button)
         button_layout.addStretch()
 
-
-
         # Arrange Layouts
-        plotting_layout = QVBoxLayout()
-        plotting_layout.addLayout(x_prime_layout)
-        plotting_layout.addLayout(y_prime_layout)
-        plotting_layout.addLayout(button_layout)
+        equation_entry_layout = QVBoxLayout()
+        equation_entry_layout.addLayout(x_prime_layout)
+        equation_entry_layout.addLayout(y_prime_layout)
+        equation_entry_layout.addLayout(button_layout)
 
         parameters_layout = QVBoxLayout()
         parameters_layout.addWidget(QLabel("Parameters"))
-        parameters_layout.addLayout(param_0_layout)
+        for param_num in range(no_of_params):
+            parameters_layout.addLayout(self.parameter_layouts["param_"+str(param_num)+"_layout"])
 
-        overall_layout = QHBoxLayout()
+        overall_layout = QVBoxLayout()
+        overall_layout.addLayout(equation_entry_layout)
         overall_layout.addLayout(parameters_layout)
-        overall_layout.addLayout(plotting_layout)
 
         self.setLayout(overall_layout)
 
