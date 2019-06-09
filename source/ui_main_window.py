@@ -12,6 +12,10 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout
 )
+from matplotlib.backends.backend_qt4agg import(
+    FigureCanvasQTAgg as FigCanvas,
+    NavigationToolbar2QT as NavToolbar
+)
 from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter
 
@@ -88,6 +92,9 @@ class MainWindow(QWidget):
         # Set window title and show
         self.setWindowTitle("PyPLANE Main Window")
         self.show()
+    
+    def draw_plot(self):
+        pass
 
     def plot_button_clicked(self):
         """
