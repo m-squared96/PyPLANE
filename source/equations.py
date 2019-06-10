@@ -133,12 +133,13 @@ def example():
     ]
     params = {'a': -1, 'b': 5, 'c': -4, 'd': -2}
     r0 = [0.4, -0.3]
-    t = np.linspace(0, 40, 5000)
+    t_span = (0, 40)
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     print(sys)
-    sol = sys.solve(t, r0)
-    plt.plot(sol[:,0], sol[:,1])
+    sol = sys.solve(t_span, r0)
+    print(sol)
+    plt.plot(sol.y[0], sol.y[1])
     plt.show()
 
 if __name__ == "__main__":
