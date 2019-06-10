@@ -11,8 +11,14 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
-    QHBoxLayout
+    QHBoxLayout,
 )
+
+from PyQt5.QtGui import(
+    QPixmap,
+    QIcon
+)
+
 from matplotlib.backends.backend_qt4agg import(
     FigureCanvasQTAgg as FigCanvas,
     NavigationToolbar2QT as NavToolbar
@@ -47,6 +53,9 @@ class MainWindow(QMainWindow):
         self.x_prime_entry = QLineEdit()
         self.y_prime_entry = QLineEdit()
         self.plot_button = QPushButton("Plot")
+        self.plt_plot = QLabel()
+
+        self.plt_plot.setPixmap(QPixmap("source/plot_placeholder.png"))
 
         # Parameter inputs
         self.parameter_input_boxes = {}
@@ -87,9 +96,13 @@ class MainWindow(QMainWindow):
         for param_num in range(self.no_of_params):
             parameters_layout.addLayout(self.parameter_layouts["param_"+str(param_num)+"_layout"])
 
-        overall_layout = QVBoxLayout()
-        overall_layout.addLayout(equation_entry_layout)
-        overall_layout.addLayout(parameters_layout)
+        inputs_layout = QVBoxLayout()
+        inputs_layout.addLayout(equation_entry_layout)
+        inputs_layout.addLayout(parameters_layout)
+
+        overall_layout = QHBoxLayout()
+        overall_layout.addLayout(inputs_layout)
+        overall_layout.addWidget(self.plt_plot)
 
         cent_widget.setLayout(overall_layout)
 
