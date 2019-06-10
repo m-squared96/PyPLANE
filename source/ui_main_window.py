@@ -5,6 +5,7 @@ Draws the main window of the PyPLANE Qt5 interface
 import sys
 from PyQt5.QtWidgets import (
     QApplication,
+    QMainWindow,
     QWidget,
     QLabel,
     QLineEdit,
@@ -19,7 +20,9 @@ from matplotlib.backends.backend_qt4agg import(
 from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter
 
-class MainWindow(QWidget):
+VERSION = "0.0-pre-apha"
+
+class MainWindow(QMainWindow):
     """
     TODO: Insert docstring
     """
@@ -32,6 +35,10 @@ class MainWindow(QWidget):
         """
         Adds components (buttons, text boxes, etc.) and draws the window
         """
+
+        # Define central widget
+        cent_widget = QWidget(self)
+        self.setCentralWidget(cent_widget)
 
         # Window Features
         self.x_prime_label = QLabel("x' =")
@@ -84,13 +91,13 @@ class MainWindow(QWidget):
         overall_layout.addLayout(equation_entry_layout)
         overall_layout.addLayout(parameters_layout)
 
-        self.setLayout(overall_layout)
+        cent_widget.setLayout(overall_layout)
 
         # Button Actions
         self.plot_button.clicked.connect(self.plot_button_clicked)
 
         # Set window title and show
-        self.setWindowTitle("PyPLANE Main Window")
+        self.setWindowTitle("PyPLANE "+VERSION)
         self.show()
     
     def draw_plot(self):
