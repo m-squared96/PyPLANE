@@ -107,7 +107,7 @@ class SystemOfEquations(object):
         return "\n".join(s)
     
     def solve(self, t_span, r0, method="LSODA"):        
-        return solve_ivp(self.phasespace_eval, t_span, r0, method="RK45", max_step=0.02)
+        return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
 
     def phasespace_eval(self, t, r):
         """
