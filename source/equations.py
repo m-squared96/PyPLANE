@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
 
-from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 from sympy.utilities.lambdify import lambdify
 from sympy import symbols
 from sympy.parsing.sympy_parser import (
@@ -77,7 +77,7 @@ class SystemOfEquations(object):
     """
     System of ODE's. Handles solving and evaluating the ODE's.
     """
-    def __init__(self, phase_coords, ode_expr_strings, params=None):
+    def __init__(self, phase_coords, ode_expr_strings, params):
         # ode_expr_strings is a dictionary that maps the dependent variable 
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
@@ -106,11 +106,23 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
-    def solve(self, t, r0):
-        def f(t, r):
-            return [eqn.eval_rhs(t, r) for eqn in self.equations]
+    def solve(self, t_span, r0, method="LSODA"):        
+        return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
+
+    def phasespace_eval(self, t, r):
+        """
+        Allows for the phase space to be evaluated using the SOE class.
         
-        return odeint(f, r0, t, tfirst=True)
+        Example:
+        >>> import numpy as np
+        >>> from equations import SystemOfEquations
+        >>> sys = SystemOfEquations(phase_coords, eqns, params=params)
+        >>> X, Y = np.meshgrid(np.arange(-10, 10, 1), np.arange(-10, 10, 1))
+        >>> U, V = sys.phasespace_eval(t=None, r=np.array([X,Y]))
+
+        Added by Mikie on 29/05/2019
+        """
+        return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)
 
 def example():
     # 2-D
@@ -121,12 +133,13 @@ def example():
     ]
     params = {'a': -1, 'b': 5, 'c': -4, 'd': -2}
     r0 = [0.4, -0.3]
-    t = np.linspace(0, 40, 5000)
+    t_span = (0, 40)
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     print(sys)
-    sol = sys.solve(t, r0)
-    plt.plot(sol[:,0], sol[:,1])
+    sol = sys.solve(t_span, r0)
+    print(sol)
+    plt.plot(sol.y[0], sol.y[1])
     plt.show()
 
 if __name__ == "__main__":
