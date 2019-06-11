@@ -77,22 +77,27 @@ class SystemOfEquations(object):
     """
     System of ODE's. Handles solving and evaluating the ODE's.
     """
-    def __init__(self, phase_coords, ode_expr_strings, params=None):
+    def __init__(self, system_coords, ode_expr_strings, params=None):
         # ode_expr_strings is a dictionary that maps the dependent variable 
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
         self.ode_expr_strings = ode_expr_strings
-        self.phase_coords = phase_coords
+        self.system_coords = system_coords
+        self.dims = len(self.system_coords)
 
         # generate the list of expressions representing the system.
-        # The elements in phase_coords and ode_expr_strings are assumed
+        # The elements in system_coords and ode_expr_strings are assumed
         # to correspond to each other in the order given.
-        # i.e. phase_coords[i] pairs with ode_expr_strings[i]
+        # i.e. system_coords[i] pairs with ode_expr_strings[i]
         self.equations = []
-        for i in range(len(phase_coords)):
-            coord = phase_coords[i]
+        for i in range(len(system_coords)):
+            coord = system_coords[i]
             expr = ode_expr_strings[i]
-            self.equations.append(DifferentialEquation(coord, phase_coords, expr))
+            self.equations.append(DifferentialEquation(coord, system_coords, expr))
+
+        self.var_function_pairs = {}
+        for var, eqn in zip(self.system_coords, self.equations):
+            self.var_function_pairs[var] = eqn
         
         # Set the parameters in the ODEs
         self.params = params
@@ -106,10 +111,12 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
-    def solve(self, t_span, r0, method="LSODA"):        
-        return solve_ivp(self.phasespace_eval, t_span, r0, method="RK45", max_step=0.02)
+    def solve(self, t_span, r0, method="LSODA"):
+        def functions(t, r):
+            return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)    
+        return solve_ivp(functions, t_span, r0, method="RK45", max_step=0.02)
 
-    def phasespace_eval(self, t, r):
+    def phasespace_eval(self, phase_coords, r):
         """
         Allows for the phase space to be evaluated using the SOE class.
         
@@ -122,11 +129,16 @@ class SystemOfEquations(object):
 
         Added by Mikie on 29/05/2019
         """
-        return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)
+        for p in phase_coords:
+            if not (p in self.system_coords): return
+
+        phase_list = tuple(self.var_function_pairs[p] for p in phase_coords)
+        return tuple(eqn.eval_rhs(t=None, r=r) for eqn in phase_list)
+
 
 def example():
     # 2-D
-    phase_coords = ['x', 'y']
+    system_coords = ['x', 'y']
     eqns = [
         'ax + by',
         'cx + dy'
@@ -135,7 +147,7 @@ def example():
     r0 = [0.4, -0.3]
     t = np.linspace(0, 40, 5000)
 
-    sys = SystemOfEquations(phase_coords, eqns, params=params)
+    sys = SystemOfEquations(system_coords, eqns, params=params)
     print(sys)
     sol = sys.solve(t, r0)
     plt.plot(sol[:,0], sol[:,1])
