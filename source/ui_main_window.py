@@ -92,13 +92,14 @@ class MainWindow(QMainWindow):
         equation_entry_layout.addLayout(button_layout)
 
         parameters_layout = QVBoxLayout()
-        parameters_layout.addWidget(QLabel("Parameters"))
+        parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
         for param_num in range(self.no_of_params):
             parameters_layout.addLayout(self.parameter_layouts["param_"+str(param_num)+"_layout"])
 
         inputs_layout = QVBoxLayout()
         inputs_layout.addLayout(equation_entry_layout)
         inputs_layout.addLayout(parameters_layout)
+        inputs_layout.addStretch()
 
         overall_layout = QHBoxLayout()
         overall_layout.addLayout(inputs_layout)
