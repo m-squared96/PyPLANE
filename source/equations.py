@@ -106,8 +106,8 @@ class SystemOfEquations(object):
             s.append("{}".format(eqn))
         return "\n".join(s)
     
-    def solve(self, t_span, r0): #, method="LSODA"):        
-        return solve_ivp(self.phasespace_eval, t_span, r0, method="RK45", max_step=0.02)
+    def solve(self, t_span, r0, method="LSODA"):        
+        return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
 
     def phasespace_eval(self, t, r):
         """
@@ -133,12 +133,13 @@ def example():
     ]
     params = {'a': -1, 'b': 5, 'c': -4, 'd': -2}
     r0 = [0.4, -0.3]
-    t = np.linspace(0, 40, 5000)
+    t_span = (0, 40)
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     print(sys)
-    sol = sys.solve(t, r0)
-    plt.plot(sol[:,0], sol[:,1])
+    sol = sys.solve(t_span, r0)
+    print(sol)
+    plt.plot(sol.y[0], sol.y[1])
     plt.show()
 
 if __name__ == "__main__":
