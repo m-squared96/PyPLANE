@@ -19,10 +19,13 @@ from PyQt5.QtGui import(
     QIcon
 )
 
-from matplotlib.backends.backend_qt4agg import(
+from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigCanvas,
     NavigationToolbar2QT as NavToolbar
 )
+
+import matplotlib.pyplot as plt
+
 from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter
 
@@ -52,13 +55,11 @@ class MainWindow(QMainWindow):
         self.x_prime_entry = QLineEdit()
         self.y_prime_entry = QLineEdit()
         self.plot_button = QPushButton("Plot")
-        self.plt_plot = QLabel()
-
-        self.plt_plot.setPixmap(QPixmap("source/plot_placeholder.png"))
+        self.phase_plot = FigCanvas(plt.figure())
 
         # Parameter inputs
         self.parameter_input_boxes = {}
-        self.no_of_params = 4
+        self.no_of_params = 5
         for param_num in range(self.no_of_params):
             self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
@@ -103,7 +104,7 @@ class MainWindow(QMainWindow):
 
         overall_layout = QHBoxLayout()
         overall_layout.addLayout(inputs_layout)
-        overall_layout.addWidget(self.plt_plot)
+        overall_layout.addWidget(self.phase_plot)
 
         cent_widget.setLayout(overall_layout)
 
