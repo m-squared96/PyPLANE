@@ -49,7 +49,6 @@ class MainWindow(QMainWindow):
         # Window Features
         self.x_prime_label = QLabel("x' =")
         self.y_prime_label = QLabel("y' =")
-        self.equals_sign = QLabel("=")
         self.x_prime_entry = QLineEdit()
         self.y_prime_entry = QLineEdit()
         self.plot_button = QPushButton("Plot")
@@ -72,6 +71,7 @@ class MainWindow(QMainWindow):
         self.parameter_layouts = {}
         for param_num in range(self.no_of_params):
             self.parameter_layouts["param_"+str(param_num)+"_layout"] = QHBoxLayout()
+            self.equals_sign = QLabel("=")
             self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.parameter_input_boxes["param_"+str(param_num)+"_name"])
             self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.equals_sign)
             self.parameter_layouts["param_"+str(param_num)+"_layout"].addWidget(self.parameter_input_boxes["param_"+str(param_num)+"_val"])
@@ -113,9 +113,6 @@ class MainWindow(QMainWindow):
         # Set window title and show
         self.setWindowTitle("PyPLANE "+VERSION)
         self.show()
-    
-    def draw_plot(self):
-        pass
 
     def plot_button_clicked(self):
         """

@@ -39,7 +39,7 @@ class PhaseSpacePlotter(object):
         self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
         self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
 
-        plt.show()
+        #plt.show()
 
     def onclick(self, event):
         """
