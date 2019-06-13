@@ -4,7 +4,10 @@ import sympy as sp
 
 from scipy.integrate import solve_ivp
 from sympy.utilities.lambdify import lambdify
-from sympy import symbols
+from sympy import (
+    symbols,
+    Matrix,
+)
 from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
@@ -102,7 +105,7 @@ class SystemOfEquations(object):
                 eqn.set_param(p, val)
         
         # Calculate the symbolic Jacobian of the system
-        r = sp.Matrix([equation.expr for equation in self.equations])
+        r = Matrix([equation.expr for equation in self.equations])
         self.jacobian = r.jacobian(self.phase_coord_symbols)
         # print(f"Jacobian: {self.jac}")
     
@@ -129,6 +132,20 @@ class SystemOfEquations(object):
         Added by Mikie on 29/05/2019
         """
         return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)
+    
+    def eval_jacobian(self, r):
+        """
+        Evaluates the symbolic Jacobian of the system at the point r
+        """
+        # The subs method substitutes one symbol or value for another
+        jacobian = self.jacobian.subs(self.params)
+        print(jacobian)
+        jacobian = jacobian.subs(
+            list(zip(self.phase_coord_symbols, r))
+        )
+        print(zip(self.phase_coord_symbols, r))
+        print(jacobian)
+        return jacobian
 
 def example():
     # 2-D
@@ -143,6 +160,11 @@ def example():
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     print(sys)
+
+    pt = [0.5, 0.5]
+    jac = sys.eval_jacobian(pt)
+    print(f"Jacobian evaluated at {pt}: {jac}")
+
     sol = sys.solve(t_span, r0)
     print(sol)
     plt.plot(sol.y[0], sol.y[1])
