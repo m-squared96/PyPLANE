@@ -83,6 +83,7 @@ class SystemOfEquations(object):
         # differential equation.
         self.ode_expr_strings = ode_expr_strings
         self.phase_coords = phase_coords
+        self.phase_coord_symbols = symbols(phase_coords)
 
         # generate the list of expressions representing the system.
         # The elements in phase_coords and ode_expr_strings are assumed
@@ -99,6 +100,11 @@ class SystemOfEquations(object):
         for p, val in params.items():
             for eqn in self.equations:
                 eqn.set_param(p, val)
+        
+        # Calculate the symbolic Jacobian of the system
+        r = sp.Matrix([equation.expr for equation in self.equations])
+        self.jacobian = r.jacobian(self.phase_coord_symbols)
+        # print(f"Jacobian: {self.jac}")
     
     def __str__(self):
         s = ["{}".format(self.__repr__())]
