@@ -1,28 +1,13 @@
 """
 Create a sample canvas that used to plot in the main window
 """
-from matplotlib.backends.backend_qt5agg import(
-    FigureCanvasQTAgg as FigCanvas,
-    NavigationToolbar2QT as NavToolbar
-)
 
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-import random
 
-class DefaultCanvas(FigCanvas):
+from trajectory import PhaseSpacePlotter
+from equations import SystemOfEquations
+
+class DefaultCanvas(PhaseSpacePlotter):
     
     def __init__(self):
-        self.fig = Figure()
-        self.axes = self.fig.add_subplot(111)
-        FigCanvas.__init__(self, self.fig)
-        
-        self.plot()
-    
-    def plot(self):
-        data = [random.random() for i in range(25)]
-        self.axes.plot(data)
-        self.draw()
-        
-if __name__ == "__main__":
-    test = PlotCanvas()
+        self.default_system = SystemOfEquations(["x", "y"], ["y", "-x"], params={})
+        super().__init__(self.default_system, 5, -5)
