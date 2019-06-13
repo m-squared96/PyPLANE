@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import random
 
-class PlotCanvas(FigCanvas):
+class DefaultCanvas(FigCanvas):
     
     def __init__(self):
         self.fig = Figure()

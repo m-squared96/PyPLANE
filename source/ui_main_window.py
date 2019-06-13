@@ -19,12 +19,12 @@ from PyQt5.QtGui import(
     QIcon
 )
 
-from ui_canvas import PlotCanvas
+from ui_default_canvas import DefaultCanvas
 
-from matplotlib.backends.backend_qt5agg import(
-    FigureCanvasQTAgg as FigCanvas,
-    NavigationToolbar2QT as NavToolbar
-)
+#from matplotlib.backends.backend_qt5agg import(
+#    FigureCanvasQTAgg as FigCanvas,
+#    NavigationToolbar2QT as NavToolbar
+#)
 
 import matplotlib.pyplot as plt
 
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.x_prime_entry = QLineEdit("y")
         self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
-        self.phase_plot = PlotCanvas()
+        self.phase_plot = DefaultCanvas()
         
         # Parameter inputs
         self.parameter_input_boxes = {}
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        #self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
+        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
         self.phase_plot.plot()
         
 
