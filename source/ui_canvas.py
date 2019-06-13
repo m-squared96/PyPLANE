@@ -20,7 +20,7 @@ class PlotCanvas(FigCanvas):
         self.plot()
     
     def plot(self):
-        data = (1, 2, 3, 4, 5)
+        data = [random.random() for i in range(25)]
         self.axes.plot(data)
         self.draw()
         

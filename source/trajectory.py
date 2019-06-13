@@ -22,6 +22,8 @@ class PhaseSpacePlotter(FigCanvas):
         self.ymin, self.ymax = yaxis_lims
         self.ax.set_xlim(self.xmin, self.xmax)
         self.ax.set_ylim(self.ymin, self.ymax)
+        
+        FigCanvas.__init__(self, self.fig)
 
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
@@ -41,7 +43,7 @@ class PhaseSpacePlotter(FigCanvas):
         self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
         self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
 
-        #plt.show()
+        self.draw()
 
     def onclick(self, event):
         """

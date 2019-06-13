@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
         self.phase_plot = PlotCanvas()
-
+        
         # Parameter inputs
         self.parameter_input_boxes = {}
         self.no_of_params = 5
@@ -137,8 +137,8 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
-        self.phase_plot.draw()
+        #self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
+        self.phase_plot.plot()
         
 
 if __name__ == "__main__":
