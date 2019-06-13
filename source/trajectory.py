@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+from matplotlib.figure import Figure
 from equations import SystemOfEquations
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
 
-class PhaseSpacePlotter(object):
+
+class PhaseSpacePlotter(FigCanvas):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
     a phase plot. Individual trajectories evaluated upon click event.
@@ -14,7 +16,7 @@ class PhaseSpacePlotter(object):
 
         self.system = system # SOE object
         self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
-        self.fig = plt.figure() 
+        self.fig = Figure() 
         self.ax = self.fig.add_subplot(111)
         self.xmin, self.xmax = xaxis_lims
         self.ymin, self.ymax = yaxis_lims

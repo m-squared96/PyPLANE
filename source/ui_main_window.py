@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
-    QHBoxLayout,
+    QHBoxLayout
 )
 
 from PyQt5.QtGui import(
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        plotter = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
+        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
         self.phase_plot.draw()
         
 

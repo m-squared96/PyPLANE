@@ -13,9 +13,9 @@ import random
 class PlotCanvas(FigCanvas):
     
     def __init__(self):
-        fig = Figure()
-        self.axes = fig.add_subplot(111)
-        FigCanvas.__init__(self, fig)
+        self.fig = Figure()
+        self.axes = self.fig.add_subplot(111)
+        FigCanvas.__init__(self, self.fig)
         
         self.plot()
     
