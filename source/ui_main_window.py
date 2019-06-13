@@ -19,6 +19,8 @@ from PyQt5.QtGui import(
     QIcon
 )
 
+from ui_canvas import PlotCanvas
+
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigCanvas,
     NavigationToolbar2QT as NavToolbar
@@ -52,10 +54,10 @@ class MainWindow(QMainWindow):
         # Window Features
         self.x_prime_label = QLabel("x' =")
         self.y_prime_label = QLabel("y' =")
-        self.x_prime_entry = QLineEdit()
-        self.y_prime_entry = QLineEdit()
+        self.x_prime_entry = QLineEdit("y")
+        self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
-        self.phase_plot = FigCanvas(plt.figure())
+        self.phase_plot = PlotCanvas()
 
         # Parameter inputs
         self.parameter_input_boxes = {}

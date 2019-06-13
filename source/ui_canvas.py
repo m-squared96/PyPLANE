@@ -7,19 +7,20 @@ from matplotlib.backends.backend_qt5agg import(
 )
 
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import random
 
 class PlotCanvas(FigCanvas):
     
     def __init__(self):
-        fig = plt.figure()
-        self.axes = plt.add_subplot(111)
-        super().__init__(self, fig)
+        fig = Figure()
+        self.axes = fig.add_subplot(111)
+        FigCanvas.__init__(self, fig)
         
         self.plot()
     
     def plot(self):
-        data = [random.randint for i in range(40)]
+        data = (1, 2, 3, 4, 5)
         self.axes.plot(data)
         self.draw()
         
