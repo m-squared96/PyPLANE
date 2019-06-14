@@ -139,12 +139,7 @@ class SystemOfEquations(object):
         """
         # The subs method substitutes one symbol or value for another
         jacobian = self.jacobian.subs(self.params)
-        print(jacobian)
-        jacobian = jacobian.subs(
-            list(zip(self.phase_coord_symbols, r))
-        )
-        print(zip(self.phase_coord_symbols, r))
-        print(jacobian)
+        jacobian = jacobian.subs(list(zip(self.phase_coord_symbols, r)))
         return jacobian
 
 def example():
