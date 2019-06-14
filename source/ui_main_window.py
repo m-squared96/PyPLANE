@@ -21,11 +21,6 @@ from PyQt5.QtGui import(
 
 from ui_default_canvas import DefaultCanvas
 
-#from matplotlib.backends.backend_qt5agg import(
-#    FigureCanvasQTAgg as FigCanvas,
-#    NavigationToolbar2QT as NavToolbar
-#)
-
 import matplotlib.pyplot as plt
 
 from equations import SystemOfEquations
@@ -137,7 +132,7 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
+        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)   
         
 
 if __name__ == "__main__":
