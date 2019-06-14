@@ -149,6 +149,14 @@ class SystemOfEquations(object):
         
         jacobian = self.eval_jacobian(r) if eval else self.jacobian
         sp.pprint(jacobian)
+    
+    def eigenvects(self, r=None):
+        """
+        Calculates the eigenvalues and eigenvalues of the system's Jacobian
+        """
+
+        jacobian = self.eval_jacobian(r) if r is not None else self.jacobian
+        return jacobian.eigenvects(simplify=True)
 
 
 def example():
@@ -168,6 +176,9 @@ def example():
     r = [0.5, 0.5]
     print(f"Jacobian evaluated at {r}:")
     sys.show_jacobian(eval=True, r=r)
+
+    # Calculate eigenvalues and eigenvectors
+    sp.pprint(sys.eigenvects(r))
 
     sol = sys.solve(t_span, r0)
     print(sol)
