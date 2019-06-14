@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         # Window Features
         self.x_prime_label = QLabel("x' =")
         self.y_prime_label = QLabel("y' =")
-        self.x_prime_entry = QLineEdit("y")
+        self.x_prime_entry = QLineEdit("y*sin(x)")
         self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
         self.phase_plot = DefaultCanvas()
@@ -132,7 +132,10 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)   
+        #print(self.phase_plot)
+        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
+        #print(self.phase_plot)
+        self.phase_plot.show()
         
 
 if __name__ == "__main__":
