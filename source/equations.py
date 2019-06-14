@@ -141,6 +141,15 @@ class SystemOfEquations(object):
         jacobian = self.jacobian.subs(self.params)
         jacobian = jacobian.subs(list(zip(self.phase_coord_symbols, r)))
         return jacobian
+    
+    def show_jacobian(self, eval=False, r=None):
+        """
+        Prints Jacobian. May be evaluated at a point first, or printed symbolically
+        """
+        
+        jacobian = self.eval_jacobian(r) if eval else self.jacobian
+        sp.pprint(jacobian)
+
 
 def example():
     # 2-D
@@ -156,9 +165,9 @@ def example():
     sys = SystemOfEquations(phase_coords, eqns, params=params)
     print(sys)
 
-    pt = [0.5, 0.5]
-    jac = sys.eval_jacobian(pt)
-    print(f"Jacobian evaluated at {pt}: {jac}")
+    r = [0.5, 0.5]
+    print(f"Jacobian evaluated at {r}:")
+    sys.show_jacobian(eval=True, r=r)
 
     sol = sys.solve(t_span, r0)
     print(sol)
