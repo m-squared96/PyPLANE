@@ -112,11 +112,9 @@ class SystemOfEquations(object):
         return "\n".join(s)
     
     def solve(self, t_span, r0, method="LSODA"):
-        def functions(t, r):
-            return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)    
-        return solve_ivp(functions, t_span, r0, method="RK45", max_step=0.02)
+        return solve_ivp(self.phasespace_eval, t_span, r0, method="RK45", max_step=0.02)
 
-    def phasespace_eval(self, phase_coords, r):
+    def phasespace_eval(self, t, r):
         """
         Allows for the phase space to be evaluated using the SOE class.
         
@@ -129,11 +127,7 @@ class SystemOfEquations(object):
 
         Added by Mikie on 29/05/2019
         """
-        for p in phase_coords:
-            if not (p in self.system_coords): return
-
-        phase_list = tuple(self.var_function_pairs[p] for p in phase_coords)
-        return tuple(eqn.eval_rhs(t=None, r=r) for eqn in phase_list)
+        return tuple(eqn.eval_rhs(t=t, r=r) for eqn in self.equations)
 
 
 def example():

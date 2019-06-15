@@ -8,51 +8,107 @@ class PhaseSpacePlotter(object):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
     a phase plot. Individual trajectories evaluated upon click event.
+
+    For now, can handle up to three-dimensional systems. An arbitrary number of dimensions
+    may require a lot of work.
     """
-    def __init__(self, system, fw_time_lim, bw_time_lim, max_trajectories=10, quiver_expansion_factor=0.2):
+    def __init__(self, system, fw_time_lim, bw_time_lim, axes_limits, max_trajectories=10, quiver_expansion_factor=0.2,
+                default_num_points=20):
 
         self.system = system # SOE object
-
-        self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
-        
         self.time_f = fw_time_lim # Time at which to stop forward trajectory evaluation
         self.time_r = bw_time_lim # Time at which to stop backward trajectory evaluation
+        
+        self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
+        self.axes_limits = np.array(axes_limits) # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
+        self.default_num_points = default_num_points # Number of arrows on plot. Also number of grid points in meshes.
 
         self.max_trajectories = max_trajectories # Maximum number of trajectories that can be visualised
         self.trajectory_count = 0 # Trajectory increment variable
-      
-    def show_plot(self, display_vars, axes_limits):
 
-        def one_or_two_dimensions(display_vars, axes_limits, dimensions):
+        R, Rprime = self.generate_meshes() # Returns R (coordinate grids) and Rprime (slope grids)
+        quiver_data = {}
 
-            xmin, xmax = tuple(axes_limits[0])
-            ymin, ymax = tuple(axes_limits[1])
+        if self.system.dims == 1:
+            quiver_data["t"] = (R[0], Rprime[0], self.time_r, self.time_f)
+            quiver_data[self.system.system_coords[0]] = (R[1], Rprime[1], self.axes_limits[0][0], self.axes_limits[0][1])
+
+        elif self.system.dims in (2, 3):
+            for label, mesh, prime_mesh, axlims in zip(self.system.system_coords, R, Rprime, self.axes_limits):
+                axmin, axmax = tuple(axlims)
+                quiver_data[label] = (mesh, prime_mesh, axmin, axmax)
+
+        self.quiver_data = quiver_data
+
+    def generate_meshes(self):
+        """
+        Returns R and Rprime, lists of mesh grids for coordinate positions and phase
+        space slopes respectively
+        """
+        if self.system.dims == 1:
+            tmin, tmax = self.set_grid_limits((self.time_r, self.time_f))
+            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
+
+            R = np.meshgrid(np.linspace(tmin, tmax, self.default_num_points), 
+                            np.linspace(xmin, xmax, self.default_num_points))
+
+            Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
+
+        elif self.system.dims == 2:
+            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
+            ymin, ymax = self.set_grid_limits(self.axes_limits[1])
+
+            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
+                            np.linspace(ymin, ymax, self.default_num_points))
+
+        elif self.system.dims == 3:
+            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
+            ymin, ymax = self.set_grid_limits(self.axes_limits[1])
+            zmin, zmax = self.set_grid_limits(self.axes_limits[2])
+
+            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
+                            np.linspace(ymin, ymax, self.default_num_points),
+                            np.linspace(zmin, zmax, self.default_num_points))
+
+        if self.system.dims in (2, 3):
+            Rprime = self.system.phasespace_eval(t=None, r=R)
+
+        return R, Rprime
+             
+    def set_grid_limits(self, lims):
+        """
+        Returns the limits to be used in the mesh grid generation expanded with the
+        self.quiver_expansion_factor variable
+        """
+        min_lim, max_lim = tuple(lims)
+
+        if min_lim <= 0: min_lim *= 1 + self.quiver_expansion_factor
+        elif min_lim > 0: min_lim /= 1 + self.quiver_expansion_factor
+
+        if max_lim >= 0: max_lim *= 1 + self.quiver_expansion_factor
+        elif max_lim < 0: max_lim /= 1 + self.quiver_expansion_factor
+
+        return min_lim, max_lim
+        
+    def show_plot(self, display_vars):
+
+        def one_or_two_dimensions(display_vars, dimensions):
 
             self.ax = self.fig.add_subplot(111)
-            self.ax.set_xlim(xmin, xmax)
-            self.ax.set_ylim(ymin, ymax)
-            
             # Initialise button click event on local figure object
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-            # Defines X and Y points and evaluates the derivatives at each point
-            X, Y = np.meshgrid(np.linspace(xmin * (1 + self.quiver_expansion_factor), xmax * (1 + self.quiver_expansion_factor), 15),
-                               np.linspace(ymin * (1 + self.quiver_expansion_factor), ymax * (1 + self.quiver_expansion_factor), 15))
-
-            # If only single dimension plotted, time on the x-axis of the plot. dt/dt = 1, hence U is a mesh of ones.
-            # V is the variable's derivative mesh, as is normally the case for a quiverplot
+       
             if dimensions == 1:
-                U = np.ones(X.shape)
-                V = self.system.phasespace_eval(display_vars, (Y,))
+                X, U, xmin, xmax = self.quiver_data["t"]
+                Y, V, ymin, ymax = self.quiver_data[display_vars[0]]
 
-            # If 2D system visualised, U and V are the usual meshes of variable derivatives at the respective points
-            # in phase space.
-            elif dimensions == 2:
-                # For a system with system coords [w, x, y, z], eval_vector will be a NumPy array with coordinates
-                # [w, x, y, z]
-                eval_vector = self.derivative_expression_resolve(display_vars, dimensions, (X, Y))
-                U, V = self.system.phasespace_eval(display_vars, eval_vector)
-        
+            if dimensions == 2:
+                X, U, xmin, xmax = self.quiver_data[display_vars[0]]
+                Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
+            
+            self.ax.set_xlim(xmin, xmax)
+            self.ax.set_ylim(ymin, ymax)
+
             # Sets up quiver plot
             self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
             self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
@@ -78,7 +134,7 @@ class PhaseSpacePlotter(object):
             raise ValueError("Must be between 1 and 3 variables to display")
 
         elif self.dimensions in (1, 2):
-            one_or_two_dimensions(display_vars, axes_limits, self.dimensions)
+            one_or_two_dimensions(display_vars, self.dimensions)
 
         elif self.dimensions == 3:
             three_dimensions(display_vars, axes_limits)       
@@ -160,14 +216,14 @@ class PhaseSpacePlotter(object):
 
 def one_D_example():
     phase_coords = ['x']
-    eqns = ['x^2']
+    eqns = ['sin(x)']
     params = {'a':1, 'b':0}
     t_f = 20
     t_r = -20
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    plotter = PhaseSpacePlotter(sys, t_f, t_r)
-    plotter.show_plot(['x'], np.array(((0, 10), (0, 2))))
+    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 2))))
+    plotter.show_plot(['x'])
 
 def two_D_example():
     phase_coords = ['x', 'y']
@@ -185,8 +241,10 @@ def two_D_example():
     t_r = -5
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    plotter = PhaseSpacePlotter(sys, t_f, t_r)
-    plotter.show_plot(['x', 'y'], np.array(((-10, 10), (-10, 10))))
+    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((-10, 10), (-10, 10))))
+    # print(plotter.R[0].shape)
+    # print(plotter.Rprime)
+    plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
     one_D_example()
