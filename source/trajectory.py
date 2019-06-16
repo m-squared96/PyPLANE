@@ -78,6 +78,31 @@ class PhaseSpacePlotter(FigCanvas):
 
 
         self.trajectory_count += 1
+        
+    def update_system(self, system):
+        self.ax.cla() # clears axis
+        self.system = system # SOE object
+        
+        # later on, set axis limits
+        # self.xmin, self.xmax = ...
+        # self.ymin, self.ymax = ...
+        # self.ax.set_xlim(self.xmin, self.xmax)
+        # self.ax.set_ylim(self.ymin, self.ymax)
+        
+        self.trajectory_count = 0
+    
+        # Defines X and Y points and evaluates the derivatives at each point
+        X, Y = np.meshgrid(
+            np.linspace(self.xmin * (1 + self.quiver_expansion_factor), self.xmax * (1 + self.quiver_expansion_factor), 15),
+            np.linspace(self.ymin * (1 + self.quiver_expansion_factor), self.ymax * (1 + self.quiver_expansion_factor), 15)
+        )
+        U, V = self.system.phasespace_eval(t=None, r=np.array([X, Y]))
+ 
+        # Sets up quiver plot
+        self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
+        self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
+ 
+        self.draw()
 
 
 

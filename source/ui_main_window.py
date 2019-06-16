@@ -132,10 +132,7 @@ class MainWindow(QMainWindow):
         t_r = -5
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        #print(self.phase_plot)
-        self.phase_plot = PhaseSpacePlotter(system_of_eqns, t_f, t_r)
-        #print(self.phase_plot)
-        self.phase_plot.show()
+        self.phase_plot.update_system(system_of_eqns)
         
 
 if __name__ == "__main__":
