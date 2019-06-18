@@ -110,7 +110,7 @@ class PhaseSpacePlotter(object):
             self.ax.set_ylim(ymin, ymax)
 
             # Sets up quiver plot
-            self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
+            self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle", angles="xy")
             self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
 
         #TODO: Three dimensional plotting
