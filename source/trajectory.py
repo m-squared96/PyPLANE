@@ -46,8 +46,8 @@ class PhaseSpacePlotter(object):
         space slopes respectively
         """
         if self.system.dims == 1:
-            tmin, tmax = self.set_grid_limits((self.time_r, self.time_f))
-            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
+            tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
+            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
 
             R = np.meshgrid(np.linspace(tmin, tmax, self.default_num_points), 
                             np.linspace(xmin, xmax, self.default_num_points))
@@ -55,16 +55,16 @@ class PhaseSpacePlotter(object):
             Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
 
         elif self.system.dims == 2:
-            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
-            ymin, ymax = self.set_grid_limits(self.axes_limits[1])
+            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
+            ymin, ymax = self.get_calc_limits(self.axes_limits[1])
 
             R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
                             np.linspace(ymin, ymax, self.default_num_points))
 
         elif self.system.dims == 3:
-            xmin, xmax = self.set_grid_limits(self.axes_limits[0])
-            ymin, ymax = self.set_grid_limits(self.axes_limits[1])
-            zmin, zmax = self.set_grid_limits(self.axes_limits[2])
+            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
+            ymin, ymax = self.get_calc_limits(self.axes_limits[1])
+            zmin, zmax = self.get_calc_limits(self.axes_limits[2])
 
             R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
                             np.linspace(ymin, ymax, self.default_num_points),
@@ -75,7 +75,7 @@ class PhaseSpacePlotter(object):
 
         return R, Rprime
              
-    def set_grid_limits(self, lims):
+    def get_calc_limits(self, lims):
         """
         Returns the limits to be used in the mesh grid generation expanded with the
         self.quiver_expansion_factor variable
