@@ -94,10 +94,6 @@ class SystemOfEquations(object):
             coord = system_coords[i]
             expr = ode_expr_strings[i]
             self.equations.append(DifferentialEquation(coord, system_coords, expr))
-
-        self.var_function_pairs = {}
-        for var, eqn in zip(self.system_coords, self.equations):
-            self.var_function_pairs[var] = eqn
         
         # Set the parameters in the ODEs
         self.params = params
