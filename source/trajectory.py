@@ -146,7 +146,7 @@ class PhaseSpacePlotter(object):
         Function called upon mouse click event
         """
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if not (event.inaxes == self.ax and self.trajectory_count < self.max_trajectories):
+        if not (event.inaxes == self.ax and self.trajectory_count < self.max_trajectories and event.dblclick):
             return
             
         # Mouse click coordinates
