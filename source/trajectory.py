@@ -139,6 +139,9 @@ class PhaseSpacePlotter(object):
         elif self.dimensions == 3:
             three_dimensions(display_vars, axes_limits)       
 
+        if self.dimensions == 2:
+            self.plot_2d_nullclines()
+        
         plt.show()
 
     def onclick(self, event):
@@ -213,6 +216,23 @@ class PhaseSpacePlotter(object):
             eval_seq.append(self.system.system_coords[0])
 
         return np.array(eval_seq)
+    
+    def plot_2d_nullclines(self):
+        """
+        Plots the nullclines for the current 2-D system.
+        """
+
+        num_x_contour_points = 100
+        num_y_contour_points = 100
+        R = np.meshgrid(
+            np.linspace(*self.axes_limits[0], num_x_contour_points),
+            np.linspace(*self.axes_limits[1], num_y_contour_points)
+            )
+        U, V = self.system.phasespace_eval(None, R)
+        contours_x = self.ax.contour(*R, U, levels=[0])
+        contours_y = self.ax.contour(*R, V, levels=[0])
+        return contours_x, contours_y
+
 
 def one_D_example():
     phase_coords = ['x']
@@ -228,7 +248,7 @@ def one_D_example():
 def two_D_example():
     phase_coords = ['x', 'y']
     eqns = [
-        'ax + by',
+        'ax + by^2',
         'cx + dy'
     ]
     params = {
@@ -247,5 +267,5 @@ def two_D_example():
     plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
-    one_D_example()
+    # one_D_example()
     two_D_example()
