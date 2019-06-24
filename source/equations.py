@@ -77,22 +77,23 @@ class SystemOfEquations(object):
     """
     System of ODE's. Handles solving and evaluating the ODE's.
     """
-    def __init__(self, phase_coords, ode_expr_strings, params):
+    def __init__(self, system_coords, ode_expr_strings, params=None):
         # ode_expr_strings is a dictionary that maps the dependent variable 
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
         self.ode_expr_strings = ode_expr_strings
-        self.phase_coords = phase_coords
+        self.system_coords = system_coords
+        self.dims = len(self.system_coords)
 
         # generate the list of expressions representing the system.
-        # The elements in phase_coords and ode_expr_strings are assumed
+        # The elements in system_coords and ode_expr_strings are assumed
         # to correspond to each other in the order given.
-        # i.e. phase_coords[i] pairs with ode_expr_strings[i]
+        # i.e. system_coords[i] pairs with ode_expr_strings[i]
         self.equations = []
-        for i in range(len(phase_coords)):
-            coord = phase_coords[i]
+        for i in range(len(system_coords)):
+            coord = system_coords[i]
             expr = ode_expr_strings[i]
-            self.equations.append(DifferentialEquation(coord, phase_coords, expr))
+            self.equations.append(DifferentialEquation(coord, system_coords, expr))
         
         # Set the parameters in the ODEs
         self.params = params
@@ -122,11 +123,12 @@ class SystemOfEquations(object):
 
         Added by Mikie on 29/05/2019
         """
-        return tuple(eqn.eval_rhs(t, r) for eqn in self.equations)
+        return tuple(eqn.eval_rhs(t=t, r=r) for eqn in self.equations)
+
 
 def example():
     # 2-D
-    phase_coords = ['x', 'y']
+    system_coords = ['x', 'y']
     eqns = [
         'ax + by',
         'cx + dy'
@@ -135,7 +137,7 @@ def example():
     r0 = [0.4, -0.3]
     t_span = (0, 40)
 
-    sys = SystemOfEquations(phase_coords, eqns, params=params)
+    sys = SystemOfEquations(system_coords, eqns, params=params)
     print(sys)
     sol = sys.solve(t_span, r0)
     print(sol)

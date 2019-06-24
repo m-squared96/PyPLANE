@@ -10,4 +10,4 @@ class DefaultCanvas(PhaseSpacePlotter):
     
     def __init__(self):
         self.default_system = SystemOfEquations(["x", "y"], ["y*sin(x)", "-x"], params={})
-        super().__init__(self.default_system, 5, -5)
+        super().__init__(self.default_system, 5, -5, ((-5, 5), (-5, 5)))
