@@ -54,6 +54,8 @@ class MainWindow(QMainWindow):
         self.plot_button = QPushButton("Plot")
         self.phase_plot = DefaultCanvas()
         
+        self.phase_plot.update_system(self.phase_plot.default_system)
+        
         # Parameter inputs
         self.parameter_input_boxes = {}
         self.no_of_params = 5
