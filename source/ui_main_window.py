@@ -52,23 +52,24 @@ class MainWindow(QMainWindow):
         self.x_prime_entry = QLineEdit("y*sin(x)")
         self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
-        self.phase_plot = DefaultCanvas()
         
+        # Canvas to show the phase plot as part of the main window
+        self.phase_plot = DefaultCanvas()
         self.phase_plot.update_system(self.phase_plot.default_system)
         
         # Parameter inputs
         self.parameter_input_boxes = {}
-        self.no_of_params = 5
+        self.no_of_params = 5 # Number of user defined parameters
         for param_num in range(self.no_of_params):
             self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
 
         # Layouts
-        x_prime_layout = QHBoxLayout()
-        y_prime_layout = QHBoxLayout()
+        x_prime_layout = QHBoxLayout() # Input box for first equation
+        y_prime_layout = QHBoxLayout() # Input box for second equation
         button_layout = QHBoxLayout()
 
-        self.parameter_layouts = {}
+        self.parameter_layouts = {} # Each layout contains two input boxes (parameter name and value) and an equals sign
         for param_num in range(self.no_of_params):
             self.parameter_layouts["param_"+str(param_num)+"_layout"] = QHBoxLayout()
             self.equals_sign = QLabel("=")
@@ -85,23 +86,22 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.plot_button)
         button_layout.addStretch()
 
-        # Arrange Layouts
-        equation_entry_layout = QVBoxLayout()
+        equation_entry_layout = QVBoxLayout() # Contains input boxes for both eqations
         equation_entry_layout.addLayout(x_prime_layout)
         equation_entry_layout.addLayout(y_prime_layout)
         equation_entry_layout.addLayout(button_layout)
 
-        parameters_layout = QVBoxLayout()
+        parameters_layout = QVBoxLayout() # Inputs for all parameters
         parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
         for param_num in range(self.no_of_params):
             parameters_layout.addLayout(self.parameter_layouts["param_"+str(param_num)+"_layout"])
 
-        inputs_layout = QVBoxLayout()
+        inputs_layout = QVBoxLayout() # All input boxes
         inputs_layout.addLayout(equation_entry_layout)
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
 
-        overall_layout = QHBoxLayout()
+        overall_layout = QHBoxLayout() # Input boxes and phase plot
         overall_layout.addLayout(inputs_layout)
         overall_layout.addWidget(self.phase_plot)
 
