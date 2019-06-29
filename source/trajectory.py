@@ -26,6 +26,7 @@ class PhaseSpacePlotter(FigCanvas):
         self.ax.set_xlim(self.xmin, self.xmax)
         self.ax.set_ylim(self.ymin, self.ymax)
         
+        object.__init__(self)
         FigCanvas.__init__(self, self.fig)
 
         # Initialise button click event on local figure object
