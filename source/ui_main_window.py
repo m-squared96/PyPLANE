@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
-    QHBoxLayout
+    QHBoxLayout,
+    QAction
 )
 
 from ui_default_canvas import DefaultCanvas
@@ -38,6 +39,18 @@ class MainWindow(QMainWindow):
         # Define central widget
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
+
+        # Menu Bar
+        menu_bar = self.menuBar()
+        menu_file = menu_bar.addMenu("File")
+        menu_edit = menu_bar.addMenu("Edit")
+        menu_plot_opts = menu_edit.addMenu("Plot Options")
+
+        action_nullclines = QAction("Plot Nullclines", self, checkable=True)
+        menu_plot_opts.addAction(action_nullclines)
+
+        # action_quit = QAction("Quit", self)
+        # menu_file.addAction(action_quit)
 
         # Window Features
         self.x_prime_label = QLabel("x' =")
