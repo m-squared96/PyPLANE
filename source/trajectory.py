@@ -4,8 +4,6 @@ from matplotlib.figure import Figure
 from equations import SystemOfEquations
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
-
-
 class PhaseSpacePlotter(FigCanvas):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
@@ -215,7 +213,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.trajectory_count += 1
         
-    def update_system(self, system):
+    def update_system(self, system, nulclines):
         self.ax.cla() # clears axis
         self.system = system # SOE object
         
@@ -237,9 +235,10 @@ class PhaseSpacePlotter(FigCanvas):
         # Sets up quiver plot
         self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
         self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
- 
-        if self.dimensions == 2:
-            self.plot_2d_nullclines()
+
+        if nulclines:
+            if self.dimensions == 2:
+                self.plot_2d_nullclines()
 
         self.draw()
 
