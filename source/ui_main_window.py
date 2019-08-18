@@ -46,12 +46,16 @@ class MainWindow(QMainWindow):
         menu_edit = menu_bar.addMenu("Edit")
         menu_plot_opts = menu_edit.addMenu("Plot Options")
 
-        action_nullclines = QAction("Plot Nullclines", self, checkable=True)
-        action_nullclines.setChecked(True)
-        menu_plot_opts.addAction(action_nullclines)
+        self.action_new_window = QAction("New Window", self)
+        self.action_quit = QAction("Quit", self)
+        menu_file.addAction(self.action_new_window)
+        menu_file.addAction(self.action_quit)
 
-        # action_quit = QAction("Quit", self)
-        # menu_file.addAction(action_quit)
+        self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
+        self.action_nullclines.setChecked(True)
+        menu_plot_opts.addAction(self.action_nullclines)
+
+        #print(action_nullclines.isChecked())
 
         # Window Features
         self.x_prime_label = QLabel("x' =")
@@ -138,7 +142,11 @@ class MainWindow(QMainWindow):
                 passed_params[self.parameter_input_boxes["param_"+str(param_num)+"_name"].text()] = float(self.parameter_input_boxes["param_"+str(param_num)+"_val"].text())
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        self.phase_plot.update_system(system_of_eqns)
+        
+        if self.action_nullclines.isChecked() == True:
+            self.phase_plot.update_system(system_of_eqns)
+        else:
+            print("Nullclines false not yet implemented")
 
 
 if __name__ == "__main__":
