@@ -47,6 +47,7 @@ class MainWindow(QMainWindow):
         menu_plot_opts = menu_edit.addMenu("Plot Options")
 
         action_nullclines = QAction("Plot Nullclines", self, checkable=True)
+        action_nullclines.setChecked(True)
         menu_plot_opts.addAction(action_nullclines)
 
         # action_quit = QAction("Quit", self)
