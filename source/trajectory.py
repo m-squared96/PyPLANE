@@ -13,7 +13,7 @@ class PhaseSpacePlotter(object):
     may require a lot of work.
     """
     def __init__(self, system, fw_time_lim, bw_time_lim, axes_limits, max_trajectories=10, quiver_expansion_factor=0.2,
-                default_num_points=20):
+                axes_points=20):
 
         self.system = system # SOE object
         self.time_f = fw_time_lim # Time at which to stop forward trajectory evaluation
@@ -21,7 +21,14 @@ class PhaseSpacePlotter(object):
         
         self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
         self.axes_limits = np.array(axes_limits) # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
-        self.default_num_points = default_num_points # Number of arrows on plot. Also number of grid points in meshes.
+
+        # axes_points = number of points along each axis if quiver_expansion_factor = 0
+        # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
+        # whilst preserving as much as possible the spacing between individual vectors.
+        # Another possible approach would be to explicitly define the spacing between vectors, but this method
+        # could cause performance issues if large axis limits are required and the vector spacing is not adjusted
+        # accordingly.
+        self.axes_points = int(axes_points * (1 + self.quiver_expansion_factor))
 
         self.max_trajectories = max_trajectories # Maximum number of trajectories that can be visualised
         self.trajectory_count = 0 # Trajectory increment variable
@@ -49,8 +56,8 @@ class PhaseSpacePlotter(object):
             tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
 
-            R = np.meshgrid(np.linspace(tmin, tmax, self.default_num_points), 
-                            np.linspace(xmin, xmax, self.default_num_points))
+            R = np.meshgrid(np.linspace(tmin, tmax, self.axes_points), 
+                            np.linspace(xmin, xmax, self.axes_points))
 
             Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
 
@@ -58,17 +65,17 @@ class PhaseSpacePlotter(object):
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
-                            np.linspace(ymin, ymax, self.default_num_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.axes_points),
+                            np.linspace(ymin, ymax, self.axes_points))
 
         elif self.system.dims == 3:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
             zmin, zmax = self.get_calc_limits(self.axes_limits[2])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
-                            np.linspace(ymin, ymax, self.default_num_points),
-                            np.linspace(zmin, zmax, self.default_num_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.axes_points),
+                            np.linspace(ymin, ymax, self.axes_points),
+                            np.linspace(zmin, zmax, self.axes_points))
 
         if self.system.dims in (2, 3):
             Rprime = self.system.phasespace_eval(t=None, r=R)
@@ -80,14 +87,9 @@ class PhaseSpacePlotter(object):
         Returns the limits to be used in the mesh grid generation expanded with the
         self.quiver_expansion_factor variable
         """
-        min_lim, max_lim = tuple(lims)
-
-        if min_lim <= 0: min_lim *= 1 + self.quiver_expansion_factor
-        elif min_lim > 0: min_lim /= 1 + self.quiver_expansion_factor
-
-        if max_lim >= 0: max_lim *= 1 + self.quiver_expansion_factor
-        elif max_lim < 0: max_lim /= 1 + self.quiver_expansion_factor
-
+        extension = np.abs(lims[1] - lims[0]) * self.quiver_expansion_factor * 0.5
+        min_lim = lims[0] - extension
+        max_lim = lims[1] + extension
         return min_lim, max_lim
         
     def show_plot(self, display_vars):
@@ -222,7 +224,7 @@ def one_D_example():
     t_r = -20
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 2))))
+    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2)
     plotter.show_plot(['x'])
 
 def two_D_example():
@@ -247,5 +249,5 @@ def two_D_example():
     plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
-    one_D_example()
+    #one_D_example()
     two_D_example()
