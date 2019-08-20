@@ -249,5 +249,5 @@ def two_D_example():
     plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
-    #one_D_example()
+    one_D_example()
     two_D_example()
