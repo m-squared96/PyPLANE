@@ -13,7 +13,7 @@ class PhaseSpacePlotter(object):
     may require a lot of work.
     """
     def __init__(self, system, fw_time_lim, bw_time_lim, axes_limits, max_trajectories=10, quiver_expansion_factor=0.2,
-                axes_points=20):
+                axes_points=20, mesh_density=200):
 
         self.system = system # SOE object
         self.time_f = fw_time_lim # Time at which to stop forward trajectory evaluation
@@ -29,6 +29,9 @@ class PhaseSpacePlotter(object):
         # could cause performance issues if large axis limits are required and the vector spacing is not adjusted
         # accordingly.
         self.axes_points = int(axes_points * (1 + self.quiver_expansion_factor))
+
+        # TODO: explain
+        self.mesh_density = mesh_density
 
         self.max_trajectories = max_trajectories # Maximum number of trajectories that can be visualised
         self.trajectory_count = 0 # Trajectory increment variable
@@ -56,8 +59,8 @@ class PhaseSpacePlotter(object):
             tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
 
-            R = np.meshgrid(np.linspace(tmin, tmax, self.axes_points), 
-                            np.linspace(xmin, xmax, self.axes_points))
+            R = np.meshgrid(np.linspace(tmin, tmax, self.mesh_density), 
+                            np.linspace(xmin, xmax, self.mesh_density))
 
             Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
 
@@ -65,17 +68,17 @@ class PhaseSpacePlotter(object):
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.axes_points),
-                            np.linspace(ymin, ymax, self.axes_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.mesh_density),
+                            np.linspace(ymin, ymax, self.mesh_density))
 
         elif self.system.dims == 3:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
             zmin, zmax = self.get_calc_limits(self.axes_limits[2])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.axes_points),
-                            np.linspace(ymin, ymax, self.axes_points),
-                            np.linspace(zmin, zmax, self.axes_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.mesh_density),
+                            np.linspace(ymin, ymax, self.mesh_density),
+                            np.linspace(zmin, zmax, self.mesh_density))
 
         if self.system.dims in (2, 3):
             Rprime = self.system.phasespace_eval(t=None, r=R)
@@ -108,11 +111,19 @@ class PhaseSpacePlotter(object):
                 X, U, xmin, xmax = self.quiver_data[display_vars[0]]
                 Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
             
+            print(X.shape, Y.shape)
+            reduced_X = self.reduce_array_density(X, self.axes_points)
+            print(reduced_X.shape)
+
             self.ax.set_xlim(xmin, xmax)
             self.ax.set_ylim(ymin, ymax)
 
             # Sets up quiver plot
-            self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle", angles="xy")
+            self.quiver = self.ax.quiver(reduced_X, 
+                                         self.reduce_array_density(Y, self.axes_points), 
+                                         self.reduce_array_density(U, self.axes_points), 
+                                         self.reduce_array_density(V, self.axes_points), 
+                                         pivot="middle", angles="xy")
             self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
 
         #TODO: Three dimensional plotting
@@ -223,17 +234,45 @@ class PhaseSpacePlotter(object):
         """
         Plots the nullclines for the current 2-D system.
         """
+        X, U, *_ = self.quiver_data[self.system.system_coords[0]]
+        Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
 
         num_x_contour_points = 100
         num_y_contour_points = 100
-        R = np.meshgrid(
-            np.linspace(*self.axes_limits[0], num_x_contour_points),
-            np.linspace(*self.axes_limits[1], num_y_contour_points)
-            )
-        U, V = self.system.phasespace_eval(None, R)
-        contours_x = self.ax.contour(*R, U, levels=[0])
-        contours_y = self.ax.contour(*R, V, levels=[0])
+
+        contours_x = self.ax.contour(X, Y, U, levels=[0], colors='red')
+        contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
         return contours_x, contours_y
+
+    def reduce_array_density(self, array, axes_points):
+        if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
+            reduction_factor = int(array.shape[0]/axes_points)
+            
+            val_count = 0
+            row_count = 0
+            row_vals = []
+            reduced_array = np.array([])
+
+            for row in array:
+                if row_count % reduction_factor == 0:
+                    for val in row:
+                        if val_count % reduction_factor == 0 and len(row_vals) < axes_points:
+                            row_vals.append(val)
+
+                        val_count += 1
+
+                    if reduced_array.shape[0] == 0:
+                        reduced_array = np.array(row_vals)
+
+                    else:
+                        reduced_array = np.vstack((reduced_array, np.array(row_vals)))
+
+                    row_vals = []
+                    val_count = 0
+
+                row_count += 1
+
+        return reduced_array
 
 
 def one_D_example():
@@ -250,8 +289,8 @@ def one_D_example():
 def two_D_example():
     phase_coords = ['x', 'y']
     eqns = [
-        'ax + by^2',
-        'cx + dy'
+        '2x - y + 3(x^2-y^2) + 2xy',
+        'x - 3y - 3(x^2-y^2) + 3xy'
     ]
     params = {
         'a': -1,
