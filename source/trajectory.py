@@ -246,33 +246,8 @@ class PhaseSpacePlotter(object):
 
     def reduce_array_density(self, array, axes_points):
         if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
-            reduction_factor = int(array.shape[0]/axes_points)
-            
-            val_count = 0
-            row_count = 0
-            row_vals = []
-            reduced_array = np.array([])
-
-            for row in array:
-                if row_count % reduction_factor == 0:
-                    for val in row:
-                        if val_count % reduction_factor == 0 and len(row_vals) < axes_points:
-                            row_vals.append(val)
-
-                        val_count += 1
-
-                    if reduced_array.shape[0] == 0:
-                        reduced_array = np.array(row_vals)
-
-                    else:
-                        reduced_array = np.vstack((reduced_array, np.array(row_vals)))
-
-                    row_vals = []
-                    val_count = 0
-
-                row_count += 1
-
-        return reduced_array
+            step = int(array.shape[0]/axes_points)
+            return array[::step, ::step]
 
 
 def one_D_example():
