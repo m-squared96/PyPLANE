@@ -62,7 +62,9 @@ class PhaseSpacePlotter(object):
             R = np.meshgrid(np.linspace(tmin, tmax, self.mesh_density), 
                             np.linspace(xmin, xmax, self.mesh_density))
 
-            Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
+            # Split the Rprime declaration into two lines for clarity
+            dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[0]
+            Rprime = [np.ones(R[0].shape), dependent_primes]
 
         elif self.system.dims == 2:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
@@ -152,8 +154,8 @@ class PhaseSpacePlotter(object):
         elif self.dimensions == 3:
             three_dimensions(display_vars, axes_limits)       
 
-        if self.dimensions == 2:
-            self.plot_2d_nullclines()
+        if self.dimensions <= 2:
+            self.plot_nullclines()
         
         plt.show()
 
@@ -230,21 +232,29 @@ class PhaseSpacePlotter(object):
 
         return np.array(eval_seq)
     
-    def plot_2d_nullclines(self):
+    def plot_nullclines(self):
         """
         Plots the nullclines for the current 2-D system.
         """
-        X, U, *_ = self.quiver_data[self.system.system_coords[0]]
-        Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
 
-        num_x_contour_points = 100
-        num_y_contour_points = 100
+        if self.dimensions == 1:
+            X, *_ = self.quiver_data["t"]
+            Y, V, *_ = self.quiver_data[self.system.system_coords[0]]
+            contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
+            return contours_y
 
-        contours_x = self.ax.contour(X, Y, U, levels=[0], colors='red')
-        contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
-        return contours_x, contours_y
+        elif self.dimensions == 2:
+            X, U, *_ = self.quiver_data[self.system.system_coords[0]]
+            Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
+            contours_x = self.ax.contour(X, Y, U, levels=[0], colors='red')
+            contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
+            return contours_x, contours_y
 
     def reduce_array_density(self, array, axes_points):
+        """
+        Accepts a square, 2D Numpy array (array) and an integer variable (axes_points).
+        Returns a less dense, 2D, square Numpy array with a size of (at least) axes_points squared.
+        """
         if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
             step = int(array.shape[0]/axes_points)
             return array[::step, ::step]
@@ -283,5 +293,5 @@ def two_D_example():
     plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
-    # one_D_example()
+    one_D_example()
     two_D_example()
