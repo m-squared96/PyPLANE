@@ -13,7 +13,7 @@ class PhaseSpacePlotter(FigCanvas):
     may require a lot of work.
     """
     def __init__(self, system, fw_time_lim, bw_time_lim, axes_limits, max_trajectories=10, quiver_expansion_factor=0.2,
-                default_num_points=20):
+                axes_points=20, mesh_density=200):
 
         self.system = system # SOE object
         self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
@@ -35,7 +35,17 @@ class PhaseSpacePlotter(FigCanvas):
         
         self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
         self.axes_limits = np.array(axes_limits) # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
-        self.default_num_points = default_num_points # Number of arrows on plot. Also number of grid points in meshes.
+
+        # axes_points = number of points along each axis if quiver_expansion_factor = 0
+        # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
+        # whilst preserving as much as possible the spacing between individual vectors.
+        # Another possible approach would be to explicitly define the spacing between vectors, but this method
+        # could cause performance issues if large axis limits are required and the vector spacing is not adjusted
+        # accordingly.
+        self.axes_points = int(axes_points * (1 + self.quiver_expansion_factor))
+
+        # TODO: explain
+        self.mesh_density = mesh_density
 
         self.max_trajectories = max_trajectories # Maximum number of trajectories that can be visualised
         self.trajectory_count = 0 # Trajectory increment variable
@@ -63,26 +73,28 @@ class PhaseSpacePlotter(FigCanvas):
             tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
 
-            R = np.meshgrid(np.linspace(tmin, tmax, self.default_num_points), 
-                            np.linspace(xmin, xmax, self.default_num_points))
+            R = np.meshgrid(np.linspace(tmin, tmax, self.mesh_density), 
+                            np.linspace(xmin, xmax, self.mesh_density))
 
-            Rprime = [np.ones(R[0].shape), self.system.phasespace_eval(t=None, r=np.array([R[1]]))]
+            # Split the Rprime declaration into two lines for clarity
+            dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[0]
+            Rprime = [np.ones(R[0].shape), dependent_primes]
 
         elif self.system.dims == 2:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
-                            np.linspace(ymin, ymax, self.default_num_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.mesh_density),
+                            np.linspace(ymin, ymax, self.mesh_density))
 
         elif self.system.dims == 3:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
             zmin, zmax = self.get_calc_limits(self.axes_limits[2])
 
-            R = np.meshgrid(np.linspace(xmin, xmax, self.default_num_points),
-                            np.linspace(ymin, ymax, self.default_num_points),
-                            np.linspace(zmin, zmax, self.default_num_points))
+            R = np.meshgrid(np.linspace(xmin, xmax, self.mesh_density),
+                            np.linspace(ymin, ymax, self.mesh_density),
+                            np.linspace(zmin, zmax, self.mesh_density))
 
         if self.system.dims in (2, 3):
             Rprime = self.system.phasespace_eval(t=None, r=R)
@@ -94,14 +106,9 @@ class PhaseSpacePlotter(FigCanvas):
         Returns the limits to be used in the mesh grid generation expanded with the
         self.quiver_expansion_factor variable
         """
-        min_lim, max_lim = tuple(lims)
-
-        if min_lim <= 0: min_lim *= 1 + self.quiver_expansion_factor
-        elif min_lim > 0: min_lim /= 1 + self.quiver_expansion_factor
-
-        if max_lim >= 0: max_lim *= 1 + self.quiver_expansion_factor
-        elif max_lim < 0: max_lim /= 1 + self.quiver_expansion_factor
-
+        extension = np.abs(lims[1] - lims[0]) * self.quiver_expansion_factor * 0.5
+        min_lim = lims[0] - extension
+        max_lim = lims[1] + extension
         return min_lim, max_lim
         
     def show_plot(self, display_vars):
@@ -120,11 +127,19 @@ class PhaseSpacePlotter(FigCanvas):
                 X, U, xmin, xmax = self.quiver_data[display_vars[0]]
                 Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
             
+            print(X.shape, Y.shape)
+            reduced_X = self.reduce_array_density(X, self.axes_points)
+            print(reduced_X.shape)
+
             self.ax.set_xlim(xmin, xmax)
             self.ax.set_ylim(ymin, ymax)
 
             # Sets up quiver plot
-            self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle", angles="xy")
+            self.quiver = self.ax.quiver(reduced_X, 
+                                         self.reduce_array_density(Y, self.axes_points), 
+                                         self.reduce_array_density(U, self.axes_points), 
+                                         self.reduce_array_density(V, self.axes_points), 
+                                         pivot="middle", angles="xy")
             self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
 
         #TODO: Three dimensional plotting
@@ -154,8 +169,8 @@ class PhaseSpacePlotter(FigCanvas):
             three_dimensions(display_vars, axes_limits)       
 
         self.draw()
-        if self.dimensions == 2:
-            self.plot_2d_nullclines()
+        if self.dimensions <= 2:
+            self.plot_nullclines()
         
         plt.show()
 
@@ -238,7 +253,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         if nulclines:
             if self.dimensions == 2:
-                self.plot_2d_nullclines()
+                self.plot_nullclines()
 
         self.draw()
 
@@ -261,21 +276,32 @@ class PhaseSpacePlotter(FigCanvas):
 
         return np.array(eval_seq)
     
-    def plot_2d_nullclines(self):
+    def plot_nullclines(self):
         """
         Plots the nullclines for the current 2-D system.
         """
 
-        num_x_contour_points = 100
-        num_y_contour_points = 100
-        R = np.meshgrid(
-            np.linspace(*self.axes_limits[0], num_x_contour_points),
-            np.linspace(*self.axes_limits[1], num_y_contour_points)
-            )
-        U, V = self.system.phasespace_eval(None, R)
-        contours_x = self.ax.contour(*R, U, levels=[0])
-        contours_y = self.ax.contour(*R, V, levels=[0])
-        return contours_x, contours_y
+        if self.dimensions == 1:
+            X, *_ = self.quiver_data["t"]
+            Y, V, *_ = self.quiver_data[self.system.system_coords[0]]
+            contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
+            return contours_y
+
+        elif self.dimensions == 2:
+            X, U, *_ = self.quiver_data[self.system.system_coords[0]]
+            Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
+            contours_x = self.ax.contour(X, Y, U, levels=[0], colors='red')
+            contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
+            return contours_x, contours_y
+
+    def reduce_array_density(self, array, axes_points):
+        """
+        Accepts a square, 2D Numpy array (array) and an integer variable (axes_points).
+        Returns a less dense, 2D, square Numpy array with a size of (at least) axes_points squared.
+        """
+        if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
+            step = int(array.shape[0]/axes_points)
+            return array[::step, ::step]
 
 
 def one_D_example():
@@ -286,14 +312,14 @@ def one_D_example():
     t_r = -20
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 2))))
+    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2)
     plotter.show_plot(['x'])
 
 def two_D_example():
     phase_coords = ['x', 'y']
     eqns = [
-        'y',
-        '-x'
+        '2x - y + 3(x^2-y^2) + 2xy',
+        'x - 3y - 3(x^2-y^2) + 3xy'
     ]
     params = {
         'a': -1,
@@ -311,5 +337,5 @@ def two_D_example():
     plotter.show_plot(['x', 'y'])
 
 if __name__ == "__main__":
-    # one_D_example()
+    one_D_example()
     two_D_example()
