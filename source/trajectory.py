@@ -234,7 +234,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.trajectory_count += 1
         
-    def update_system(self, system, nulclines):
+    def update_system(self, system):
         self.ax.cla() # clears axis
         self.system = system # SOE object
         

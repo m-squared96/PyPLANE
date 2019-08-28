@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
 
         # Canvas to show the phase plot as part of the main window
         self.phase_plot = DefaultCanvas()
-        self.phase_plot.update_system(self.phase_plot.default_system, nulclines=True)
+        self.phase_plot.update_system(self.phase_plot.default_system)
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
-        self.phase_plot.update_system(system_of_eqns, nulclines=False)
+        self.phase_plot.update_system(system_of_eqns)
         
 
 
