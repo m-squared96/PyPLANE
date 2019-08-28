@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
         # Window Features
         self.x_prime_label = QLabel("x' =")
         self.y_prime_label = QLabel("y' =")
-        self.x_prime_entry = QLineEdit("y*sin(x)")
+        self.x_prime_entry = QLineEdit("y")
         self.y_prime_entry = QLineEdit("-x")
         self.plot_button = QPushButton("Plot")
 
