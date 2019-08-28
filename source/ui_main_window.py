@@ -15,9 +15,8 @@ from PyQt5.QtWidgets import (
     QAction
 )
 
-from ui_default_canvas import DefaultCanvas
-
 from equations import SystemOfEquations
+from trajectory import PhaseSpacePlotter, call_PSP
 
 VERSION = "0.0-pre-apha"
 
@@ -64,8 +63,15 @@ class MainWindow(QMainWindow):
         self.plot_button = QPushButton("Plot")
 
         # Canvas to show the phase plot as part of the main window
-        self.phase_plot = DefaultCanvas()
-        self.phase_plot.update_system(self.phase_plot.default_system)
+        self.default_PSP_args = {
+                    't_f': 5,
+                    't_r': -5,
+                    'axes_lims': ((-5, 5), (-5, 5)),
+                    'qef': 0.2
+                }
+
+        self.phase_plot = call_PSP(None, self.default_PSP_args) 
+        self.phase_plot.show_plot(self.phase_plot.system.system_coords)
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
@@ -114,11 +120,11 @@ class MainWindow(QMainWindow):
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
 
-        overall_layout = QHBoxLayout()  # Input boxes and phase plot
-        overall_layout.addLayout(inputs_layout)
-        overall_layout.addWidget(self.phase_plot)
+        self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
+        self.overall_layout.addLayout(inputs_layout)
+        self.overall_layout.addWidget(self.phase_plot)
 
-        cent_widget.setLayout(overall_layout)
+        cent_widget.setLayout(self.overall_layout)
 
         # Button Actions
         self.plot_button.clicked.connect(self.plot_button_clicked)
@@ -146,8 +152,19 @@ class MainWindow(QMainWindow):
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
-        self.phase_plot.update_system(system_of_eqns)
-        
+
+        # Removes current phase_plot
+        self.overall_layout.removeWidget(self.phase_plot)
+
+        # Changes phase_plot object and adds it back into GUI
+        self.phase_plot = call_PSP(system_of_eqns, self.default_PSP_args)
+        self.phase_plot.show_plot(self.phase_plot.system.system_coords)
+
+        self.phase_plot.nullclines_init = True
+        self.phase_plot.nullcline_contour_sets = []
+        self.phase_plot.toggle_nullclines()
+
+        self.overall_layout.addWidget(self.phase_plot)
 
 
 if __name__ == "__main__":
