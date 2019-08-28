@@ -135,9 +135,7 @@ class PhaseSpacePlotter(FigCanvas):
                 X, U, xmin, xmax = self.quiver_data[display_vars[0]]
                 Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
             
-            print(X.shape, Y.shape)
             reduced_X = self.reduce_array_density(X, self.axes_points)
-            print(reduced_X.shape)
 
             self.ax.set_xlim(xmin, xmax)
             self.ax.set_ylim(ymin, ymax)
@@ -303,17 +301,14 @@ class PhaseSpacePlotter(FigCanvas):
         Toggles nullcline visibility on plot
         """
 
-        print("toggle")
         if not self.nullclines_init:
             self.nullcline_contour_sets = self.plot_nullclines()
             self.nullclines_init = True
-            print("nc init")
         else:
             for contour in self.nullcline_contour_sets:
                 # The QuadContourSet object usually has a collections (list) attribute
                 # with a single LineCollection object in it
                 nc = contour.collections[0]
-                print(nc.get_visible())
                 nc.set_visible(not nc.get_visible())
         
         self.draw()
