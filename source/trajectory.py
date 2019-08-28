@@ -64,6 +64,14 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.quiver_data = quiver_data
 
+        # Set to True once nullclines are first created and plotted
+        # See "toggle_nullclines" method
+        self.nullclines_init = False
+
+        # List of references to the contour sets returned by plt.contour
+        self.nullcline_contour_sets = None
+
+
     def generate_meshes(self):
         """
         Returns R and Rprime, lists of mesh grids for coordinate positions and phase
@@ -169,8 +177,6 @@ class PhaseSpacePlotter(FigCanvas):
             three_dimensions(display_vars, axes_limits)       
 
         self.draw()
-        if self.dimensions <= 2:
-            self.plot_nullclines()
         
         plt.show()
 
@@ -239,6 +245,8 @@ class PhaseSpacePlotter(FigCanvas):
         # self.ax.set_ylim(self.ymin, self.ymax)
         
         self.trajectory_count = 0
+        self.nullclines_init = False
+        self.nullcline_contour_sets = None
     
         # Defines X and Y points and evaluates the derivatives at each point
         X, Y = np.meshgrid(
@@ -250,10 +258,6 @@ class PhaseSpacePlotter(FigCanvas):
         # Sets up quiver plot
         self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
         self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
-
-        if nulclines:
-            if self.dimensions == 2:
-                self.plot_nullclines()
 
         self.draw()
 
@@ -285,14 +289,35 @@ class PhaseSpacePlotter(FigCanvas):
             X, *_ = self.quiver_data["t"]
             Y, V, *_ = self.quiver_data[self.system.system_coords[0]]
             contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
-            return contours_y
+            return [contours_y]
 
         elif self.dimensions == 2:
             X, U, *_ = self.quiver_data[self.system.system_coords[0]]
             Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
             contours_x = self.ax.contour(X, Y, U, levels=[0], colors='red')
             contours_y = self.ax.contour(X, Y, V, levels=[0], colors='yellow')
-            return contours_x, contours_y
+            return [contours_x, contours_y]
+    
+    def toggle_nullclines(self):
+        """
+        Toggles nullcline visibility on plot
+        """
+
+        print("toggle")
+        if not self.nullclines_init:
+            self.nullcline_contour_sets = self.plot_nullclines()
+            self.nullclines_init = True
+            print("nc init")
+        else:
+            for contour in self.nullcline_contour_sets:
+                # The QuadContourSet object usually has a collections (list) attribute
+                # with a single LineCollection object in it
+                nc = contour.collections[0]
+                print(nc.get_visible())
+                nc.set_visible(not nc.get_visible())
+        
+        self.draw()
+
 
     def reduce_array_density(self, array, axes_points):
         """

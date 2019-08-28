@@ -52,7 +52,6 @@ class MainWindow(QMainWindow):
         menu_file.addAction(self.action_quit)
 
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
-        self.action_nullclines.setChecked(True)
         menu_plot_opts.addAction(self.action_nullclines)
 
         #print(action_nullclines.isChecked())
@@ -67,6 +66,9 @@ class MainWindow(QMainWindow):
         # Canvas to show the phase plot as part of the main window
         self.phase_plot = DefaultCanvas()
         self.phase_plot.update_system(self.phase_plot.default_system, nulclines=True)
+
+        # Nullclines are set to toggle with the "Plot Nullclines" menu option
+        self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Parameter inputs
         self.parameter_input_boxes = {}
@@ -142,11 +144,9 @@ class MainWindow(QMainWindow):
                 passed_params[self.parameter_input_boxes["param_"+str(param_num)+"_name"].text()] = float(self.parameter_input_boxes["param_"+str(param_num)+"_val"].text())
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-        
-        if self.action_nullclines.isChecked() == True:
-            self.phase_plot.update_system(system_of_eqns, nulclines=True)
-        else:
-            self.phase_plot.update_system(system_of_eqns, nulclines=False)
+
+        self.action_nullclines.setChecked(False)
+        self.phase_plot.update_system(system_of_eqns, nulclines=False)
         
 
 
