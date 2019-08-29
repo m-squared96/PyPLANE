@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
                     'qef': 0.2
                 }
 
-        self.phase_plot = call_PSP(None, self.default_PSP_args) 
+        self.phase_plot = call_PSP(None, self.default_PSP_args)
         self.phase_plot.show_plot(self.phase_plot.system.system_coords)
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
@@ -82,6 +82,28 @@ class MainWindow(QMainWindow):
         for param_num in range(self.no_of_params):
             self.parameter_input_boxes["param_"+str(param_num)+"_name"] = QLineEdit()
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
+
+        # Axes limit imputs
+        limits_heading = QLabel("Limits of Axes:")
+        x_max_label = QLabel("Max x =")
+        x_max_input = QLineEdit("5")
+        x_min_label = QLabel("Min x =")
+        x_min_input = QLineEdit("-5")
+        xlim_layout = QHBoxLayout()
+        xlim_layout.addWidget(x_max_label)
+        xlim_layout.addWidget(x_max_input)
+        xlim_layout.addWidget(x_min_label)
+        xlim_layout.addWidget(x_min_input)
+
+        y_max_label = QLabel("Max y =")
+        y_max_input = QLineEdit("5")
+        y_min_label = QLabel("Min y =")
+        y_min_input = QLineEdit("-5")
+        ylim_layout = QHBoxLayout()
+        ylim_layout.addWidget(y_max_label)
+        ylim_layout.addWidget(y_max_input)
+        ylim_layout.addWidget(y_min_label)
+        ylim_layout.addWidget(y_min_input)
 
         # Layouts
         x_prime_layout = QHBoxLayout() # Input box for first equation
@@ -117,6 +139,11 @@ class MainWindow(QMainWindow):
 
         inputs_layout = QVBoxLayout()  # All input boxes
         inputs_layout.addLayout(equation_entry_layout)
+
+        inputs_layout.addWidget(limits_heading)
+        inputs_layout.addLayout(xlim_layout)
+        inputs_layout.addLayout(ylim_layout)
+
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
 
