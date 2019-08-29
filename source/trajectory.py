@@ -12,28 +12,56 @@ class PhaseSpacePlotter(FigCanvas):
     For now, can handle up to three-dimensional systems. An arbitrary number of dimensions
     may require a lot of work.
     """
-    def __init__(self, system, fw_time_lim, bw_time_lim, axes_limits, max_trajectories=10, quiver_expansion_factor=0.2,
-                axes_points=20, mesh_density=200):
+    def __init__(
+        self,
+        system,
+        fw_time_lim=5,
+        bw_time_lim=-5,
+        axes_limits=((-5, 5), (-5, 5)),
+        max_trajectories=10,
+        quiver_expansion_factor=0.2,
+        axes_points=20,
+        mesh_density=200
+    ):
 
-        self.system = system # SOE object
-        self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
         self.fig = Figure() 
-        self.ax = self.fig.add_subplot(111)
-        self.xmin, self.xmax = axes_limits[0]
-        self.ymin, self.ymax = axes_limits[1]
-        self.ax.set_xlim(self.xmin, self.xmax)
-        self.ax.set_ylim(self.ymin, self.ymax)
-        
         object.__init__(self)
         FigCanvas.__init__(self, self.fig)
+        self.ax = self.fig.add_subplot(111)
 
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
+        self.update_system(
+            system,
+            fw_time_lim=fw_time_lim,
+            bw_time_lim=bw_time_lim,
+            axes_limits=axes_limits,
+            max_trajectories=max_trajectories,
+            quiver_expansion_factor=quiver_expansion_factor,
+            axes_points=axes_points,
+            mesh_density=mesh_density
+        )
+    
+    def update_system(
+        self,
+        system,
+        fw_time_lim=5,
+        bw_time_lim=-5,
+        axes_limits=((-5, 5), (-5, 5)),
+        max_trajectories=10,
+        quiver_expansion_factor=0.2,
+        axes_points=20,
+        mesh_density=200
+    ):
+        self.ax.cla()
+        self.system = system
+
         self.time_f = fw_time_lim # Time at which to stop forward trajectory evaluation
         self.time_r = bw_time_lim # Time at which to stop backward trajectory evaluation
-        
+
         self.quiver_expansion_factor = quiver_expansion_factor # Factor to expand quiverplot to ensure all visible regions plotted
+
         self.axes_limits = np.array(axes_limits) # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
 
         # axes_points = number of points along each axis if quiver_expansion_factor = 0
@@ -64,12 +92,65 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.quiver_data = quiver_data
 
-        # Set to True once nullclines are first created and plotted
-        # See "toggle_nullclines" method
+        # Set to True only by toggle_nullclines method
         self.nullclines_init = False
 
         # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
+
+        def one_or_two_dimensions(display_vars, dimensions):
+
+            # Initialise button click event on local figure object
+            self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+       
+            if dimensions == 1:
+                X, U, xmin, xmax = self.quiver_data["t"]
+                Y, V, ymin, ymax = self.quiver_data[display_vars[0]]
+
+            if dimensions == 2:
+                X, U, xmin, xmax = self.quiver_data[display_vars[0]]
+                Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
+
+            self.ax.set_xlim(xmin, xmax)
+            self.ax.set_ylim(ymin, ymax)
+
+            # Sets up quiver plot
+            self.quiver = self.ax.quiver(self.reduce_array_density(X, self.axes_points), 
+                                         self.reduce_array_density(Y, self.axes_points), 
+                                         self.reduce_array_density(U, self.axes_points), 
+                                         self.reduce_array_density(V, self.axes_points), 
+                                         pivot="middle", angles="xy")
+
+            self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
+
+        #TODO: Three dimensional plotting
+        def three_dimensions(display_vars, axes_limits):
+            pass
+        
+        display_vars = self.system.system_coords
+
+        for var in display_vars:
+            if not(var in self.system.system_coords): return 
+
+        # Display vars are the system variables to be plotted. 
+        # Given a system with coords [x, y], display_vars can take 4 forms:
+        # 1. ["x"], 2. ["y"], 3. ["x", "y"], 4. ["y", "x"]
+        # In the one-dimensional cases, the quiverplot will be t vs x, or t vs y.
+        # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
+        # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
+        self.display_vars = display_vars
+        self.dimensions = len(self.display_vars)
+
+        if self.dimensions < 1 or self.dimensions > 3:
+            raise ValueError("Must be between 1 and 3 variables to display")
+
+        elif self.dimensions in (1, 2):
+            one_or_two_dimensions(display_vars, self.dimensions)
+
+        elif self.dimensions == 3:
+            three_dimensions(display_vars, axes_limits)       
+
+        self.draw()
 
 
     def generate_meshes(self):
@@ -118,89 +199,6 @@ class PhaseSpacePlotter(FigCanvas):
         min_lim = lims[0] - extension
         max_lim = lims[1] + extension
         return min_lim, max_lim
-
-    def update_system(self, system):
-        self.ax.cla() # clears axis
-        self.system = system # SOE object
-        
-        # later on, set axis limits
-        # self.xmin, self.xmax = ...
-        # self.ymin, self.ymax = ...
-        # self.ax.set_xlim(self.xmin, self.xmax)
-        # self.ax.set_ylim(self.ymin, self.ymax)
-        
-        self.trajectory_count = 0
-        self.nullclines_init = False
-        self.nullcline_contour_sets = None
-    
-        # Defines X and Y points and evaluates the derivatives at each point
-        X, Y = np.meshgrid(
-            np.linspace(self.xmin * (1 + self.quiver_expansion_factor), self.xmax * (1 + self.quiver_expansion_factor), 15),
-            np.linspace(self.ymin * (1 + self.quiver_expansion_factor), self.ymax * (1 + self.quiver_expansion_factor), 15)
-        )
-        U, V = self.system.phasespace_eval(t=None, r=np.array([X, Y]))
- 
-        # Sets up quiver plot
-        self.quiver = self.ax.quiver(X, Y, U, V, pivot="middle")
-        self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
-
-        self.draw()
-        
-    def show_plot(self, display_vars):
-
-        def one_or_two_dimensions(display_vars, dimensions):
-
-            # Initialise button click event on local figure object
-            self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-       
-            if dimensions == 1:
-                X, U, xmin, xmax = self.quiver_data["t"]
-                Y, V, ymin, ymax = self.quiver_data[display_vars[0]]
-
-            if dimensions == 2:
-                X, U, xmin, xmax = self.quiver_data[display_vars[0]]
-                Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
-
-            self.ax.set_xlim(xmin, xmax)
-            self.ax.set_ylim(ymin, ymax)
-
-            # Sets up quiver plot
-            self.quiver = self.ax.quiver(self.reduce_array_density(X, self.axes_points), 
-                                         self.reduce_array_density(Y, self.axes_points), 
-                                         self.reduce_array_density(U, self.axes_points), 
-                                         self.reduce_array_density(V, self.axes_points), 
-                                         pivot="middle", angles="xy")
-
-            self.trajectory = self.ax.plot(0, 0) # Need an initial 'trajectory'
-
-        #TODO: Three dimensional plotting
-        def three_dimensions(display_vars, axes_limits):
-            pass
-        
-        self.ax.cla() # clears axis
-
-        for var in display_vars:
-            if not(var in self.system.system_coords): return 
-
-        # Display vars are the system variables to be plotted. 
-        # Given a system with coords [x, y], display_vars can take 4 forms:
-        # 1. ["x"], 2. ["y"], 3. ["x", "y"], 4. ["y", "x"]
-        # In the one-dimensional cases, the quiverplot will be t vs x, or t vs y.
-        # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
-        # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
-        self.display_vars = display_vars
-        self.dimensions = len(self.display_vars)
-
-        if self.dimensions < 1 or self.dimensions > 3:
-            raise ValueError("Must be between 1 and 3 variables to display")
-
-        elif self.dimensions in (1, 2):
-            one_or_two_dimensions(display_vars, self.dimensions)
-
-        elif self.dimensions == 3:
-            three_dimensions(display_vars, axes_limits)       
-
-        self.draw()
 
     def onclick(self, event):
         """
@@ -325,17 +323,6 @@ class PhaseSpacePlotter(FigCanvas):
         if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
             step = int(array.shape[0]/axes_points)
             return array[::step, ::step]
-
-
-def call_PSP(system, PSP_args):
-    if system == None:
-        system = default_system()
-
-    return PhaseSpacePlotter(system, PSP_args['t_f'], PSP_args['t_r'], PSP_args['axes_lims'], quiver_expansion_factor=PSP_args['qef'])
-
-
-def default_system():
-   return SystemOfEquations(['x', 'y'], ['y', '-x'], params={})
 
 
 #def one_D_example():
