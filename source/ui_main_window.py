@@ -84,26 +84,26 @@ class MainWindow(QMainWindow):
             self.parameter_input_boxes["param_"+str(param_num)+"_val"] = QLineEdit()
 
         # Axes limit imputs
-        limits_heading = QLabel("Limits of Axes:")
-        x_max_label = QLabel("Max x =")
-        x_max_input = QLineEdit("5")
-        x_min_label = QLabel("Min x =")
-        x_min_input = QLineEdit("-5")
+        self.limits_heading = QLabel("Limits of Axes:")
+        self.x_max_label = QLabel("Max x =")
+        self.x_max_input = QLineEdit("5")
+        self.x_min_label = QLabel("Min x =")
+        self.x_min_input = QLineEdit("-5")
         xlim_layout = QHBoxLayout()
-        xlim_layout.addWidget(x_max_label)
-        xlim_layout.addWidget(x_max_input)
-        xlim_layout.addWidget(x_min_label)
-        xlim_layout.addWidget(x_min_input)
+        xlim_layout.addWidget(self.x_max_label)
+        xlim_layout.addWidget(self.x_max_input)
+        xlim_layout.addWidget(self.x_min_label)
+        xlim_layout.addWidget(self.x_min_input)
 
-        y_max_label = QLabel("Max y =")
-        y_max_input = QLineEdit("5")
-        y_min_label = QLabel("Min y =")
-        y_min_input = QLineEdit("-5")
+        self.y_max_label = QLabel("Max y =")
+        self.y_max_input = QLineEdit("5")
+        self.y_min_label = QLabel("Min y =")
+        self.y_min_input = QLineEdit("-5")
         ylim_layout = QHBoxLayout()
-        ylim_layout.addWidget(y_max_label)
-        ylim_layout.addWidget(y_max_input)
-        ylim_layout.addWidget(y_min_label)
-        ylim_layout.addWidget(y_min_input)
+        ylim_layout.addWidget(self.y_max_label)
+        ylim_layout.addWidget(self.y_max_input)
+        ylim_layout.addWidget(self.y_min_label)
+        ylim_layout.addWidget(self.y_min_input)
 
         # Layouts
         x_prime_layout = QHBoxLayout() # Input box for first equation
@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         inputs_layout = QVBoxLayout()  # All input boxes
         inputs_layout.addLayout(equation_entry_layout)
 
-        inputs_layout.addWidget(limits_heading)
+        inputs_layout.addWidget(self.limits_heading)
         inputs_layout.addLayout(xlim_layout)
         inputs_layout.addLayout(ylim_layout)
 
@@ -179,6 +179,10 @@ class MainWindow(QMainWindow):
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
+
+        # Grab axes limits
+        self.default_PSP_args["axes_lims"] = ((float(self.x_min_input.text()), float(self.x_max_input.text())),
+         (float(self.y_min_input.text()), float(self.y_max_input.text())))
 
         # Removes current phase_plot
         self.overall_layout.removeWidget(self.phase_plot)
