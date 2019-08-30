@@ -173,7 +173,15 @@ class MainWindow(QMainWindow):
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
-        self.phase_plot.update_system(system_of_eqns)  # entry of other arguments still needs to be added
+
+        x_min = float(self.x_min_input.text())
+        x_max = float(self.x_max_input.text())
+        y_min = float(self.y_min_input.text())
+        y_max = float(self.y_max_input.text())
+
+        self.phase_plot.update_system(
+            system_of_eqns,
+            axes_limits=((x_min, x_max), (y_min, y_max))
         
 
 
