@@ -15,11 +15,14 @@ from PyQt5.QtWidgets import (
     QAction
 )
 
+
 from ui_default_canvas import DefaultCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
 
 from equations import SystemOfEquations
 
-VERSION = "0.0-pre-apha"
+VERSION = "0.0-pre-alpha"
 
 
 class MainWindow(QMainWindow):
@@ -141,9 +144,13 @@ class MainWindow(QMainWindow):
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
 
+        plot_layout = QVBoxLayout()
+        plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
+        plot_layout.addWidget(self.phase_plot)
+
         self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
         self.overall_layout.addLayout(inputs_layout)
-        self.overall_layout.addWidget(self.phase_plot)
+        self.overall_layout.addLayout(plot_layout)
 
         cent_widget.setLayout(self.overall_layout)
 
