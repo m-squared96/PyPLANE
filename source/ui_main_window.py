@@ -15,10 +15,12 @@ from PyQt5.QtWidgets import (
     QAction
 )
 
+
+from ui_default_canvas import DefaultCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+
 from equations import SystemOfEquations
-from trajectory import PhaseSpacePlotter, call_PSP
 
 VERSION = "0.0-pre-alpha"
 
@@ -65,15 +67,8 @@ class MainWindow(QMainWindow):
         self.plot_button = QPushButton("Plot")
 
         # Canvas to show the phase plot as part of the main window
-        self.default_PSP_args = {
-                    't_f': 5,
-                    't_r': -5,
-                    'axes_lims': ((-5, 5), (-5, 5)),
-                    'qef': 0.2
-                }
-
-        self.phase_plot = call_PSP(None, self.default_PSP_args)
-        self.phase_plot.show_plot(self.phase_plot.system.system_coords)
+        self.phase_plot = DefaultCanvas()
+        self.phase_plot.update_system(self.phase_plot.default_system)
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
@@ -186,22 +181,16 @@ class MainWindow(QMainWindow):
 
         self.action_nullclines.setChecked(False)
 
-        # Grab axes limits
-        self.default_PSP_args["axes_lims"] = ((float(self.x_min_input.text()), float(self.x_max_input.text())),
-         (float(self.y_min_input.text()), float(self.y_max_input.text())))
+        x_min = float(self.x_min_input.text())
+        x_max = float(self.x_max_input.text())
+        y_min = float(self.y_min_input.text())
+        y_max = float(self.y_max_input.text())
 
-        # Removes current phase_plot
-        self.overall_layout.removeWidget(self.phase_plot)
-
-        # Changes phase_plot object and adds it back into GUI
-        self.phase_plot = call_PSP(system_of_eqns, self.default_PSP_args)
-        self.phase_plot.show_plot(self.phase_plot.system.system_coords)
-
-        self.phase_plot.nullclines_init = True
-        self.phase_plot.nullcline_contour_sets = []
-        self.phase_plot.toggle_nullclines()
-
-        self.overall_layout.addWidget(self.phase_plot)
+        self.phase_plot.update_system(
+            system_of_eqns,
+            axes_limits=((x_min, x_max), (y_min, y_max))
+        )
+        
 
 
 if __name__ == "__main__":
