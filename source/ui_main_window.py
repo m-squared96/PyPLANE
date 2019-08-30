@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter, call_PSP
 
-VERSION = "0.0-pre-apha"
+VERSION = "0.0-pre-alpha"
 
 
 class MainWindow(QMainWindow):
