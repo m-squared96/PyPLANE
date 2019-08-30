@@ -22,5 +22,6 @@ To generate a consistent development environment for PyPLANE, run the following 
 python -m venv pyplanedev/
 cd pyplanedev/
 git clone https://github.com/m-squared96/PyPLANE
+source bin/activate
 pip install -r PyPLANE/requirements.txt
 ```
