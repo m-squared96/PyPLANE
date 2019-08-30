@@ -182,6 +182,7 @@ class MainWindow(QMainWindow):
         self.phase_plot.update_system(
             system_of_eqns,
             axes_limits=((x_min, x_max), (y_min, y_max))
+        )
         
 
 
