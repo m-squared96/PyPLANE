@@ -49,10 +49,12 @@ class MainWindow(QMainWindow):
         menu_edit = menu_bar.addMenu("Edit")
         menu_plot_opts = menu_edit.addMenu("Plot Options")
 
-        self.action_new_window = QAction("New Window", self)
+        #self.action_new_window = QAction("New Window", self)
         self.action_quit = QAction("Quit", self)
-        menu_file.addAction(self.action_new_window)
+        #menu_file.addAction(self.action_new_window)
         menu_file.addAction(self.action_quit)
+
+        self.action_quit.triggered.connect(self.close)
 
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
         menu_plot_opts.addAction(self.action_nullclines)
@@ -190,7 +192,6 @@ class MainWindow(QMainWindow):
             system_of_eqns,
             axes_limits=((x_min, x_max), (y_min, y_max))
         )
-        
 
 
 if __name__ == "__main__":
