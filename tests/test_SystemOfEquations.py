@@ -8,8 +8,10 @@ from source.equations import DifferentialEquation
 
 from source.equations import SystemOfEquations
 
+
 class TestSystemOfEquations(unittest.TestCase):
     pass
+
 
 if __name__ == "__main__":
     unittest.main()
