@@ -21,6 +21,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 
 
 from equations import SystemOfEquations
+from defaults import psp_by_dimensions
 
 VERSION = "0.0-pre-alpha"
 
@@ -61,16 +62,16 @@ class MainWindow(QMainWindow):
 
         # print(action_nullclines.isChecked())
 
-        # Window Features
-        self.x_prime_label = QLabel("x' =")
-        self.y_prime_label = QLabel("y' =")
-        self.x_prime_entry = QLineEdit("y")
-        self.y_prime_entry = QLineEdit("-x")
-        self.plot_button = QPushButton("Plot")
-
         # Canvas to show the phase plot as part of the main window
-        self.phase_plot = DefaultCanvas()
-        self.phase_plot.update_system(self.phase_plot.default_system)
+        # By default, open application displaying a two dimensional system
+        self.phase_plot = psp_by_dimensions(2)
+
+        # Window Features
+        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + " =")
+        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + " =")
+        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
+        self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
+        self.plot_button = QPushButton("Plot")
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
@@ -86,20 +87,28 @@ class MainWindow(QMainWindow):
 
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
-        self.x_max_label = QLabel("Max x =")
-        self.x_max_input = QLineEdit("5")
-        self.x_min_label = QLabel("Min x =")
-        self.x_min_input = QLineEdit("-5")
+        self.x_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+        self.x_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
         xlim_layout.addWidget(self.x_min_label)
         xlim_layout.addWidget(self.x_min_input)
 
-        self.y_max_label = QLabel("Max y =")
-        self.y_max_input = QLineEdit("5")
-        self.y_min_label = QLabel("Min y =")
-        self.y_min_input = QLineEdit("-5")
+        self.y_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
+        self.y_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
         ylim_layout = QHBoxLayout()
         ylim_layout.addWidget(self.y_max_label)
         ylim_layout.addWidget(self.y_max_input)
