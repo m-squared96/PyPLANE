@@ -69,8 +69,8 @@ class MainWindow(QMainWindow):
         self.psp_canvas_default(self.default_dims)
 
         # Window Features
-        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + " =")
-        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + " =")
+        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
+        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
         self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
         self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
         self.plot_button = QPushButton("Plot")
