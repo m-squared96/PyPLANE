@@ -16,12 +16,13 @@ from PyQt5.QtWidgets import (
 )
 
 
-#from ui_default_canvas import DefaultCanvas
+# from ui_default_canvas import DefaultCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 from equations import SystemOfEquations
-from defaults import psp_by_dimensions
+from trajectory import PhaseSpacePlotter
+from defaults import psp_by_dimensions, default_1D, default_2D
 
 VERSION = "0.0-pre-alpha"
 
@@ -64,7 +65,8 @@ class MainWindow(QMainWindow):
 
         # Canvas to show the phase plot as part of the main window
         # By default, open application displaying a two dimensional system
-        self.phase_plot = psp_by_dimensions(2)
+        self.default_dims = 2
+        self.psp_canvas_default(self.default_dims)
 
         # Window Features
         self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + " =")
@@ -77,13 +79,29 @@ class MainWindow(QMainWindow):
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Parameter inputs
+
+        param_names = list(self.setup_dict["params"].keys())
+        param_vals = list(self.setup_dict["params"].values())
+
         self.parameter_input_boxes = {}
         self.no_of_params = 5  # Number of user defined parameters
         for param_num in range(self.no_of_params):
-            self.parameter_input_boxes[
-                "param_" + str(param_num) + "_name"
-            ] = QLineEdit()
-            self.parameter_input_boxes["param_" + str(param_num) + "_val"] = QLineEdit()
+            # Fills parameter input boxes with parameter vars and corresponding vals
+            if param_num < len(self.setup_dict["params"].keys()):
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_name"
+                ] = QLineEdit(param_names[param_num])
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ] = QLineEdit(str(param_vals[param_num]))
+            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
+            else:
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_name"
+                ] = QLineEdit()
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ] = QLineEdit()
 
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
@@ -185,6 +203,27 @@ class MainWindow(QMainWindow):
         # Set window title and show
         self.setWindowTitle("PyPLANE " + VERSION)
         self.show()
+
+    def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
+        """
+        Initialises default PSP
+        """
+        if dimensions == 1:
+            self.setup_dict = default_1D
+
+        elif dimensions == 2:
+            self.setup_dict = default_2D
+
+        # Unpacks self.setup_dict into SOE. Only works if dict keys
+        # are in same order as function params, which is why it doesn't
+        # work for PSP.
+        sys = SystemOfEquations(*self.setup_dict.values())
+        self.phase_plot = PhaseSpacePlotter(
+            sys,
+            self.setup_dict["t_f"],
+            self.setup_dict["t_r"],
+            self.setup_dict["axes_limits"],
+        )
 
     def plot_button_clicked(self: QMainWindow) -> None:
         """
