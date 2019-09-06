@@ -24,6 +24,8 @@ class PhaseSpacePlotter(FigCanvas):
         quiver_expansion_factor=0.2,
         axes_points=20,
         mesh_density=200,
+        *args,
+        **kwargs
     ):
 
         self.fig = Figure()
@@ -196,6 +198,7 @@ class PhaseSpacePlotter(FigCanvas):
             Rprime = [np.ones(R[0].shape), dependent_primes]
 
         elif self.system.dims == 2:
+            print(self.axes_limits)
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
 

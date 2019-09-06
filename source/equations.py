@@ -82,7 +82,7 @@ class SystemOfEquations(object):
     System of ODE's. Handles solving and evaluating the ODE's.
     """
 
-    def __init__(self, system_coords, ode_expr_strings, params=None):
+    def __init__(self, system_coords, ode_expr_strings, params=None, *args, **kwargs):
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
