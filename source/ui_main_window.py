@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
 )
 
 
-from ui_default_canvas import DefaultCanvas
+#from ui_default_canvas import DefaultCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
