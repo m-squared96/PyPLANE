@@ -217,13 +217,8 @@ class MainWindow(QMainWindow):
         # Unpacks self.setup_dict into SOE. Only works if dict keys
         # are in same order as function params, which is why it doesn't
         # work for PSP.
-        sys = SystemOfEquations(*self.setup_dict.values())
-        self.phase_plot = PhaseSpacePlotter(
-            sys,
-            self.setup_dict["t_f"],
-            self.setup_dict["t_r"],
-            self.setup_dict["axes_limits"],
-        )
+        sys = SystemOfEquations(**self.setup_dict)
+        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
 
     def plot_button_clicked(self: QMainWindow) -> None:
         """
