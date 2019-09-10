@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
-from equations import SystemOfEquations
+from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
 from defaults import psp_by_dimensions, default_1D, default_2D
 
@@ -244,6 +244,11 @@ class MainWindow(QMainWindow):
                     ].text()
                 )
 
+        for eqn, var in zip(eqns, phase_coords):
+            if self.undefined_param_check(var, phase_coords, eqn, passed_params):
+                print("Undefined parameter")
+                return
+
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
@@ -256,6 +261,27 @@ class MainWindow(QMainWindow):
         self.phase_plot.update_system(
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
+
+    def undefined_param_check(
+        self, dep_var, phase_coords, ode_str, passed_params
+    ) -> bool:
+        """
+        Checks for undefined parameters in ODE expressions.
+        Returns True if undefined parameters found.
+        Returns False otherwise
+        """
+        ode = DifferentialEquation(dep_var, phase_coords, ode_str)
+
+        # Currently unused, except to determine that there are undefined params.
+        # Could be used later to highlight offending ode expression?
+        undefined_params = [
+            str(sym) for sym in ode.params if str(sym) not in passed_params.keys()
+        ]
+
+        if len(undefined_params) != 0:
+            return False
+        else:
+            return True
 
 
 if __name__ == "__main__":
