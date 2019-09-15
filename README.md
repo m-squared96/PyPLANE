@@ -32,7 +32,8 @@ cd pyplanedev/
 git clone https://github.com/m-squared96/PyPLANE
 source bin/activate
 pip install -r PyPLANE/requirements.txt
+pre-commit install
 ```
 
-Note that all Python code should be formatted using the Black Python code formatter. Information can be found on the
-project's GitHub page: https://github.com/psf/black
+Note that all Python code should be formatted using the Black Python code formatter. This is achieved automatically
+through the use of pre-commit hooks.
