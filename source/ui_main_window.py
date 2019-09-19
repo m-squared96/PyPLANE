@@ -276,7 +276,8 @@ class MainWindow(QMainWindow):
         passed_params: dict,
     ) -> bool:
         """
-        Checks if all of the required entry boxes on the GUI are full. Returns True if all full.
+        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable. 
+        Returns True if all full.
         Returns False if any are empty
         """
         if self.equations_undefined():
