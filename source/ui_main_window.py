@@ -15,10 +15,7 @@ from PyQt5.QtWidgets import (
     QAction,
 )
 
-
-# from ui_default_canvas import DefaultCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
 
 from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
@@ -79,7 +76,6 @@ class MainWindow(QMainWindow):
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Parameter inputs
-
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
 
@@ -214,9 +210,7 @@ class MainWindow(QMainWindow):
         elif dimensions == 2:
             self.setup_dict = default_2D
 
-        # Unpacks self.setup_dict into SOE. Only works if dict keys
-        # are in same order as function params, which is why it doesn't
-        # work for PSP.
+        # Unpacks self.setup_dict into SOE.
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
 
@@ -237,9 +231,9 @@ class MainWindow(QMainWindow):
                         "param_" + str(param_num) + "_name"
                     ].text()
                 ] = self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-    
+                    "param_" + str(param_num) + "_val"
+                ].text()
+
         if self.required_fields_full(phase_coords, passed_params):
             self.update_psp(phase_coords, passed_params)
 
@@ -267,13 +261,13 @@ class MainWindow(QMainWindow):
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
 
-    def handle_empty_entry(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
+    def handle_empty_entry(
+        self: QMainWindow, phase_coords: list, passed_params: dict
+    ) -> None:
         print("Blank detected")
 
     def required_fields_full(
-        self: QMainWindow,
-        phase_coords: list,
-        passed_params: dict,
+        self: QMainWindow, phase_coords: list, passed_params: dict
     ) -> bool:
         """
         Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable. 
@@ -282,8 +276,10 @@ class MainWindow(QMainWindow):
         """
         if self.equations_undefined():
             return False
-        
-        for var, eqn in zip(phase_coords, (self.x_prime_entry.text(), self.y_prime_entry.text())):
+
+        for var, eqn in zip(
+            phase_coords, (self.x_prime_entry.text(), self.y_prime_entry.text())
+        ):
             if self.params_undefined(var, phase_coords, eqn, passed_params):
                 return False
 
