@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib  # Imported seperately for type hinting in onclick function signature
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from equations import SystemOfEquations
@@ -16,17 +17,15 @@ class PhaseSpacePlotter(FigCanvas):
 
     def __init__(
         self,
-        system,
-        fw_time_lim=5,
-        bw_time_lim=-5,
-        axes_limits=((-5, 5), (-5, 5)),
-        max_trajectories=10,
-        quiver_expansion_factor=0.2,
-        axes_points=20,
-        mesh_density=200,
-        *args,
-        **kwargs
-    ):
+        system: SystemOfEquations,
+        fw_time_lim: float = 5.0,
+        bw_time_lim: float = -5.0,
+        axes_limits: tuple = ((-5, 5), (-5, 5)),
+        max_trajectories: int = 10,
+        quiver_expansion_factor: float = 0.2,
+        axes_points: int = 20,
+        mesh_density: int = 200,
+    ) -> None:
 
         self.fig = Figure()
         object.__init__(self)
@@ -49,15 +48,15 @@ class PhaseSpacePlotter(FigCanvas):
 
     def update_system(
         self,
-        system,
-        fw_time_lim=5,
-        bw_time_lim=-5,
-        axes_limits=((-5, 5), (-5, 5)),
-        max_trajectories=10,
-        quiver_expansion_factor=0.2,
-        axes_points=20,
-        mesh_density=200,
-    ):
+        system: SystemOfEquations,
+        fw_time_lim: float = 5.0,
+        bw_time_lim: float = -5.0,
+        axes_limits: tuple = ((-5, 5), (-5, 5)),
+        max_trajectories: int = 10,
+        quiver_expansion_factor: float = 0.2,
+        axes_points: int = 20,
+        mesh_density: int = 200,
+    ) -> None:
         self.ax.cla()
         self.system = system
 
@@ -119,7 +118,7 @@ class PhaseSpacePlotter(FigCanvas):
         # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
 
-        def one_or_two_dimensions(display_vars, dimensions):
+        def one_or_two_dimensions(display_vars: list, dimensions: int) -> None:
 
             # Initialise button click event on local figure object
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
@@ -148,7 +147,7 @@ class PhaseSpacePlotter(FigCanvas):
             self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
         # TODO: Three dimensional plotting
-        def three_dimensions(display_vars, axes_limits):
+        def three_dimensions(display_vars, axes_limits) -> None:
             pass
 
         display_vars = self.system.system_coords
@@ -177,7 +176,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.draw()
 
-    def generate_meshes(self):
+    def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
         Returns R and Rprime, lists of mesh grids for coordinate positions and phase
         space slopes respectively
@@ -222,7 +221,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         return R, Rprime
 
-    def get_calc_limits(self, lims):
+    def get_calc_limits(self, lims: list) -> (float, float):
         """
         Returns the limits to be used in the mesh grid generation expanded with the
         self.quiver_expansion_factor variable
@@ -232,7 +231,7 @@ class PhaseSpacePlotter(FigCanvas):
         max_lim = lims[1] + extension
         return min_lim, max_lim
 
-    def onclick(self, event):
+    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
         """
         Function called upon mouse click event
         """
@@ -242,6 +241,7 @@ class PhaseSpacePlotter(FigCanvas):
         #    print(self.trajectory_count, self.max_trajectories)
         #    print(event.dblclick)
 
+        print(type(event))
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
         if not (
             event.inaxes == self.ax
@@ -303,7 +303,9 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.trajectory_count += 1
 
-    def derivative_expression_resolve(self, display_vars, dimensions, positions):
+    def derivative_expression_resolve(
+        self, display_vars: list, dimensions: int, positions: list
+    ) -> np.ndarray:
         """
         Function to resolve the coordinates of an argument to the order of
         coordinates in an equations.SystemOfEquations object
@@ -323,7 +325,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         return np.array(eval_seq)
 
-    def plot_nullclines(self):
+    def plot_nullclines(self) -> list:
         """
         Plots the nullclines for the current 2-D system.
         """
@@ -341,7 +343,7 @@ class PhaseSpacePlotter(FigCanvas):
             contours_y = self.ax.contour(X, Y, V, levels=[0], colors="yellow")
             return [contours_x, contours_y]
 
-    def toggle_nullclines(self):
+    def toggle_nullclines(self) -> None:
         """
         Toggles nullcline visibility on plot
         """
@@ -359,7 +361,7 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.draw()
 
-    def reduce_array_density(self, array, axes_points):
+    def reduce_array_density(self, array: np.ndarray, axes_points: int) -> np.ndarray:
         """
         Accepts a square, 2D Numpy array (array) and an integer variable (axes_points).
         Returns a less dense, 2D, square Numpy array with a size of (at least) axes_points squared.
