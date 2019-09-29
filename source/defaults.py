@@ -36,8 +36,8 @@ def two_dimensional_default():
     phase_coords = ["x", "y"]
     eqns = ["ax - y + b(x^2-y^2) + axy", "x - cy - d(x^2-y^2) + cxy"]
     params = {"a": 2, "b": 3, "c": 3, "d": 3}
-    t_f = 5
-    t_r = -5
+    t_f = 50
+    t_r = -50
 
     xmin = -10
     xmax = 10
