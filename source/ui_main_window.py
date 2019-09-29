@@ -230,9 +230,11 @@ class MainWindow(QMainWindow):
                     self.parameter_input_boxes[
                         "param_" + str(param_num) + "_name"
                     ].text()
-                ] = self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ].text()
+                ] = float(
+                    self.parameter_input_boxes[
+                        "param_" + str(param_num) + "_val"
+                    ].text()
+                )
 
         if self.required_fields_full(phase_coords, passed_params):
             self.update_psp(phase_coords, passed_params)
