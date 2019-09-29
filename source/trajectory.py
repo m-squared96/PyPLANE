@@ -97,12 +97,17 @@ class PhaseSpacePlotter(FigCanvas):
         quiver_data = {}
 
         if self.system.dims == 1:
-            quiver_data["t"] = (R[0], Rprime[0], self.time_r, self.time_f)
+            quiver_data["t"] = (
+                R[0],
+                Rprime[0],
+                self.axes_limits[0][0],
+                self.axes_limits[0][1],
+            )
             quiver_data[self.system.system_coords[0]] = (
                 R[1],
                 Rprime[1],
-                self.axes_limits[0][0],
-                self.axes_limits[0][1],
+                self.axes_limits[1][0],
+                self.axes_limits[1][1],
             )
 
         elif self.system.dims in (2, 3):
@@ -184,8 +189,8 @@ class PhaseSpacePlotter(FigCanvas):
         space slopes respectively
         """
         if self.system.dims == 1:
-            tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
-            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
+            tmin, tmax = self.get_calc_limits(self.axes_limits[0])
+            xmin, xmax = self.get_calc_limits(self.axes_limits[1])
 
             R = np.meshgrid(
                 np.linspace(tmin, tmax, self.mesh_density),
