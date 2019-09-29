@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
         # Unpacks self.setup_dict into SOE.
         sys = SystemOfEquations(**self.setup_dict)
-        self.phase_plot = PhaseSpacePlotter(sys)
+        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
 
     def plot_button_clicked(self: QMainWindow) -> None:
         """
