@@ -15,12 +15,11 @@ from PyQt5.QtWidgets import (
     QAction,
 )
 
-
-from ui_default_canvas import DefaultCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-
-from equations import SystemOfEquations
+from equations import DifferentialEquation, SystemOfEquations
+from trajectory import PhaseSpacePlotter
+from defaults import psp_by_dimensions, default_1D, default_2D
 
 VERSION = "0.0-pre-alpha"
 
@@ -61,45 +60,69 @@ class MainWindow(QMainWindow):
 
         # print(action_nullclines.isChecked())
 
-        # Window Features
-        self.x_prime_label = QLabel("x' =")
-        self.y_prime_label = QLabel("y' =")
-        self.x_prime_entry = QLineEdit("y")
-        self.y_prime_entry = QLineEdit("-x")
-        self.plot_button = QPushButton("Plot")
-
         # Canvas to show the phase plot as part of the main window
-        self.phase_plot = DefaultCanvas()
-        self.phase_plot.update_system(self.phase_plot.default_system)
+        # By default, open application displaying a two dimensional system
+        self.default_dims = 2
+        self.psp_canvas_default(self.default_dims)
+
+        # Window Features
+        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
+        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
+        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
+        self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
+        self.plot_button = QPushButton("Plot")
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Parameter inputs
+        param_names = list(self.setup_dict["params"].keys())
+        param_vals = list(self.setup_dict["params"].values())
+
         self.parameter_input_boxes = {}
         self.no_of_params = 5  # Number of user defined parameters
         for param_num in range(self.no_of_params):
-            self.parameter_input_boxes[
-                "param_" + str(param_num) + "_name"
-            ] = QLineEdit()
-            self.parameter_input_boxes["param_" + str(param_num) + "_val"] = QLineEdit()
+            # Fills parameter input boxes with parameter vars and corresponding vals
+            if param_num < len(self.setup_dict["params"].keys()):
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_name"
+                ] = QLineEdit(param_names[param_num])
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ] = QLineEdit(str(param_vals[param_num]))
+            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
+            else:
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_name"
+                ] = QLineEdit()
+                self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ] = QLineEdit()
 
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
-        self.x_max_label = QLabel("Max x =")
-        self.x_max_input = QLineEdit("5")
-        self.x_min_label = QLabel("Min x =")
-        self.x_min_input = QLineEdit("-5")
+        self.x_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+        self.x_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
         xlim_layout.addWidget(self.x_min_label)
         xlim_layout.addWidget(self.x_min_input)
 
-        self.y_max_label = QLabel("Max y =")
-        self.y_max_input = QLineEdit("5")
-        self.y_min_label = QLabel("Min y =")
-        self.y_min_input = QLineEdit("-5")
+        self.y_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
+        self.y_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
         ylim_layout = QHBoxLayout()
         ylim_layout.addWidget(self.y_max_label)
         ylim_layout.addWidget(self.y_max_input)
@@ -177,15 +200,27 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("PyPLANE " + VERSION)
         self.show()
 
+    def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
+        """
+        Initialises default PSP
+        """
+        if dimensions == 1:
+            self.setup_dict = default_1D
+
+        elif dimensions == 2:
+            self.setup_dict = default_2D
+
+        # Unpacks self.setup_dict into SOE.
+        sys = SystemOfEquations(**self.setup_dict)
+        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
+
     def plot_button_clicked(self: QMainWindow) -> None:
         """
-        Plot the phase space when the 'plot' button is clicked
+        Gathers phase_coords and passed_params to feed into GUI checks.
+        If GUI checks pass, self.update_psp is called.
+        Else, self.handle_empty_entry is called.
         """
-        f_1 = self.x_prime_entry.text()
-        f_2 = self.y_prime_entry.text()
-
         phase_coords = ["x", "y"]
-        eqns = [f_1, f_2]
 
         # Grab parameters
         passed_params = {}
@@ -195,11 +230,23 @@ class MainWindow(QMainWindow):
                     self.parameter_input_boxes[
                         "param_" + str(param_num) + "_name"
                     ].text()
-                ] = float(
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-                )
+                ] = self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ].text()
+
+        if self.required_fields_full(phase_coords, passed_params):
+            self.update_psp(phase_coords, passed_params)
+
+        else:
+            self.handle_empty_entry(phase_coords, passed_params)
+
+    def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
+        """
+        Gathers entry information from GUI and updates phase plot
+        """
+        f_1 = self.x_prime_entry.text()
+        f_2 = self.y_prime_entry.text()
+        eqns = [f_1, f_2]
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
@@ -213,6 +260,93 @@ class MainWindow(QMainWindow):
         self.phase_plot.update_system(
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
+
+    def handle_empty_entry(
+        self: QMainWindow, phase_coords: list, passed_params: dict
+    ) -> None:
+        print("Blank detected")
+
+    def required_fields_full(
+        self: QMainWindow, phase_coords: list, passed_params: dict
+    ) -> bool:
+        """
+        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable. 
+        Returns True if all full.
+        Returns False if any are empty
+        """
+        if self.equations_undefined():
+            return False
+
+        for var, eqn in zip(
+            phase_coords, (self.x_prime_entry.text(), self.y_prime_entry.text())
+        ):
+            if self.params_undefined(var, phase_coords, eqn, passed_params):
+                return False
+
+        return not self.lims_undefined()
+
+    def equations_undefined(self: QMainWindow) -> bool:
+        """
+        Checks if either ODE expression entry boxes are entry. Returns True if either
+        are empty. Returns False if both are not empty
+        """
+        for string_eqn in (self.x_prime_entry.text(), self.y_prime_entry.text()):
+            if string_eqn == "":
+                return True
+
+        return False
+
+    def params_undefined(
+        self: QMainWindow,
+        dep_var: str,
+        phase_coords: list,
+        ode_str: str,
+        passed_params: dict,
+    ) -> bool:
+        """
+        Checks for undefined parameters in ODE expressions.
+        Returns True if undefined parameters found.
+        Returns False otherwise
+        """
+        for val in passed_params.values():
+            try:
+                float(val)
+            except ValueError:
+                return True
+
+        ode = DifferentialEquation(dep_var, phase_coords, ode_str)
+
+        # Currently unused, except to determine that there are undefined params.
+        # Could be used later to highlight offending ode expression?
+        undefined_params = [
+            str(sym) for sym in ode.params if str(sym) not in passed_params.keys()
+        ]
+
+        if len(undefined_params) != 0:
+            return True
+
+        return False
+
+    def lims_undefined(self: QMainWindow) -> bool:
+        """
+        Checks for undefined axes limits. Returns True if any of the axes limits 
+        entry boxes are empty or contain non-numerical characters. 
+        Returns False if all contain text that can be converted to floats.
+        """
+        for lim in (
+            self.x_min_input.text(),
+            self.x_max_input.text(),
+            self.y_min_input.text(),
+            self.y_max_input.text(),
+        ):
+            if lim == "":
+                return True
+            try:
+                float(lim)
+            except ValueError:
+                return True
+
+        return False
 
 
 if __name__ == "__main__":

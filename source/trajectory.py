@@ -25,6 +25,8 @@ class PhaseSpacePlotter(FigCanvas):
         quiver_expansion_factor: float = 0.2,
         axes_points: int = 20,
         mesh_density: int = 200,
+        *args,
+        **kwargs,
     ) -> None:
 
         self.fig = Figure()
