@@ -17,7 +17,7 @@ The Contributor Covenant has been adopted as a probationary CoC for the PyPLANE 
 
 ## Development environment
 
-Python 3.7 is used as the development Python environment. Dependencies (listed in requirements.txt) are as follows:
+Python 3.7 is used for development. Dependencies (listed in requirements.txt) are as follows:
 * NumPy 1.17.0
 * SymPy 1.4
 * SciPy 1.3.1
@@ -27,7 +27,7 @@ Python 3.7 is used as the development Python environment. Dependencies (listed i
 To generate a consistent development environment for PyPLANE, run the following lines of code:
 
 ```bash
-python --version # Ensure is says "Python 3.7.X" with X being another number
+python --version # Ensure output says "Python 3.7.X" with X being another number
 python -m venv pyplanedev/
 cd pyplanedev/
 git clone https://github.com/m-squared96/PyPLANE
