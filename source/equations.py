@@ -21,7 +21,7 @@ TRANSFORMATIONS = standard_transformations + (
 )
 
 
-class DifferentialEquation(object):
+class DifferentialEquation:
     """
     Handles first-order ODE's
     """
@@ -74,10 +74,10 @@ class DifferentialEquation(object):
         return self.func(t, r, **self.param_values)
 
     def __str__(self):  # implemented for readable printing of equation
-        return "d{}/dt = {}".format(self.dep_var, self.expr)
+        return f"d{self.dep_var}/dt = {self.expr}"
 
 
-class SystemOfEquations(object):
+class SystemOfEquations:
     """
     System of ODE's. Handles solving and evaluating the ODE's.
     """
@@ -94,11 +94,10 @@ class SystemOfEquations(object):
         # The elements in system_coords and ode_expr_strings are assumed
         # to correspond to each other in the order given.
         # i.e. system_coords[i] pairs with ode_expr_strings[i]
-        self.equations = []
-        for i in range(len(system_coords)):
-            coord = system_coords[i]
-            expr = ode_expr_strings[i]
-            self.equations.append(DifferentialEquation(coord, system_coords, expr))
+        self.equations = [
+            DifferentialEquation(coord, system_coords, expr)
+            for coord, expr in zip(system_coords, ode_expr_strings)
+        ]
 
         # Set the parameters in the ODEs
         self.params = params
@@ -107,10 +106,7 @@ class SystemOfEquations(object):
                 eqn.set_param(p, val)
 
     def __str__(self):
-        s = ["{}".format(self.__repr__())]
-        for eqn in self.equations:
-            s.append("{}".format(eqn))
-        return "\n".join(s)
+        return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
 
     def solve(self, t_span, r0, method="LSODA"):
         return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
