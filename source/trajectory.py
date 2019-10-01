@@ -27,7 +27,7 @@ class PhaseSpacePlotter(FigCanvas):
         mesh_density: int = 200,
         *args,
         **kwargs,
-    ):
+    ) -> None:
 
         self.fig = Figure()
         object.__init__(self)
@@ -58,7 +58,7 @@ class PhaseSpacePlotter(FigCanvas):
         quiver_expansion_factor: float = 0.2,
         axes_points: int = 20,
         mesh_density: int = 200,
-    ):
+    ) -> None:
         self.ax.cla()
         self.system = system
 
@@ -123,7 +123,7 @@ class PhaseSpacePlotter(FigCanvas):
         # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
 
-        def one_or_two_dimensions(display_vars: list, dimensions: int):
+        def one_or_two_dimensions(display_vars: list, dimensions: int) -> None:
 
             # Initialise button click event on local figure object
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)

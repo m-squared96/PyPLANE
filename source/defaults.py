@@ -4,15 +4,16 @@ from equations import SystemOfEquations
 from trajectory import PhaseSpacePlotter
 
 
-def psp_by_dimensions(dims):
+def psp_by_dimensions(dims) -> PhaseSpacePlotter:
 
     if dims == 1:
         return one_dimensional_default()
     if dims == 2:
         return two_dimensional_default()
+    # TODO what do we do in other dimensions?
 
 
-def one_dimensional_default():
+def one_dimensional_default() -> PhaseSpacePlotter:
 
     phase_coords = ["x"]
     eqns = ["sin(x)"]
@@ -31,7 +32,7 @@ def one_dimensional_default():
     )
 
 
-def two_dimensional_default():
+def two_dimensional_default() -> PhaseSpacePlotter:
 
     phase_coords = ["x", "y"]
     eqns = ["ax - y + b(x^2-y^2) + axy", "x - cy - d(x^2-y^2) + cxy"]

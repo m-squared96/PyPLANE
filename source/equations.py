@@ -26,7 +26,7 @@ class DifferentialEquation:
     Handles first-order ODE's
     """
 
-    def __init__(self, dep_var, phase_coords, expr_string):
+    def __init__(self, dep_var, phase_coords, expr_string) -> None:
         # dep_var is converted from a string into the corresponding Sympy symbol
         self.dep_var = symbols(dep_var)
 
@@ -59,7 +59,7 @@ class DifferentialEquation:
             [self.indep_var, self.phase_coords, *self.params], self.expr
         )
 
-    def set_param(self, param, value):
+    def set_param(self, param, value) -> None:
         """
         Sets self.param_values[param] to value.
         If 
@@ -73,7 +73,7 @@ class DifferentialEquation:
             r = [r]
         return self.func(t, r, **self.param_values)
 
-    def __str__(self):  # implemented for readable printing of equation
+    def __str__(self) -> str:  # implemented for readable printing of equation
         return f"d{self.dep_var}/dt = {self.expr}"
 
 
@@ -82,7 +82,9 @@ class SystemOfEquations:
     System of ODE's. Handles solving and evaluating the ODE's.
     """
 
-    def __init__(self, system_coords, ode_expr_strings, params=None, *args, **kwargs):
+    def __init__(
+        self, system_coords, ode_expr_strings, params=None, *args, **kwargs
+    ) -> None:
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
@@ -105,13 +107,13 @@ class SystemOfEquations:
             for eqn in self.equations:
                 eqn.set_param(p, val)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
 
     def solve(self, t_span, r0, method="LSODA"):
         return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
 
-    def phasespace_eval(self, t, r):
+    def phasespace_eval(self, t, r) -> tuple:
         """
         Allows for the phase space to be evaluated using the SOE class.
         
