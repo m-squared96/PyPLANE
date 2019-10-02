@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
     TODO: Insert docstring
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.init_ui()
 
@@ -324,10 +324,7 @@ class MainWindow(QMainWindow):
             str(sym) for sym in ode.params if str(sym) not in passed_params.keys()
         ]
 
-        if len(undefined_params) != 0:
-            return True
-
-        return False
+        return len(undefined_params) != 0
 
     def lims_undefined(self: QMainWindow) -> bool:
         """
@@ -347,7 +344,6 @@ class MainWindow(QMainWindow):
                 float(lim)
             except ValueError:
                 return True
-
         return False
 
 

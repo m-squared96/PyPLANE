@@ -62,18 +62,16 @@ class PhaseSpacePlotter(FigCanvas):
         self.ax.cla()
         self.system = system
 
-        self.time_f = fw_time_lim  # Time at which to stop forward trajectory evaluation
-        self.time_r = (
-            bw_time_lim
-        )  # Time at which to stop backward trajectory evaluation
+        # Time at which to stop forward trajectory evaluation
+        self.time_f = fw_time_lim
+        # Time at which to stop backward trajectory evaluation
+        self.time_r = bw_time_lim
 
-        self.quiver_expansion_factor = (
-            quiver_expansion_factor
-        )  # Factor to expand quiverplot to ensure all visible regions plotted
+        # Factor to expand quiverplot to ensure all visible regions plotted
+        self.quiver_expansion_factor = quiver_expansion_factor
 
-        self.axes_limits = np.array(
-            axes_limits
-        )  # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
+        # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
+        self.axes_limits = np.array(axes_limits)
 
         # axes_points = number of points along each axis if quiver_expansion_factor = 0
         # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
@@ -154,7 +152,7 @@ class PhaseSpacePlotter(FigCanvas):
             self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
         # TODO: Three dimensional plotting
-        def three_dimensions(display_vars, axes_limits) -> None:
+        def three_dimensions(display_vars, axes_limits):
             pass
 
         display_vars = self.system.system_coords
@@ -261,9 +259,8 @@ class PhaseSpacePlotter(FigCanvas):
         x_event = event.xdata
         y_event = event.ydata
 
-        self.ax.plot(
-            x_event, y_event, ls="", marker="x", c="#FF0000"
-        )  # Plots a red "x" on the position of the user's click
+        # Plots a red "x" on the position of the user's click
+        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
         # Seperate blocks of code for handling one and two dimensions are required as, from an SOE point of view, they are
         # fundamentally different, as t is not a system variable in the same way that, for example, x is.
