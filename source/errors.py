@@ -82,3 +82,20 @@ class MathematicalFunctionError(PPException):
 
     def __init__(self, message, *args, **kwargs):
         super().__init__(message, *args, **kwargs)
+
+def main():
+    try:
+        raise(MathematicalFunctionError("Testing", ["arcsin(x)"]))
+
+    except MathematicalFunctionError as mfe:
+        print(mfe.message)
+        print(mfe.args)
+
+    else:
+        print("Unrecognised error")
+
+    finally:
+        print("Done")
+
+if __name__ == "__main__":
+    main()

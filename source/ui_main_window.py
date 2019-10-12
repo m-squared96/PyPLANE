@@ -20,6 +20,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
 from defaults import psp_by_dimensions, default_1D, default_2D
+from errors import *
 
 VERSION = "0.0-pre-alpha"
 
@@ -230,17 +231,19 @@ class MainWindow(QMainWindow):
                     self.parameter_input_boxes[
                         "param_" + str(param_num) + "_name"
                     ].text()
-                ] = float(
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-                )
+                ] = self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ].text()
 
-        if self.required_fields_full(phase_coords, passed_params):
+        try:
             self.update_psp(phase_coords, passed_params)
 
-        else:
-            self.handle_empty_entry(phase_coords, passed_params)
+        except PPException as ppe:
+            print(ppe.message)
+
+        except Exception as e:
+            print("Generic Exception caught:")
+            print(e)
 
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
@@ -266,6 +269,10 @@ class MainWindow(QMainWindow):
     def handle_empty_entry(
         self: QMainWindow, phase_coords: list, passed_params: dict
     ) -> None:
+        # TODO:
+        # 1. Get up to speed with Qt
+        # 2. List out and deal with the different error-thowing scenarios
+        # 3. Highlight offending text boxes using alerts and/or colours
         print("Blank detected")
 
     def required_fields_full(
