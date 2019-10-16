@@ -153,7 +153,8 @@ class SystemOfEquations:
 
     def eigenvects(self, r=None):
         """
-        Calculates the eigenvalues and eigenvalues of the system's Jacobian
+        Calculates the eigenvalues and eigenvectors of the system's Jacobian.
+        Return list of triples (eigenval, multiplicity, eigenspace).
         """
 
         jacobian = self.eval_jacobian(r) if r is not None else self.jacobian
