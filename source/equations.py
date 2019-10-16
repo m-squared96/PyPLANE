@@ -5,6 +5,7 @@ import sympy as sp
 from scipy.integrate import solve_ivp
 from sympy.utilities.lambdify import lambdify
 from sympy import symbols, Matrix
+from sympy.matrices.dense import matrix2numpy
 from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
@@ -113,6 +114,9 @@ class SystemOfEquations:
         self.jacobian = r.jacobian(self.system_coord_symbols)
         # print(f"Jacobian: {self.jac}")
 
+        # calculated fixed points are cached here
+        self.fixed_points = []
+
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
 
@@ -160,11 +164,32 @@ class SystemOfEquations:
         jacobian = self.eval_jacobian(r) if r is not None else self.jacobian
         return jacobian.eigenvects(simplify=True)
 
+    def find_fixed_point(self, r_init):
+        """
+        Returns the value of a fixed point based a Newton's method computation.
+        See https://en.wikipedia.org/wiki/Newton%27s_method for details.
+        """
+
+        num_iter = 50
+        r = r_init
+
+        for _ in range(num_iter):
+            J = self.eval_jacobian(r)
+            J_inv = matrix2numpy(J.inv(), dtype="float")
+            print(f"J_inv: {J_inv}")
+            r = r - J_inv.dot(self.phasespace_eval(t=None, r=r))
+            print(f"next: {r}")
+
+        self.fixed_points.append(r)
+        print(r)
+        return r
+
 
 def example():
     # 2-D
     system_coords = ["x", "y"]
-    eqns = ["ax + by", "cx + dy"]
+    # eqns = ["ax + by", "cx + dy"]
+    eqns = ["2x - y + 3(x^2-y^2) + 2xy", "x - 3y - 3(x^2-y^2) + 3xy"]
     params = {"a": -1, "b": 5, "c": -4, "d": -2}
     r0 = [0.4, -0.3]
     t_span = (0, 40)
@@ -172,9 +197,14 @@ def example():
     sys = SystemOfEquations(system_coords, eqns, params=params)
     print(sys)
 
-    r = [0.5, 0.5]
+    # r = [0.5, 0.5]
+    r = [-1, -1]
     print(f"Jacobian evaluated at {r}:")
     sys.show_jacobian(eval=True, r=r)
+
+    print(f"finding fixed point from initial guess {r}...")
+    fp = sys.find_fixed_point(r)
+    print(f"fixed point: {fp}")
 
     # Calculate eigenvalues and eigenvectors
     sp.pprint(sys.eigenvects(r))
