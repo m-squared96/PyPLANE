@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
@@ -176,12 +178,9 @@ class SystemOfEquations:
         for _ in range(num_iter):
             J = self.eval_jacobian(r)
             J_inv = matrix2numpy(J.inv(), dtype="float")
-            print(f"J_inv: {J_inv}")
             r = r - J_inv.dot(self.phasespace_eval(t=None, r=r))
-            print(f"next: {r}")
 
         self.fixed_points.append(r)
-        print(r)
         return r
 
 
