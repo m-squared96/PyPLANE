@@ -53,9 +53,10 @@ class MainWindow(QMainWindow):
         self.action_quit = QAction("Quit", self)
 
         menu_file.addAction(self.action_new_window)
-        menu_file.addAction(self.action_export_json)
-        menu_file.addAction(self.action_import_json)
         menu_file.addAction(self.action_quit)
+
+        menu_edit.addAction(self.action_export_json)
+        menu_edit.addAction(self.action_import_json)
 
         self.action_quit.triggered.connect(self.close)
 
