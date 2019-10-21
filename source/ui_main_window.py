@@ -23,7 +23,6 @@ from defaults import psp_by_dimensions, default_1D, default_2D
 
 VERSION = "0.0-pre-alpha"
 
-
 class MainWindow(QMainWindow):
     """
     TODO: Insert docstring
@@ -42,15 +41,19 @@ class MainWindow(QMainWindow):
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
 
+##############################################################################################################
         # Menu Bar
         menu_bar = self.menuBar()
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
         menu_plot_opts = menu_edit.addMenu("Plot Options")
 
-        # self.action_new_window = QAction("New Window", self)
+        #self.action_new_window = QAction("New Window", self)
+        self.action_export_json = QAction("Export JSON", self)
+        self.action_export_json = QAction("Import JSON", self)
         self.action_quit = QAction("Quit", self)
-        # menu_file.addAction(self.action_new_window)
+
+        #menu_file.addAction(self.action_new_window)
         menu_file.addAction(self.action_quit)
 
         self.action_quit.triggered.connect(self.close)
@@ -60,6 +63,7 @@ class MainWindow(QMainWindow):
 
         # print(action_nullclines.isChecked())
 
+##############################################################################################################
         # Canvas to show the phase plot as part of the main window
         # By default, open application displaying a two dimensional system
         self.default_dims = 2
@@ -75,6 +79,7 @@ class MainWindow(QMainWindow):
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
+##############################################################################################################
         # Parameter inputs
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
@@ -98,7 +103,8 @@ class MainWindow(QMainWindow):
                 self.parameter_input_boxes[
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
-
+                
+##############################################################################################################
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
         self.x_max_label = QLabel(
