@@ -46,22 +46,21 @@ class MainWindow(QMainWindow):
         menu_bar = self.menuBar()
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
-        menu_plot_opts = menu_edit.addMenu("Plot Options")
 
-        #self.action_new_window = QAction("New Window", self)
+        self.action_new_window = QAction("New Window", self)
         self.action_export_json = QAction("Export JSON", self)
-        self.action_export_json = QAction("Import JSON", self)
+        self.action_import_json = QAction("Import JSON", self)
         self.action_quit = QAction("Quit", self)
 
-        #menu_file.addAction(self.action_new_window)
+        menu_file.addAction(self.action_new_window)
+        menu_file.addAction(self.action_export_json)
+        menu_file.addAction(self.action_import_json)
         menu_file.addAction(self.action_quit)
 
         self.action_quit.triggered.connect(self.close)
 
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
-        menu_plot_opts.addAction(self.action_nullclines)
-
-        # print(action_nullclines.isChecked())
+        menu_edit.addAction(self.action_nullclines)
 
 ##############################################################################################################
         # Canvas to show the phase plot as part of the main window
@@ -103,7 +102,7 @@ class MainWindow(QMainWindow):
                 self.parameter_input_boxes[
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
-                
+
 ##############################################################################################################
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
