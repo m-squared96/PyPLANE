@@ -206,6 +206,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("PyPLANE " + VERSION)
         self.show()
 
+##############################################################################################################
     def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
         """
         Initialises default PSP
@@ -228,6 +229,7 @@ class MainWindow(QMainWindow):
         """
         phase_coords = ["x", "y"]
 
+##############################################################################################################
         # Grab parameters
         passed_params = {}
         for param_num in range(self.no_of_params):
@@ -248,6 +250,7 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
+##############################################################################################################
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -269,11 +272,13 @@ class MainWindow(QMainWindow):
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
 
+##############################################################################################################
     def handle_empty_entry(
         self: QMainWindow, phase_coords: list, passed_params: dict
     ) -> None:
         print("Blank detected")
 
+##############################################################################################################
     def required_fields_full(
         self: QMainWindow, phase_coords: list, passed_params: dict
     ) -> bool:
@@ -293,6 +298,7 @@ class MainWindow(QMainWindow):
 
         return not self.lims_undefined()
 
+##############################################################################################################
     def equations_undefined(self: QMainWindow) -> bool:
         """
         Checks if either ODE expression entry boxes are entry. Returns True if either
@@ -304,6 +310,7 @@ class MainWindow(QMainWindow):
 
         return False
 
+##############################################################################################################
     def params_undefined(
         self: QMainWindow,
         dep_var: str,
@@ -332,6 +339,7 @@ class MainWindow(QMainWindow):
 
         return len(undefined_params) != 0
 
+##############################################################################################################
     def lims_undefined(self: QMainWindow) -> bool:
         """
         Checks for undefined axes limits. Returns True if any of the axes limits 
@@ -352,7 +360,7 @@ class MainWindow(QMainWindow):
                 return True
         return False
 
-
+##############################################################################################################
 if __name__ == "__main__":
     PyPLANE = QApplication(sys.argv)
     PyPLANE_main_window = MainWindow()
