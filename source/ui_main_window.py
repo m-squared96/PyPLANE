@@ -221,6 +221,7 @@ class MainWindow(QMainWindow):
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
 
+##############################################################################################################
     def plot_button_clicked(self: QMainWindow) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
@@ -228,8 +229,7 @@ class MainWindow(QMainWindow):
         Else, self.handle_empty_entry is called.
         """
         phase_coords = ["x", "y"]
-
-##############################################################################################################
+        
         # Grab parameters
         passed_params = {}
         for param_num in range(self.no_of_params):
@@ -359,6 +359,16 @@ class MainWindow(QMainWindow):
             except ValueError:
                 return True
         return False
+
+##############################################################################################################
+        def gather_system_data(self: QMainWindow) -> dict:
+            """
+            Extracts data about the current system from the relevant UI elements,
+            storing it in a dict in preparation for exporting to a .json file.
+            """
+            system_data = dict()
+
+            return system_data
 
 ##############################################################################################################
 if __name__ == "__main__":
