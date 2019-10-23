@@ -163,7 +163,7 @@ class SystemOfEquations(object):
                 self.params[p] = float(val)
 
         except ValueError:
-            raise ParameterTypeError("Parameter of invalid type", val)
+            raise ParameterTypeError("Parameter of invalid type", (p, val))
 
     def validate_param_labels(self):
         """

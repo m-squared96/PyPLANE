@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 from equations import SystemOfEquations
 from errors import *
 
+
 class PhaseSpacePlotter(FigCanvas):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
@@ -391,4 +392,6 @@ class PhaseSpacePlotter(FigCanvas):
                     raise LimitTypeError("Limit of invalid type", i)
 
             if row[0] >= row[1]:
-                raise LimitMagnitudeError("Minimum limit greater than or equal to maximum limit", row)
+                raise LimitMagnitudeError(
+                    "Minimum limit greater than or equal to maximum limit", row
+                )
