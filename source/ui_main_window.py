@@ -60,6 +60,8 @@ class MainWindow(QMainWindow):
 
         self.action_quit.triggered.connect(self.close)
 
+        self.action_export_json.triggered.connect(self.gather_system_data)
+
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
         menu_edit.addAction(self.action_nullclines)
 
@@ -361,14 +363,15 @@ class MainWindow(QMainWindow):
         return False
 
 ##############################################################################################################
-        def gather_system_data(self: QMainWindow) -> dict:
-            """
-            Extracts data about the current system from the relevant UI elements,
-            storing it in a dict in preparation for exporting to a .json file.
-            """
-            system_data = dict()
+    def gather_system_data(self: QMainWindow) -> dict:
+        """
+        Extracts data about the current system from the relevant UI elements,
+        storing it in a dict in preparation for exporting to a .json file.
+        """
+        system_data = dict()
 
-            return system_data
+        print("IT WORKS!")
+        #return system_data
 
 ##############################################################################################################
 if __name__ == "__main__":
