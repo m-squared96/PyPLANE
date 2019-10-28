@@ -2,8 +2,10 @@ import numpy as np
 import matplotlib  # Imported seperately for type hinting in onclick function signature
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from equations import SystemOfEquations
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
+
+from equations import SystemOfEquations
+from errors import *
 
 
 class PhaseSpacePlotter(FigCanvas):
@@ -72,6 +74,8 @@ class PhaseSpacePlotter(FigCanvas):
 
         # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
         self.axes_limits = np.array(axes_limits)
+
+        self.validate_axes_limits()
 
         # axes_points = number of points along each axis if quiver_expansion_factor = 0
         # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
@@ -240,13 +244,6 @@ class PhaseSpacePlotter(FigCanvas):
         """
         Function called upon mouse click event
         """
-        # if event.dblclick:
-        #    print("\nActivated")
-        #    print(event.inaxes == self.ax)
-        #    print(self.trajectory_count, self.max_trajectories)
-        #    print(event.dblclick)
-
-        print(type(event))
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
         if not (
             event.inaxes == self.ax
@@ -374,41 +371,24 @@ class PhaseSpacePlotter(FigCanvas):
             step = int(array.shape[0] / axes_points)
             return array[::step, ::step]
 
+    def validate_axes_limits(self) -> None:
+        """
+        1. Checks if axes limits are of a numerical-compatible type.
+        2. Checks if axes limits conform to min < max.
 
-# def one_D_example():
-#    phase_coords = ['x']
-#    eqns = ['sin(x)']
-#    params = {'a':1, 'b':0}
-#    t_f = 20
-#    t_r = -20
-#
-#    sys = SystemOfEquations(phase_coords, eqns, params=params)
-#    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2)
-#    plotter.show_plot(['x'])
-#
-#
-# def two_D_example():
-#    phase_coords = ['x', 'y']
-#    eqns = [
-#        '2x - y + 3(x^2-y^2) + 2xy',
-#        'x - 3y - 3(x^2-y^2) + 3xy'
-#    ]
-#    params = {
-#        'a': -1,
-#        'b': 5,
-#        'c': -4,
-#        'd': -2
-#    }
-#    t_f = 5
-#    t_r = -5
-#
-#    sys = SystemOfEquations(phase_coords, eqns, params=params)
-#    plotter = PhaseSpacePlotter(sys, t_f, t_r, np.array(((-10, 10), (-10, 10))))
-#    # print(plotter.R[0].shape)
-#    # print(plotter.Rprime)
-#    plotter.show_plot(['x', 'y'])
-#
-#
-# if __name__ == "__main__":
-#    one_D_example()
-#    two_D_example()
+        If not, raises:
+            1. LimitTypeError
+            2. LimitMagnitudeError
+        """
+        for row in self.axes_limits:
+            for i in row:
+                try:
+                    i = float(i)
+
+                except TypeError:
+                    raise LimitTypeError("Limit of invalid type", i)
+
+            if row[0] >= row[1]:
+                raise LimitMagnitudeError(
+                    "Minimum limit greater than or equal to maximum limit", row
+                )

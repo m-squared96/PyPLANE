@@ -3,6 +3,8 @@ Draws the main window of the PyPLANE Qt5 interface
 """
 
 import sys
+
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -14,15 +16,13 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QAction,
 )
-
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
 from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
 from defaults import psp_by_dimensions, default_1D, default_2D
+from errors import *
 
 VERSION = "0.0-pre-alpha"
-
 
 class MainWindow(QMainWindow):
     """
@@ -37,6 +37,8 @@ class MainWindow(QMainWindow):
         """
         Adds components (buttons, text boxes, etc.) and draws the window
         """
+        
+        self.setStyleSheet(open("source/styles.css").read())
 
         # Define central widget
         cent_widget = QWidget(self)
@@ -166,10 +168,10 @@ class MainWindow(QMainWindow):
         equation_entry_layout.addLayout(y_prime_layout)
         equation_entry_layout.addLayout(button_layout)
 
-        parameters_layout = QVBoxLayout()  # Inputs for all parameters
-        parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
+        self.parameters_layout = QVBoxLayout()  # Inputs for all parameters
+        self.parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
         for param_num in range(self.no_of_params):
-            parameters_layout.addLayout(
+            self.parameters_layout.addLayout(
                 self.parameter_layouts["param_" + str(param_num) + "_layout"]
             )
 
@@ -180,7 +182,7 @@ class MainWindow(QMainWindow):
         inputs_layout.addLayout(xlim_layout)
         inputs_layout.addLayout(ylim_layout)
 
-        inputs_layout.addLayout(parameters_layout)
+        inputs_layout.addLayout(self.parameters_layout)
         inputs_layout.addStretch()
 
         plot_layout = QVBoxLayout()
@@ -230,17 +232,37 @@ class MainWindow(QMainWindow):
                     self.parameter_input_boxes[
                         "param_" + str(param_num) + "_name"
                     ].text()
-                ] = float(
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-                )
+                ] = self.parameter_input_boxes[
+                    "param_" + str(param_num) + "_val"
+                ].text()
 
-        if self.required_fields_full(phase_coords, passed_params):
+        # print(self.parameter_input_boxes)
+
+        try:
             self.update_psp(phase_coords, passed_params)
 
-        else:
-            self.handle_empty_entry(phase_coords, passed_params)
+        except ParameterTypeError as pte:
+            print(pte.message)
+            self.handle_pte(pte.args)
+
+        except ParameterValidityError as pve:
+            print(pve.message)
+            self.handle_pve(pve.args)
+
+        except LimitTypeError as lte:
+            print(lte.message)
+            self.handle_lte(lte.args)
+
+        except LimitMagnitudeError as lme:
+            print(lme.message)
+            self.handle_lme(lme.args)
+
+        except PPException as ppe:
+            print(ppe.message)
+
+        except Exception as e:
+            print("Generic Exception caught:")
+            print(e)
 
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
@@ -263,59 +285,18 @@ class MainWindow(QMainWindow):
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
 
-    def handle_empty_entry(
-        self: QMainWindow, phase_coords: list, passed_params: dict
-    ) -> None:
-        print("Blank detected")
+    def handle_pte(self: QMainWindow, pte_args: tuple) -> None:
+        self.plot_button.setProperty("warning-indicator", True)
 
-    def required_fields_full(
-        self: QMainWindow, phase_coords: list, passed_params: dict
-    ) -> bool:
-        """
-        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable. 
-        Returns True if all full.
-        Returns False if any are empty
-        """
-        if self.equations_undefined():
-            return False
+    def handle_pve(self: QMainWindow, pve_args: tuple) -> None:
+        print(pve_args)
+        print(type(pve_args))
 
-        for var, eqn in zip(
-            phase_coords, (self.x_prime_entry.text(), self.y_prime_entry.text())
-        ):
-            if self.params_undefined(var, phase_coords, eqn, passed_params):
-                return False
+    def handle_lte(self: QMainWindow, lte_args: tuple) -> None:
+        print(lte_args)
+        print(type(lte_args))
 
-        return not self.lims_undefined()
-
-    def equations_undefined(self: QMainWindow) -> bool:
-        """
-        Checks if either ODE expression entry boxes are entry. Returns True if either
-        are empty. Returns False if both are not empty
-        """
-        for string_eqn in (self.x_prime_entry.text(), self.y_prime_entry.text()):
-            if string_eqn == "":
-                return True
-
-        return False
-
-    def params_undefined(
-        self: QMainWindow,
-        dep_var: str,
-        phase_coords: list,
-        ode_str: str,
-        passed_params: dict,
-    ) -> bool:
-        """
-        Checks for undefined parameters in ODE expressions.
-        Returns True if undefined parameters found.
-        Returns False otherwise
-        """
-        for val in passed_params.values():
-            try:
-                float(val)
-            except ValueError:
-                return True
-
+<<<<<<< HEAD
         ode = DifferentialEquation(dep_var, phase_coords, ode_str)
 
         # Currently unused, except to determine that there are undefined params.
@@ -345,6 +326,11 @@ class MainWindow(QMainWindow):
             except ValueError:
                 return True
         return False
+=======
+    def handle_lme(self: QMainWindow, lme_args: tuple) -> None:
+        print(lme_args)
+        print(type(lme_args))
+>>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
 
 if __name__ == "__main__":

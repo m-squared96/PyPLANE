@@ -13,6 +13,8 @@ from sympy.parsing.sympy_parser import (
     convert_xor,
 )
 
+from errors import *
+
 # transformation functions that modify the equation parser
 TRANSFORMATIONS = standard_transformations + (
     split_symbols,  # used for implicit multiplication
@@ -26,7 +28,12 @@ class DifferentialEquation:
     Handles first-order ODE's
     """
 
+<<<<<<< HEAD
     def __init__(self, dep_var, phase_coords, expr_string) -> None:
+=======
+    def __init__(self, dep_var, phase_coords, expr_string):
+
+>>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
         # dep_var is converted from a string into the corresponding Sympy symbol
         self.dep_var = symbols(dep_var)
 
@@ -83,8 +90,18 @@ class SystemOfEquations:
     """
 
     def __init__(
+<<<<<<< HEAD
         self, system_coords, ode_expr_strings, params=None, *args, **kwargs
     ) -> None:
+=======
+        self,
+        system_coords: list,
+        ode_expr_strings: list,
+        params: dict = dict(),
+        *args,
+        **kwargs
+    ):
+>>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
@@ -92,23 +109,123 @@ class SystemOfEquations:
         self.system_coords = system_coords
         self.dims = len(self.system_coords)
 
+        self.equations = []
+        self.params = params
+
+        # Checks for invalid input data from GUI text boxes
+        # Passes exception up the callstack if raised
+        self.validate_params_all()
+        self.validate_mathematics()
+
+        # print("Validated")
+
         # generate the list of expressions representing the system.
         # The elements in system_coords and ode_expr_strings are assumed
         # to correspond to each other in the order given.
         # i.e. system_coords[i] pairs with ode_expr_strings[i]
+<<<<<<< HEAD
         self.equations = [
             DifferentialEquation(coord, system_coords, expr)
             for coord, expr in zip(system_coords, ode_expr_strings)
         ]
+=======
+        for i in range(len(system_coords)):
+            coord = system_coords[i]
+            expr = ode_expr_strings[i]
+            self.equations.append(DifferentialEquation(coord, system_coords, expr))
+>>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
         # Set the parameters in the ODEs
-        self.params = params
         for p, val in params.items():
             for eqn in self.equations:
                 eqn.set_param(p, val)
 
+<<<<<<< HEAD
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
+=======
+    def validate_params_all(self):
+        """
+        Calls sub-validation methods for validation of 
+        parameters before being passed to DifferentialEquation
+        class
+        """
+        self.indep_var_sym = [symbols("t")]
+        self.system_coords_sym = list(symbols(self.system_coords))
+
+        # Used to check for undefined and unused parameters
+        self.expr_params = []
+        for expr in self.ode_expr_strings:
+            parsed_expr = parse_expr(expr, transformations=TRANSFORMATIONS)
+            self.expr_params += [
+                str(s)
+                for s in parsed_expr.free_symbols
+                if s not in (self.system_coords_sym + self.indep_var_sym)
+                and s not in self.expr_params
+            ]
+
+        # print(self.expr_params)
+
+        self.validate_param_types()
+        self.validate_param_labels()
+        self.validate_params_defined()
+        self.validate_params_used()
+
+    def validate_param_types(self):
+        """
+        Validates that parameter values passed to SOE are
+        float-compatible.
+
+        If not, raises ParameterTypeError
+        """
+        try:
+            for p, val in self.params.items():
+                self.params[p] = float(val)
+
+        except ValueError:
+            raise ParameterTypeError("Parameter of invalid type", (p, val))
+
+    def validate_param_labels(self):
+        """
+        Validates that parameter labels are valid.
+
+        If not, raises ParameterValidityError
+        """
+        invalid_labels = [p for p in self.params if len(p) != 1]
+        if len(invalid_labels) != 0:
+            raise ParameterValidityError(
+                "Parameter(s) with invalid label(s)", invalid_labels
+            )
+
+    def validate_params_defined(self):
+        """
+        Checks if there are no undefined parameters in the expressions.
+
+        If there are, raises a ParameterValidityError
+        """
+        undefined_params = [s for s in self.expr_params if s not in self.params]
+        if len(undefined_params) != 0:
+            raise ParameterValidityError("Undefined parameter(s)", undefined_params)
+
+    def validate_params_used(self):
+        """
+        Checks if there are no unused parameters specified in the GUI.
+
+        If there are, raises a ParameterValidityError
+        """
+        unused_params = [s for s in self.params if s not in self.expr_params]
+        if len(unused_params) != 0:
+            raise ParameterValidityError("Unused parameters(s)", unused_params)
+
+    def validate_mathematics(self):
+        pass
+
+    def __str__(self):
+        s = ["{}".format(self.__repr__())]
+        for eqn in self.equations:
+            s.append("{}".format(eqn))
+        return "\n".join(s)
+>>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
     def solve(self, t_span, r0, method="LSODA"):
         return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
@@ -116,15 +233,6 @@ class SystemOfEquations:
     def phasespace_eval(self, t, r) -> tuple:
         """
         Allows for the phase space to be evaluated using the SOE class.
-        
-        Example:
-        >>> import numpy as np
-        >>> from equations import SystemOfEquations
-        >>> sys = SystemOfEquations(phase_coords, eqns, params=params)
-        >>> X, Y = np.meshgrid(np.arange(-10, 10, 1), np.arange(-10, 10, 1))
-        >>> U, V = sys.phasespace_eval(t=None, r=np.array([X,Y]))
-
-        Added by Mikie on 29/05/2019
         """
         return tuple(eqn.eval_rhs(t=t, r=r) for eqn in self.equations)
 
