@@ -35,7 +35,7 @@ def one_dimensional_default() -> PhaseSpacePlotter:
 def two_dimensional_default() -> PhaseSpacePlotter:
 
     phase_coords = ["x", "y"]
-    eqns = ["ax - y + b(x^2-y^2) + axy", "x - cy - d(x^2-y^2) + cxy"]
+    eqns = ["a*x - y + b*(x^2-y^2) + a*x*y", "x - c*y - d*(x^2-y^2) + c*x*y"]
     params = {"a": 2, "b": 3, "c": 3, "d": 3}
     t_f = 50
     t_r = -50
@@ -51,7 +51,7 @@ def two_dimensional_default() -> PhaseSpacePlotter:
 
 default_1D = {
     "system_coords": ["x"],
-    "ode_expr_strings": ["a*sin(bx)"],
+    "ode_expr_strings": ["a*sin(b*x)"],
     "params": {"a": 1, "b": 1},
     "t_f": 20,
     "t_r": -20,
@@ -64,7 +64,10 @@ default_1D = {
 
 default_2D = {
     "system_coords": ["x", "y"],
-    "ode_expr_strings": ["ax - y + b(x^2-y^2) + axy", "x - cy - d(x^2-y^2) + cxy"],
+    "ode_expr_strings": [
+        "a*x - y + b*(x^2-y^2) + a*x*y",
+        "x - c*y - d*(x^2-y^2) + c*x*y",
+    ],
     "params": {"a": 2, "b": 3, "c": 3, "d": 3},
     "t_f": 10,
     "t_r": -10,

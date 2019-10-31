@@ -17,8 +17,8 @@ from errors import *
 
 # transformation functions that modify the equation parser
 TRANSFORMATIONS = standard_transformations + (
-    split_symbols,  # used for implicit multiplication
-    implicit_multiplication,  # makes multiplication operator (*) optional
+    #    split_symbols,  # used for implicit multiplication
+    #    implicit_multiplication,  # makes multiplication operator (*) optional
     convert_xor,  # ^ used for exponentiation
 )
 
@@ -28,12 +28,7 @@ class DifferentialEquation:
     Handles first-order ODE's
     """
 
-<<<<<<< HEAD
     def __init__(self, dep_var, phase_coords, expr_string) -> None:
-=======
-    def __init__(self, dep_var, phase_coords, expr_string):
-
->>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
         # dep_var is converted from a string into the corresponding Sympy symbol
         self.dep_var = symbols(dep_var)
 
@@ -69,7 +64,7 @@ class DifferentialEquation:
     def set_param(self, param, value) -> None:
         """
         Sets self.param_values[param] to value.
-        If 
+        If
         """
         if param in self.param_values:
             self.param_values[param] = value
@@ -90,18 +85,13 @@ class SystemOfEquations:
     """
 
     def __init__(
-<<<<<<< HEAD
-        self, system_coords, ode_expr_strings, params=None, *args, **kwargs
-    ) -> None:
-=======
         self,
         system_coords: list,
         ode_expr_strings: list,
         params: dict = dict(),
         *args,
-        **kwargs
+        **kwargs,
     ):
->>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
         # differential equation.
@@ -123,30 +113,22 @@ class SystemOfEquations:
         # The elements in system_coords and ode_expr_strings are assumed
         # to correspond to each other in the order given.
         # i.e. system_coords[i] pairs with ode_expr_strings[i]
-<<<<<<< HEAD
         self.equations = [
             DifferentialEquation(coord, system_coords, expr)
             for coord, expr in zip(system_coords, ode_expr_strings)
         ]
-=======
-        for i in range(len(system_coords)):
-            coord = system_coords[i]
-            expr = ode_expr_strings[i]
-            self.equations.append(DifferentialEquation(coord, system_coords, expr))
->>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
         # Set the parameters in the ODEs
         for p, val in params.items():
             for eqn in self.equations:
                 eqn.set_param(p, val)
 
-<<<<<<< HEAD
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
-=======
+
     def validate_params_all(self):
         """
-        Calls sub-validation methods for validation of 
+        Calls sub-validation methods for validation of
         parameters before being passed to DifferentialEquation
         class
         """
@@ -219,13 +201,6 @@ class SystemOfEquations:
 
     def validate_mathematics(self):
         pass
-
-    def __str__(self):
-        s = ["{}".format(self.__repr__())]
-        for eqn in self.equations:
-            s.append("{}".format(eqn))
-        return "\n".join(s)
->>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
     def solve(self, t_span, r0, method="LSODA"):
         return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)

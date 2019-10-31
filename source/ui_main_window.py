@@ -24,6 +24,7 @@ from errors import *
 
 VERSION = "0.0-pre-alpha"
 
+
 class MainWindow(QMainWindow):
     """
     TODO: Insert docstring
@@ -37,7 +38,7 @@ class MainWindow(QMainWindow):
         """
         Adds components (buttons, text boxes, etc.) and draws the window
         """
-        
+
         self.setStyleSheet(open("source/styles.css").read())
 
         # Define central widget
@@ -296,7 +297,6 @@ class MainWindow(QMainWindow):
         print(lte_args)
         print(type(lte_args))
 
-<<<<<<< HEAD
         ode = DifferentialEquation(dep_var, phase_coords, ode_str)
 
         # Currently unused, except to determine that there are undefined params.
@@ -309,8 +309,8 @@ class MainWindow(QMainWindow):
 
     def lims_undefined(self: QMainWindow) -> bool:
         """
-        Checks for undefined axes limits. Returns True if any of the axes limits 
-        entry boxes are empty or contain non-numerical characters. 
+        Checks for undefined axes limits. Returns True if any of the axes limits
+        entry boxes are empty or contain non-numerical characters.
         Returns False if all contain text that can be converted to floats.
         """
         for lim in (
@@ -326,11 +326,10 @@ class MainWindow(QMainWindow):
             except ValueError:
                 return True
         return False
-=======
+
     def handle_lme(self: QMainWindow, lme_args: tuple) -> None:
         print(lme_args)
         print(type(lme_args))
->>>>>>> 579b09defa0e0e38002d9b90fa1cfee51b3d986d
 
 
 if __name__ == "__main__":
