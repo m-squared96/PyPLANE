@@ -24,7 +24,6 @@ from errors import *
 
 VERSION = "0.0-pre-alpha"
 
-
 class MainWindow(QMainWindow):
     """
     TODO: Insert docstring
@@ -45,24 +44,31 @@ class MainWindow(QMainWindow):
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
 
+##############################################################################################################
         # Menu Bar
         menu_bar = self.menuBar()
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
-        menu_plot_opts = menu_edit.addMenu("Plot Options")
 
-        # self.action_new_window = QAction("New Window", self)
+        self.action_new_window = QAction("New Window", self)
+        self.action_export_json = QAction("Export JSON", self)
+        self.action_import_json = QAction("Import JSON", self)
         self.action_quit = QAction("Quit", self)
-        # menu_file.addAction(self.action_new_window)
+
+        menu_file.addAction(self.action_new_window)
         menu_file.addAction(self.action_quit)
+
+        menu_edit.addAction(self.action_export_json)
+        menu_edit.addAction(self.action_import_json)
 
         self.action_quit.triggered.connect(self.close)
 
+        self.action_export_json.triggered.connect(self.gather_system_data)
+
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
-        menu_plot_opts.addAction(self.action_nullclines)
+        menu_edit.addAction(self.action_nullclines)
 
-        # print(action_nullclines.isChecked())
-
+##############################################################################################################
         # Canvas to show the phase plot as part of the main window
         # By default, open application displaying a two dimensional system
         self.default_dims = 2
@@ -78,6 +84,7 @@ class MainWindow(QMainWindow):
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
+##############################################################################################################
         # Parameter inputs
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
@@ -102,6 +109,7 @@ class MainWindow(QMainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
+##############################################################################################################
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
         self.x_max_label = QLabel(
@@ -203,6 +211,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("PyPLANE " + VERSION)
         self.show()
 
+##############################################################################################################
     def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
         """
         Initialises default PSP
@@ -217,6 +226,7 @@ class MainWindow(QMainWindow):
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
 
+##############################################################################################################
     def plot_button_clicked(self: QMainWindow) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
@@ -224,7 +234,7 @@ class MainWindow(QMainWindow):
         Else, self.handle_empty_entry is called.
         """
         phase_coords = ["x", "y"]
-
+        
         # Grab parameters
         passed_params = {}
         for param_num in range(self.no_of_params):
@@ -265,6 +275,7 @@ class MainWindow(QMainWindow):
             print("Generic Exception caught:")
             print(e)
 
+##############################################################################################################
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -285,7 +296,7 @@ class MainWindow(QMainWindow):
         self.phase_plot.update_system(
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
-
+        
     def handle_pte(self: QMainWindow, pte_args: tuple) -> None:
         self.plot_button.setProperty("warning-indicator", True)
 
@@ -297,41 +308,21 @@ class MainWindow(QMainWindow):
         print(lte_args)
         print(type(lte_args))
 
-        ode = DifferentialEquation(dep_var, phase_coords, ode_str)
-
-        # Currently unused, except to determine that there are undefined params.
-        # Could be used later to highlight offending ode expression?
-        undefined_params = [
-            str(sym) for sym in ode.params if str(sym) not in passed_params.keys()
-        ]
-
-        return len(undefined_params) != 0
-
-    def lims_undefined(self: QMainWindow) -> bool:
-        """
-        Checks for undefined axes limits. Returns True if any of the axes limits
-        entry boxes are empty or contain non-numerical characters.
-        Returns False if all contain text that can be converted to floats.
-        """
-        for lim in (
-            self.x_min_input.text(),
-            self.x_max_input.text(),
-            self.y_min_input.text(),
-            self.y_max_input.text(),
-        ):
-            if lim == "":
-                return True
-            try:
-                float(lim)
-            except ValueError:
-                return True
-        return False
-
     def handle_lme(self: QMainWindow, lme_args: tuple) -> None:
         print(lme_args)
         print(type(lme_args))
 
+    def gather_system_data(self: QMainWindow) -> dict:
+        """
+        Extracts data about the current system from the relevant UI elements,
+        storing it in a dict in preparation for exporting to a .json file.
+        """
+        system_data = dict()
 
+        print("IT WORKS!")
+        #return system_data
+
+        
 if __name__ == "__main__":
     PyPLANE = QApplication(sys.argv)
     PyPLANE_main_window = MainWindow()
