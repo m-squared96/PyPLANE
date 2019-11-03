@@ -17,12 +17,15 @@ from PyQt5.QtWidgets import (
     QAction,
 )
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
 from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
 from defaults import psp_by_dimensions, default_1D, default_2D
 from errors import *
 
 VERSION = "0.0-pre-alpha"
+DEFAULT_DIMS = 2
+
 
 class MainWindow(QMainWindow):
     """
@@ -44,7 +47,53 @@ class MainWindow(QMainWindow):
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
 
-##############################################################################################################
+        # Configuring menu bar
+        self.menu_bar()
+
+        # Configuring phase plot
+        self.psp_config()
+
+        # Configuring parameter inputs
+        self.param_config()
+
+        # Configuring axes limit imputs
+        self.axes_lims_config()
+
+        # Configuring plot button
+        self.button_config()
+
+        # Configuring equation inputs
+        self.equations_config()
+
+        # Final tidy-up and drawing
+        inputs_layout = QVBoxLayout()  # All input boxes
+        inputs_layout.addLayout(self.equation_entry_layout)
+
+        inputs_layout.addWidget(self.limits_heading)
+        inputs_layout.addLayout(self.xlim_layout)
+        inputs_layout.addLayout(self.ylim_layout)
+
+        inputs_layout.addLayout(self.parameters_layout)
+        inputs_layout.addStretch()
+
+        plot_layout = QVBoxLayout()
+        plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
+        plot_layout.addWidget(self.phase_plot)
+
+        self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
+        self.overall_layout.addLayout(inputs_layout)
+        self.overall_layout.addLayout(plot_layout)
+
+        cent_widget.setLayout(self.overall_layout)
+
+        # Set window title and show
+        self.setWindowTitle("PyPLANE " + VERSION)
+        self.show()
+
+    def menu_bar(self: QMainWindow) -> None:
+        """
+        Configures menu bar of main GUI window
+        """
         # Menu Bar
         menu_bar = self.menuBar()
         menu_file = menu_bar.addMenu("File")
@@ -54,38 +103,52 @@ class MainWindow(QMainWindow):
         self.action_export_json = QAction("Export JSON", self)
         self.action_import_json = QAction("Import JSON", self)
         self.action_quit = QAction("Quit", self)
+        self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
 
         menu_file.addAction(self.action_new_window)
         menu_file.addAction(self.action_quit)
 
         menu_edit.addAction(self.action_export_json)
         menu_edit.addAction(self.action_import_json)
-
-        self.action_quit.triggered.connect(self.close)
-
-        self.action_export_json.triggered.connect(self.gather_system_data)
-
-        self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
         menu_edit.addAction(self.action_nullclines)
 
-##############################################################################################################
+        self.action_quit.triggered.connect(self.close)
+        self.action_export_json.triggered.connect(self.gather_system_data)
+
+    def psp_config(self: QMainWindow) -> None:
+        """
+        Configures GUI for default PSP object
+        """
         # Canvas to show the phase plot as part of the main window
         # By default, open application displaying a two dimensional system
-        self.default_dims = 2
-        self.psp_canvas_default(self.default_dims)
+        self.psp_canvas_default(DEFAULT_DIMS)
 
         # Window Features
         self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
         self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
         self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
         self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
-        self.plot_button = QPushButton("Plot")
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
-##############################################################################################################
-        # Parameter inputs
+    def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
+        """
+        Initialises default PSP
+        """
+        if dimensions == 1:
+            self.setup_dict = default_1D
+
+        elif dimensions == 2:
+            self.setup_dict = default_2D
+
+        # Unpacks self.setup_dict into SOE.
+        sys = SystemOfEquations(**self.setup_dict)
+        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
+
+    def param_config(self: QMainWindow) -> None:
+        """
+        """
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
 
@@ -109,42 +172,6 @@ class MainWindow(QMainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
-##############################################################################################################
-        # Axes limit imputs
-        self.limits_heading = QLabel("Limits of Axes:")
-        self.x_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
-        self.x_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
-        xlim_layout = QHBoxLayout()
-        xlim_layout.addWidget(self.x_max_label)
-        xlim_layout.addWidget(self.x_max_input)
-        xlim_layout.addWidget(self.x_min_label)
-        xlim_layout.addWidget(self.x_min_input)
-
-        self.y_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
-        self.y_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
-        ylim_layout = QHBoxLayout()
-        ylim_layout.addWidget(self.y_max_label)
-        ylim_layout.addWidget(self.y_max_input)
-        ylim_layout.addWidget(self.y_min_label)
-        ylim_layout.addWidget(self.y_min_input)
-
-        # Layouts
-        x_prime_layout = QHBoxLayout()  # Input box for first equation
-        y_prime_layout = QHBoxLayout()  # Input box for second equation
-        button_layout = QHBoxLayout()
-
         self.parameter_layouts = (
             {}
         )  # Each layout contains two input boxes (parameter name and value) and an equals sign
@@ -163,20 +190,6 @@ class MainWindow(QMainWindow):
                 self.parameter_input_boxes["param_" + str(param_num) + "_val"]
             )
 
-        x_prime_layout.addWidget(self.x_prime_label)
-        x_prime_layout.addWidget(self.x_prime_entry)
-        y_prime_layout.addWidget(self.y_prime_label)
-        y_prime_layout.addWidget(self.y_prime_entry)
-
-        button_layout.addStretch()
-        button_layout.addWidget(self.plot_button)
-        button_layout.addStretch()
-
-        equation_entry_layout = QVBoxLayout()  # Contains input boxes for both eqations
-        equation_entry_layout.addLayout(x_prime_layout)
-        equation_entry_layout.addLayout(y_prime_layout)
-        equation_entry_layout.addLayout(button_layout)
-
         self.parameters_layout = QVBoxLayout()  # Inputs for all parameters
         self.parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
         for param_num in range(self.no_of_params):
@@ -184,49 +197,68 @@ class MainWindow(QMainWindow):
                 self.parameter_layouts["param_" + str(param_num) + "_layout"]
             )
 
-        inputs_layout = QVBoxLayout()  # All input boxes
-        inputs_layout.addLayout(equation_entry_layout)
+    def axes_lims_config(self: QMainWindow) -> None:
+        """
+        """
+        self.limits_heading = QLabel("Limits of Axes:")
+        self.x_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+        self.x_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
+        self.xlim_layout = QHBoxLayout()
+        self.xlim_layout.addWidget(self.x_max_label)
+        self.xlim_layout.addWidget(self.x_max_input)
+        self.xlim_layout.addWidget(self.x_min_label)
+        self.xlim_layout.addWidget(self.x_min_input)
 
-        inputs_layout.addWidget(self.limits_heading)
-        inputs_layout.addLayout(xlim_layout)
-        inputs_layout.addLayout(ylim_layout)
+        self.y_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
+        self.y_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+        self.ylim_layout = QHBoxLayout()
+        self.ylim_layout.addWidget(self.y_max_label)
+        self.ylim_layout.addWidget(self.y_max_input)
+        self.ylim_layout.addWidget(self.y_min_label)
+        self.ylim_layout.addWidget(self.y_min_input)
 
-        inputs_layout.addLayout(self.parameters_layout)
-        inputs_layout.addStretch()
+    def equations_config(self: QMainWindow) -> None:
+        """
+        """
+        self.x_prime_layout = QHBoxLayout()  # Input box for first equation
+        self.y_prime_layout = QHBoxLayout()  # Input box for second equation
 
-        plot_layout = QVBoxLayout()
-        plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
-        plot_layout.addWidget(self.phase_plot)
+        self.x_prime_layout.addWidget(self.x_prime_label)
+        self.x_prime_layout.addWidget(self.x_prime_entry)
+        self.y_prime_layout.addWidget(self.y_prime_label)
+        self.y_prime_layout.addWidget(self.y_prime_entry)
 
-        self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
-        self.overall_layout.addLayout(inputs_layout)
-        self.overall_layout.addLayout(plot_layout)
+        self.equation_entry_layout = (
+            QVBoxLayout()
+        )  # Contains input boxes for both eqations
+        self.equation_entry_layout.addLayout(self.x_prime_layout)
+        self.equation_entry_layout.addLayout(self.y_prime_layout)
+        self.equation_entry_layout.addLayout(self.button_layout)
 
-        cent_widget.setLayout(self.overall_layout)
-
+    def button_config(self: QMainWindow) -> None:
+        """
+        """
+        self.plot_button = QPushButton("Plot")
+        self.button_layout = QHBoxLayout()
+        self.button_layout.addStretch()
+        self.button_layout.addWidget(self.plot_button)
+        self.button_layout.addStretch()
         # Button Actions
         self.plot_button.clicked.connect(self.plot_button_clicked)
 
-        # Set window title and show
-        self.setWindowTitle("PyPLANE " + VERSION)
-        self.show()
-
-##############################################################################################################
-    def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
-        """
-        Initialises default PSP
-        """
-        if dimensions == 1:
-            self.setup_dict = default_1D
-
-        elif dimensions == 2:
-            self.setup_dict = default_2D
-
-        # Unpacks self.setup_dict into SOE.
-        sys = SystemOfEquations(**self.setup_dict)
-        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
-
-##############################################################################################################
+    ##############################################################################################################
     def plot_button_clicked(self: QMainWindow) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
@@ -234,7 +266,7 @@ class MainWindow(QMainWindow):
         Else, self.handle_empty_entry is called.
         """
         phase_coords = ["x", "y"]
-        
+
         # Grab parameters
         passed_params = {}
         for param_num in range(self.no_of_params):
@@ -275,7 +307,7 @@ class MainWindow(QMainWindow):
             print("Generic Exception caught:")
             print(e)
 
-##############################################################################################################
+    ##############################################################################################################
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -296,7 +328,7 @@ class MainWindow(QMainWindow):
         self.phase_plot.update_system(
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
-        
+
     def handle_pte(self: QMainWindow, pte_args: tuple) -> None:
         self.plot_button.setProperty("warning-indicator", True)
 
@@ -320,9 +352,9 @@ class MainWindow(QMainWindow):
         system_data = dict()
 
         print("IT WORKS!")
-        #return system_data
+        # return system_data
 
-        
+
 if __name__ == "__main__":
     PyPLANE = QApplication(sys.argv)
     PyPLANE_main_window = MainWindow()
