@@ -3,6 +3,7 @@ Draws the main window of the PyPLANE Qt5 interface
 """
 
 import sys
+from collections import namedtuple
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
@@ -25,6 +26,9 @@ from errors import *
 
 VERSION = "0.0-pre-alpha"
 DEFAULT_DIMS = 2
+DEFAULT_PARAM_NUM = 5
+
+ParamEntries = namedtuple("ParamEntries", "names, vals")
 
 
 class MainWindow(QMainWindow):
@@ -149,53 +153,38 @@ class MainWindow(QMainWindow):
     def param_config(self: QMainWindow) -> None:
         """
         """
-        param_names = list(self.setup_dict["params"].keys())
-        param_vals = list(self.setup_dict["params"].values())
+        self.param_names = [
+            QLineEdit(name) for name in list(self.setup_dict["params"].keys())
+        ]
+        self.param_vals = [
+            QLineEdit(str(val)) for val in list(self.setup_dict["params"].values())
+        ]
 
-        self.parameter_input_boxes = {}
-        self.no_of_params = 5  # Number of user defined parameters
-        for param_num in range(self.no_of_params):
-            # Fills parameter input boxes with parameter vars and corresponding vals
-            if param_num < len(self.setup_dict["params"].keys()):
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit(param_names[param_num])
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit(str(param_vals[param_num]))
-            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
-            else:
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit()
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit()
+        if len(self.param_names) < DEFAULT_PARAM_NUM:
+            self.param_length_padder(self.param_names)
+            self.param_length_padder(self.param_vals)
 
-        self.parameter_layouts = (
-            {}
-        )  # Each layout contains two input boxes (parameter name and value) and an equals sign
-        for param_num in range(self.no_of_params):
-            self.parameter_layouts[
-                "param_" + str(param_num) + "_layout"
-            ] = QHBoxLayout()
-            self.equals_sign = QLabel("=")
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_name"]
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.equals_sign
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_val"]
-            )
+        self.parameter_input_boxes = ParamEntries(self.param_names, self.param_vals)
 
-        self.parameters_layout = QVBoxLayout()  # Inputs for all parameters
-        self.parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
-        for param_num in range(self.no_of_params):
-            self.parameters_layout.addLayout(
-                self.parameter_layouts["param_" + str(param_num) + "_layout"]
-            )
+        equals_sign = QLabel("=")
+        self.parameters_layout = QVBoxLayout()
+        self.parameters_layout.addWidget(QLabel("Parameters (optional)"))
+        for name, val in zip(
+            self.parameter_input_boxes.names, self.parameter_input_boxes.vals
+        ):
+            layout = QHBoxLayout()
+            layout.addWidget(name)
+            layout.addWidget(equals_sign)
+            layout.addWidget(val)
+            self.parameters_layout.addLayout(layout)
+
+    def param_length_padder(self: QMainWindow, param_list: list) -> list:
+        """
+        """
+        while len(param_list) < DEFAULT_PARAM_NUM:
+            param_list.append(QLineEdit())
+
+        return param_list
 
     def axes_lims_config(self: QMainWindow) -> None:
         """
@@ -268,18 +257,20 @@ class MainWindow(QMainWindow):
         phase_coords = ["x", "y"]
 
         # Grab parameters
-        passed_params = {}
-        for param_num in range(self.no_of_params):
-            if self.parameter_input_boxes["param_" + str(param_num) + "_name"].text():
-                passed_params[
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_name"
-                    ].text()
-                ] = self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ].text()
-
-        # print(self.parameter_input_boxes)
+        passed_params = dict(
+            zip(
+                [
+                    name.text()
+                    for name in self.parameter_input_boxes.names
+                    if name.text()
+                ],
+                [
+                    value.text()
+                    for value in self.parameter_input_boxes.vals
+                    if value.text()
+                ],
+            )
+        )
 
         try:
             self.update_psp(phase_coords, passed_params)
