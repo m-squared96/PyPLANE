@@ -117,7 +117,7 @@ class SystemOfEquations:
         # print(f"Jacobian: {self.jac}")
 
         # calculated fixed points are cached here
-        self.fixed_points = []
+        self.fixed_points = self.calc_fixed_points()
 
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
@@ -166,6 +166,23 @@ class SystemOfEquations:
         jacobian = self.eval_jacobian(r) if r is not None else self.jacobian
         return jacobian.eigenvects(simplify=True)
 
+    def calc_fixed_points(self):
+        """
+        Returns a set of fixed points as tuples.
+        """
+
+        eqns = [eqn.expr for eqn in self.equations]
+
+        fps = sp.nonlinsolve(eqns, self.system_coord_symbols)
+        fps_as_cmplx = {tuple(complex(z) for z in fp) for fp in fps}
+        fps_rounded = {tuple(round_complex(z, 3) for z in fp) for fp in fps_as_cmplx}
+        fps_no_cmplx = {
+            fp for fp in fps_rounded if all(not abs(z.imag) > 0 for z in fp)
+        }
+        fps_real = {tuple(z.real for z in fp) for fp in fps_no_cmplx}
+
+        return fps_real
+
     def find_fixed_point(self, r_init):
         """
         Returns the value of a fixed point based a Newton's method computation.
@@ -180,8 +197,12 @@ class SystemOfEquations:
             J_inv = matrix2numpy(J.inv(), dtype="float")
             r = r - J_inv.dot(self.phasespace_eval(t=None, r=r))
 
-        self.fixed_points.append(r)
+        self.fixed_points.add(r)
         return r
+
+
+def round_complex(x, n):
+    return round(x.real, n) + round(x.imag, n) * 1j
 
 
 def example():
@@ -204,6 +225,13 @@ def example():
     print(f"finding fixed point from initial guess {r}...")
     fp = sys.find_fixed_point(r)
     print(f"fixed point: {fp}")
+    fp_jac = sys.eval_jacobian(fp)
+    sp.pprint(fp_jac)
+    sp.pprint(fp_jac.trace())
+    sp.pprint(fp_jac.det())
+
+    print("\nFixed points:\n")
+    print(sys.calc_fixed_points())
 
     # Calculate eigenvalues and eigenvectors
     sp.pprint(sys.eigenvects(r))
