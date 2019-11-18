@@ -164,14 +164,11 @@ class MainWindow(QMainWindow):
             self.param_length_padder(self.param_names)
             self.param_length_padder(self.param_vals)
 
-        self.parameter_input_boxes = ParamEntries(self.param_names, self.param_vals)
-
         equals_sign = QLabel("=")
         self.parameters_layout = QVBoxLayout()
         self.parameters_layout.addWidget(QLabel("Parameters (optional)"))
-        for name, val in zip(
-            self.parameter_input_boxes.names, self.parameter_input_boxes.vals
-        ):
+
+        for name, val in zip(self.param_names, self.param_vals):
             layout = QHBoxLayout()
             layout.addWidget(name)
             layout.addWidget(equals_sign)
@@ -190,33 +187,38 @@ class MainWindow(QMainWindow):
         """
         """
         self.limits_heading = QLabel("Limits of Axes:")
-        self.x_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+
         self.x_min_label = QLabel(
             "Min " + self.phase_plot.system.system_coords[0] + " ="
         )
         self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
+
+        self.x_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+
         self.xlim_layout = QHBoxLayout()
-        self.xlim_layout.addWidget(self.x_max_label)
-        self.xlim_layout.addWidget(self.x_max_input)
         self.xlim_layout.addWidget(self.x_min_label)
         self.xlim_layout.addWidget(self.x_min_input)
+        self.xlim_layout.addWidget(self.x_max_label)
+        self.xlim_layout.addWidget(self.x_max_input)
+
+        self.y_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
 
         self.y_max_label = QLabel(
             "Max " + self.phase_plot.system.system_coords[1] + " ="
         )
         self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
-        self.y_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+
         self.ylim_layout = QHBoxLayout()
-        self.ylim_layout.addWidget(self.y_max_label)
-        self.ylim_layout.addWidget(self.y_max_input)
         self.ylim_layout.addWidget(self.y_min_label)
         self.ylim_layout.addWidget(self.y_min_input)
+        self.ylim_layout.addWidget(self.y_max_label)
+        self.ylim_layout.addWidget(self.y_max_input)
 
     def equations_config(self: QMainWindow) -> None:
         """
@@ -247,7 +249,6 @@ class MainWindow(QMainWindow):
         # Button Actions
         self.plot_button.clicked.connect(self.plot_button_clicked)
 
-    ##############################################################################################################
     def plot_button_clicked(self: QMainWindow) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
@@ -259,16 +260,8 @@ class MainWindow(QMainWindow):
         # Grab parameters
         passed_params = dict(
             zip(
-                [
-                    name.text()
-                    for name in self.parameter_input_boxes.names
-                    if name.text()
-                ],
-                [
-                    value.text()
-                    for value in self.parameter_input_boxes.vals
-                    if value.text()
-                ],
+                [name.text() for name in self.param_names if name.text()],
+                [value.text() for value in self.param_vals if value.text()],
             )
         )
 
@@ -298,7 +291,6 @@ class MainWindow(QMainWindow):
             print("Generic Exception caught:")
             print(e)
 
-    ##############################################################################################################
     def update_psp(self: QMainWindow, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -330,6 +322,7 @@ class MainWindow(QMainWindow):
     def handle_lte(self: QMainWindow, lte_args: tuple) -> None:
         print(lte_args)
         print(type(lte_args))
+        self.setStyleSheet("QLabel { background-color: red}")
 
     def handle_lme(self: QMainWindow, lme_args: tuple) -> None:
         print(lme_args)

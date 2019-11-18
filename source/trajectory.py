@@ -385,10 +385,11 @@ class PhaseSpacePlotter(FigCanvas):
                 try:
                     i = float(i)
 
-                except TypeError:
+                except ValueError:
                     raise LimitTypeError("Limit of invalid type", i)
 
             if row[0] >= row[1]:
                 raise LimitMagnitudeError(
                     "Minimum limit greater than or equal to maximum limit", row
                 )
+
