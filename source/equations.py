@@ -205,6 +205,25 @@ def round_complex(x, n):
     return round(x.real, n) + round(x.imag, n) * 1j
 
 
+def get_closest_point(point, other_points):
+
+    closest_point = None
+    closest_distance = None
+
+    for pt in other_points:
+        if closest_distance is None:
+            closest_point = pt
+            closest_distance = np.hypot(pt, point)
+            continue
+
+        distance = np.hypot(point, pt)
+        if distance < closest_distance:
+            closest_point = pt
+            closest_distance = distance
+
+    return closest_point
+
+
 def example():
     # 2-D
     system_coords = ["x", "y"]
