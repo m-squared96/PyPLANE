@@ -123,6 +123,12 @@ class PhaseSpacePlotter(FigCanvas):
         # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
 
+        # Set to True only by toggle_fixed_points method
+        self.fixed_points_init = False
+
+        # list of references to fixed point markers
+        self.fixed_point_markers = None
+
         def one_or_two_dimensions(display_vars: list, dimensions: int) -> None:
 
             # Initialise button click event on local figure object
@@ -178,8 +184,6 @@ class PhaseSpacePlotter(FigCanvas):
 
         elif self.dimensions == 3:
             three_dimensions(display_vars, axes_limits)
-
-        self.plot_fixed_points()
 
         self.draw()
 
@@ -367,10 +371,17 @@ class PhaseSpacePlotter(FigCanvas):
 
         self.draw()
 
-    def plot_fixed_points(self):
-        print(self.system.fixed_points)
-        self.ax.plot(*zip(*self.system.fixed_points), "ro", markersize=5)
-        self.draw()
+    def toggle_fixed_points(self):
+        if not self.fixed_points_init:
+            self.fixed_point_markers = self.ax.plot(
+                *zip(*self.system.fixed_points), "ro", markersize=5
+            )
+            self.fixed_points_init = True
+            self.draw()
+        else:
+            for fp in self.fixed_point_markers:
+                fp.set_visible(not fp.get_visible())
+            self.draw()
 
     def reduce_array_density(self, array: np.ndarray, axes_points: int) -> np.ndarray:
         """

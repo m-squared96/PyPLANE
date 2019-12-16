@@ -58,6 +58,9 @@ class MainWindow(QMainWindow):
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
         menu_plot_opts.addAction(self.action_nullclines)
 
+        self.action_fixed_points = QAction("Plot fixed points", self, checkable=True)
+        menu_plot_opts.addAction(self.action_fixed_points)
+
         # print(action_nullclines.isChecked())
 
         # Canvas to show the phase plot as part of the main window
@@ -74,6 +77,9 @@ class MainWindow(QMainWindow):
 
         # Nullclines are set to toggle with the "Plot Nullclines" menu option
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
+
+        # Toggle fixed points
+        self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
 
         # Parameter inputs
         param_names = list(self.setup_dict["params"].keys())
@@ -272,7 +278,7 @@ class MainWindow(QMainWindow):
         self: QMainWindow, phase_coords: list, passed_params: dict
     ) -> bool:
         """
-        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable. 
+        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable.
         Returns True if all full.
         Returns False if any are empty
         """
@@ -328,8 +334,8 @@ class MainWindow(QMainWindow):
 
     def lims_undefined(self: QMainWindow) -> bool:
         """
-        Checks for undefined axes limits. Returns True if any of the axes limits 
-        entry boxes are empty or contain non-numerical characters. 
+        Checks for undefined axes limits. Returns True if any of the axes limits
+        entry boxes are empty or contain non-numerical characters.
         Returns False if all contain text that can be converted to floats.
         """
         for lim in (
