@@ -179,6 +179,8 @@ class PhaseSpacePlotter(FigCanvas):
         elif self.dimensions == 3:
             three_dimensions(display_vars, axes_limits)
 
+        self.plot_fixed_points()
+
         self.draw()
 
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
@@ -363,6 +365,11 @@ class PhaseSpacePlotter(FigCanvas):
                 nc = contour.collections[0]
                 nc.set_visible(not nc.get_visible())
 
+        self.draw()
+
+    def plot_fixed_points(self):
+        print(self.system.fixed_points)
+        self.ax.plot(*zip(*self.system.fixed_points), "ro", markersize=5)
         self.draw()
 
     def reduce_array_density(self, array: np.ndarray, axes_points: int) -> np.ndarray:
