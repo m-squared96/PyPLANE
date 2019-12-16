@@ -173,8 +173,8 @@ class SystemOfEquations:
 
         eqns = [eqn.expr for eqn in self.equations]
         eqns = [eqn.subs(self.params) for eqn in eqns]
-        fps = sp.solve(eqns, self.system_coord_symbols)
-        
+        _, fps = sp.solve(eqns, self.system_coord_symbols, set=True)
+
         fps_as_cmplx = {tuple(complex(z) for z in fp) for fp in fps}
         fps_rounded = {tuple(round_complex(z, 3) for z in fp) for fp in fps_as_cmplx}
         fps_no_cmplx = {
