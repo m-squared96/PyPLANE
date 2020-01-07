@@ -4,7 +4,8 @@ import sympy as sp
 
 from scipy.integrate import solve_ivp
 from sympy.utilities.lambdify import lambdify
-from sympy import symbols
+from sympy import symbols, Matrix
+from sympy.matrices.dense import matrix2numpy
 from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
@@ -62,7 +63,7 @@ class DifferentialEquation:
     def set_param(self, param, value) -> None:
         """
         Sets self.param_values[param] to value.
-        If 
+        If
         """
         if param in self.param_values:
             self.param_values[param] = value
@@ -90,6 +91,7 @@ class SystemOfEquations:
         # differential equation.
         self.ode_expr_strings = ode_expr_strings
         self.system_coords = system_coords
+        self.system_coord_symbols = symbols(system_coords)
         self.dims = len(self.system_coords)
 
         # generate the list of expressions representing the system.
@@ -107,6 +109,14 @@ class SystemOfEquations:
             for eqn in self.equations:
                 eqn.set_param(p, val)
 
+        # Calculate the symbolic Jacobian of the system
+        r = Matrix([equation.expr for equation in self.equations])
+        self.jacobian = r.jacobian(self.system_coord_symbols)
+        # print(f"Jacobian: {self.jac}")
+
+        # calculated fixed points are cached here
+        self.fixed_points = self.calc_fixed_points()
+
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
 
@@ -116,7 +126,7 @@ class SystemOfEquations:
     def phasespace_eval(self, t, r) -> tuple:
         """
         Allows for the phase space to be evaluated using the SOE class.
-        
+
         Example:
         >>> import numpy as np
         >>> from equations import SystemOfEquations
@@ -128,17 +138,122 @@ class SystemOfEquations:
         """
         return tuple(eqn.eval_rhs(t=t, r=r) for eqn in self.equations)
 
+    def eval_jacobian(self, r):
+        """
+        Evaluates the symbolic Jacobian of the system at the point r
+        """
+        # The subs method substitutes one symbol or value for another
+        jacobian = self.jacobian.subs(self.params)
+        jacobian = jacobian.subs(list(zip(self.system_coord_symbols, r)))
+        return jacobian
+
+    def show_jacobian(self, eval=False, r=None):
+        """
+        Prints Jacobian. May be evaluated at a point first, or printed symbolically
+        """
+
+        jacobian = self.eval_jacobian(r) if eval else self.jacobian
+        sp.pprint(jacobian)
+
+    def eigenvects(self, r=None):
+        """
+        Calculates the eigenvalues and eigenvectors of the system's Jacobian.
+        Return list of triples (eigenval, multiplicity, eigenspace).
+        """
+
+        jacobian = self.eval_jacobian(r) if r is not None else self.jacobian
+        return jacobian.eigenvects(simplify=True)
+
+    def calc_fixed_points(self):
+        """
+        Returns a set of fixed points as tuples.
+        """
+
+        eqns = [eqn.expr for eqn in self.equations]
+        eqns = [eqn.subs(self.params) for eqn in eqns]
+        _, fps = sp.solve(eqns, self.system_coord_symbols, set=True)
+
+        fps_as_cmplx = {tuple(complex(z) for z in fp) for fp in fps}
+        fps_rounded = {tuple(round_complex(z, 3) for z in fp) for fp in fps_as_cmplx}
+        fps_no_cmplx = {
+            fp for fp in fps_rounded if all(not abs(z.imag) > 0 for z in fp)
+        }
+        fps_real = {tuple(z.real for z in fp) for fp in fps_no_cmplx}
+
+        return fps_real
+
+    def find_fixed_point(self, r_init):
+        """
+        Returns the value of a fixed point based a Newton's method computation.
+        See https://en.wikipedia.org/wiki/Newton%27s_method for details.
+        """
+
+        num_iter = 50
+        r = r_init
+
+        for _ in range(num_iter):
+            J = self.eval_jacobian(r)
+            J_inv = matrix2numpy(J.inv(), dtype="float")
+            r = r - J_inv.dot(self.phasespace_eval(t=None, r=r))
+
+        self.fixed_points.add(r)
+        return r
+
+
+def round_complex(x, n):
+    return round(x.real, n) + round(x.imag, n) * 1j
+
+
+def get_closest_point(point, other_points):
+
+    closest_point = None
+    closest_distance = None
+
+    for pt in other_points:
+        if closest_distance is None:
+            closest_point = pt
+            closest_distance = np.hypot(pt, point)
+            continue
+
+        distance = np.hypot(point, pt)
+        if distance < closest_distance:
+            closest_point = pt
+            closest_distance = distance
+
+    return closest_point
+
 
 def example():
     # 2-D
     system_coords = ["x", "y"]
-    eqns = ["ax + by", "cx + dy"]
+    # eqns = ["ax + by", "cx + dy"]
+    eqns = ["2x - y + 3(x^2-y^2) + 2xy", "x - 3y - 3(x^2-y^2) + 3xy"]
     params = {"a": -1, "b": 5, "c": -4, "d": -2}
     r0 = [0.4, -0.3]
     t_span = (0, 40)
 
     sys = SystemOfEquations(system_coords, eqns, params=params)
     print(sys)
+
+    # r = [0.5, 0.5]
+    r = [-1, -1]
+    print(f"Jacobian evaluated at {r}:")
+    sys.show_jacobian(eval=True, r=r)
+
+    print(f"finding fixed point from initial guess {r}...")
+    fp = sys.find_fixed_point(r)
+    print(f"fixed point: {fp}")
+    fp_jac = sys.eval_jacobian(fp)
+    sp.pprint(fp_jac)
+    sp.pprint(fp_jac.trace())
+    sp.pprint(fp_jac.det())
+
+    print("\nFixed points:\n")
+    print(sys.calc_fixed_points())
+
+    # Calculate eigenvalues and eigenvectors
+    sp.pprint(sys.eigenvects(r))
+
     sol = sys.solve(t_span, r0)
     print(sol)
     plt.plot(sol.y[0], sol.y[1])
