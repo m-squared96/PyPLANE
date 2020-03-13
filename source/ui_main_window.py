@@ -50,11 +50,12 @@ class MainWindow(QMainWindow):
         menu_file.addAction(self.action_quit)
         self.action_quit.triggered.connect(self.close)
         
-        # Edit > Plot Nullclines
-        self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
+        # Edit > Show Nullclines
+        self.action_nullclines = QAction("Show Nullclines", self, checkable=True)
         menu_edit.addAction(self.action_nullclines)
 
-        self.action_fixed_points = QAction("Plot fixed points", self, checkable=True)
+        # Edit > Show Nullclines
+        self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
 
     def init_ui(self: QMainWindow) -> None:
