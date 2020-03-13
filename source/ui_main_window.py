@@ -32,17 +32,11 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.init_ui()
-
-    def init_ui(self: QMainWindow) -> None:
+    
+    def draw_menubar(self: QMainWindow) -> None:
         """
-        Adds components (buttons, text boxes, etc.) and draws the window
+        Draws the menu bar that appears at the top of the window
         """
-
-        # Define central widget
-        cent_widget = QWidget(self)
-        self.setCentralWidget(cent_widget)
-
-        # Menu Bar
         menu_bar = self.menuBar()
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
@@ -61,7 +55,17 @@ class MainWindow(QMainWindow):
         self.action_fixed_points = QAction("Plot fixed points", self, checkable=True)
         menu_plot_opts.addAction(self.action_fixed_points)
 
-        # print(action_nullclines.isChecked())
+    def init_ui(self: QMainWindow) -> None:
+        """
+        Adds components (buttons, text boxes, etc.) and draws the window
+        """
+
+        # Define central widget
+        cent_widget = QWidget(self)
+        self.setCentralWidget(cent_widget)
+
+        # Add a menu bar to the top of the window
+        self.draw_menubar()
 
         # Canvas to show the phase plot as part of the main window
         # By default, open application displaying a two dimensional system
