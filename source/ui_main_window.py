@@ -36,24 +36,26 @@ class MainWindow(QMainWindow):
     def draw_menubar(self: QMainWindow) -> None:
         """
         Draws the menu bar that appears at the top of the window
+        TODO:
+        File > New Window
         """
         menu_bar = self.menuBar()
+        
+        # Add menus to the bar
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
-        menu_plot_opts = menu_edit.addMenu("Plot Options")
-
-        # self.action_new_window = QAction("New Window", self)
+        
+        # File > Quit
         self.action_quit = QAction("Quit", self)
-        # menu_file.addAction(self.action_new_window)
         menu_file.addAction(self.action_quit)
-
         self.action_quit.triggered.connect(self.close)
-
+        
+        # Edit > Plot Nullclines
         self.action_nullclines = QAction("Plot Nullclines", self, checkable=True)
-        menu_plot_opts.addAction(self.action_nullclines)
+        menu_edit.addAction(self.action_nullclines)
 
         self.action_fixed_points = QAction("Plot fixed points", self, checkable=True)
-        menu_plot_opts.addAction(self.action_fixed_points)
+        menu_edit.addAction(self.action_fixed_points)
 
     def init_ui(self: QMainWindow) -> None:
         """
