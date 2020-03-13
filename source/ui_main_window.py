@@ -33,11 +33,18 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.init_ui()
     
+    def setup_canvas(self: QMainWindow) -> None:
+        """
+        Canvas to show the phase plot as part of the main window
+        By default, open application displaying a two dimensional system
+        """
+        self.default_dims = 2
+        self.psp_canvas_default(self.default_dims)
+    
     def draw_menubar(self: QMainWindow) -> None:
         """
         Draws the menu bar that appears at the top of the window
-        TODO:
-        File > New Window
+        TODO: File > New Window
         """
         menu_bar = self.menuBar()
         
@@ -53,10 +60,12 @@ class MainWindow(QMainWindow):
         # Edit > Show Nullclines
         self.action_nullclines = QAction("Show Nullclines", self, checkable=True)
         menu_edit.addAction(self.action_nullclines)
+        self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
-        # Edit > Show Nullclines
+        # Edit > Show Fixed Points
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
+        self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
 
     def init_ui(self: QMainWindow) -> None:
         """
@@ -66,14 +75,12 @@ class MainWindow(QMainWindow):
         # Define central widget
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
+        
+        #
+        self.setup_canvas()
 
         # Add a menu bar to the top of the window
         self.draw_menubar()
-
-        # Canvas to show the phase plot as part of the main window
-        # By default, open application displaying a two dimensional system
-        self.default_dims = 2
-        self.psp_canvas_default(self.default_dims)
 
         # Window Features
         self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
@@ -82,11 +89,7 @@ class MainWindow(QMainWindow):
         self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
         self.plot_button = QPushButton("Plot")
 
-        # Nullclines are set to toggle with the "Plot Nullclines" menu option
-        self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
-
-        # Toggle fixed points
-        self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
+       
 
         # Parameter inputs
         param_names = list(self.setup_dict["params"].keys())
