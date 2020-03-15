@@ -78,6 +78,9 @@ class MainWindow(QMainWindow):
         self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
         self.plot_button = QPushButton("Plot")
         
+        # Action on clicking plot button
+        self.plot_button.clicked.connect(self.plot_button_clicked)
+        
     def setup_parameter_inputs(self: QMainWindow) -> None:
         """
         Allow user to enter a number of parameters
@@ -143,9 +146,10 @@ class MainWindow(QMainWindow):
         
         #
         self.setup_parameter_inputs()
-
-        # Layouts
         
+        
+        
+        # Layouts
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
@@ -228,9 +232,6 @@ class MainWindow(QMainWindow):
         self.overall_layout.addLayout(plot_layout)
 
         cent_widget.setLayout(self.overall_layout)
-
-        # Button Actions
-        self.plot_button.clicked.connect(self.plot_button_clicked)
 
         # Set window title and show
         self.setWindowTitle("PyPLANE " + VERSION)
