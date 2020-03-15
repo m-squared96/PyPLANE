@@ -77,26 +77,10 @@ class MainWindow(QMainWindow):
         self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
         self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
         self.plot_button = QPushButton("Plot")
-
-    def init_ui(self: QMainWindow) -> None:
-        """
-        Adds components (buttons, text boxes, etc.) and draws the window
-        """
-
-        # Define central widget
-        cent_widget = QWidget(self)
-        self.setCentralWidget(cent_widget)
         
-        #
-        self.setup_canvas()
-
-        # Add a menu bar to the top of the window
-        self.draw_menubar()
-        
-        # 
-        self.setup_equation_inputs()       
-
-        # Parameter inputs
+    def setup_parameter_inputs(self: QMainWindow) -> None:
+        """
+        """
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
 
@@ -119,6 +103,27 @@ class MainWindow(QMainWindow):
                 self.parameter_input_boxes[
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
+
+    def init_ui(self: QMainWindow) -> None:
+        """
+        Adds components (buttons, text boxes, etc.) and draws the window
+        """
+
+        # Define central widget
+        cent_widget = QWidget(self)
+        self.setCentralWidget(cent_widget)
+        
+        #
+        self.setup_canvas()
+
+        # Add a menu bar to the top of the window
+        self.draw_menubar()
+        
+        # 
+        self.setup_equation_inputs()
+        
+        #
+        self.setup_parameter_inputs()
 
         # Axes limit imputs
         self.limits_heading = QLabel("Limits of Axes:")
