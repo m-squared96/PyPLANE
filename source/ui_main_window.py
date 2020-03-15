@@ -26,7 +26,10 @@ VERSION = "0.0-pre-alpha"
 
 class MainWindow(QMainWindow):
     """
-    TODO: Insert docstring
+    The application's main window.
+    Contains sections for inputting a system of equations,
+    a matplotlib canvas where the phase space is plotted,
+    as well as a menu bar for access to common options.
     """
 
     def __init__(self) -> None:
@@ -110,7 +113,8 @@ class MainWindow(QMainWindow):
 
     def setup_limit_inputs(self: QMainWindow) -> None:
         """
-        Axes limit imputs
+        Entry boxes for the max and min values to be plotted
+        on the x and y axes of the phase plot
         """
         self.limits_heading = QLabel("Limits of Axes:")
         self.x_max_label = QLabel(
@@ -125,26 +129,26 @@ class MainWindow(QMainWindow):
     
     def init_ui(self: QMainWindow) -> None:
         """
-        Adds components (buttons, text boxes, etc.) and draws the window
+        Puts together various compnents of the UI
         """
 
         # Define central widget
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
         
-        #
+        # matplotlib canvas which shows the plot
         self.setup_canvas()
 
-        # Add a menu bar to the top of the window
+        # Menu bar at the top of the window
         self.draw_menubar()
         
-        # 
+        # Fields to enter values for x' and y' (and a plot button)
         self.setup_equation_inputs()
         
-        #
+        # Wherer the user enter limits for the plot's x and y axes
         self.setup_limit_inputs()
         
-        #
+        # These take parameters which can be used in x' and y'
         self.setup_parameter_inputs()
         
         
