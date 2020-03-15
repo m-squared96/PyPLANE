@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         
     def setup_parameter_inputs(self: QMainWindow) -> None:
         """
+        Allow user to enter a number of parameters
         """
         param_names = list(self.setup_dict["params"].keys())
         param_vals = list(self.setup_dict["params"].values())
@@ -104,6 +105,21 @@ class MainWindow(QMainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
+    def setup_limit_inputs(self: QMainWindow) -> None:
+        """
+        Axes limit imputs
+        """
+        self.limits_heading = QLabel("Limits of Axes:")
+        self.x_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
+        self.x_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[0] + " ="
+        )
+        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
+        
+    
     def init_ui(self: QMainWindow) -> None:
         """
         Adds components (buttons, text boxes, etc.) and draws the window
@@ -123,18 +139,13 @@ class MainWindow(QMainWindow):
         self.setup_equation_inputs()
         
         #
+        self.setup_limit_inputs()
+        
+        #
         self.setup_parameter_inputs()
 
-        # Axes limit imputs
-        self.limits_heading = QLabel("Limits of Axes:")
-        self.x_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
-        self.x_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
+        # Layouts
+        
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
@@ -154,8 +165,7 @@ class MainWindow(QMainWindow):
         ylim_layout.addWidget(self.y_max_input)
         ylim_layout.addWidget(self.y_min_label)
         ylim_layout.addWidget(self.y_min_input)
-
-        # Layouts
+        
         x_prime_layout = QHBoxLayout()  # Input box for first equation
         y_prime_layout = QHBoxLayout()  # Input box for second equation
         button_layout = QHBoxLayout()
