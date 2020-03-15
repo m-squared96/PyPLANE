@@ -66,6 +66,17 @@ class MainWindow(QMainWindow):
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
+        
+    def setup_equation_inputs(self: QMainWindow) -> None:
+        """
+        Draw the labels and widgets to allow inputing
+        of equations (Including the plot button)
+        """
+        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
+        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
+        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
+        self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
+        self.plot_button = QPushButton("Plot")
 
     def init_ui(self: QMainWindow) -> None:
         """
@@ -81,15 +92,9 @@ class MainWindow(QMainWindow):
 
         # Add a menu bar to the top of the window
         self.draw_menubar()
-
-        # Window Features
-        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
-        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
-        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
-        self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
-        self.plot_button = QPushButton("Plot")
-
-       
+        
+        # 
+        self.setup_equation_inputs()       
 
         # Parameter inputs
         param_names = list(self.setup_dict["params"].keys())
