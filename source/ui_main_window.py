@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
         # Fields to enter values for x' and y' (and a plot button)
         self.setup_equation_inputs()
         
-        # Wherer the user enter limits for the plot's x and y axes
+        # Where the user enter limits for the plot's x and y axes
         self.setup_limit_inputs()
         
         # These take parameters which can be used in x' and y'
