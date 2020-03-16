@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         """
 
         # Define central widget
+        # This will hold all UI elements apart from the menu bar
         cent_widget = QWidget(self)
         self.setCentralWidget(cent_widget)
         
@@ -167,10 +168,29 @@ class MainWindow(QMainWindow):
         # These take parameters which can be used in x' and y'
         self.setup_parameter_inputs()
         
+        # Generate layots to arrange UI elements on the window
+        # Begin with the equatiom entry boxes
+        x_prime_layout = QHBoxLayout()
+        x_prime_layout.addWidget(self.x_prime_label)
+        x_prime_layout.addWidget(self.x_prime_entry)
         
+        y_prime_layout = QHBoxLayout()
+        y_prime_layout.addWidget(self.y_prime_label)
+        y_prime_layout.addWidget(self.y_prime_entry)
         
-        # Layouts
+        # Then do the plot button
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(self.plot_button)
+        button_layout.addStretch()
         
+        # Combine these into one layout
+        equation_entry_layout = QVBoxLayout()
+        equation_entry_layout.addLayout(x_prime_layout)
+        equation_entry_layout.addLayout(y_prime_layout)
+        equation_entry_layout.addLayout(button_layout)
+        
+        # And the axes limit inputs
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
@@ -183,10 +203,8 @@ class MainWindow(QMainWindow):
         ylim_layout.addWidget(self.y_min_label)
         ylim_layout.addWidget(self.y_min_input)
         
-        x_prime_layout = QHBoxLayout()  # Input box for first equation
-        y_prime_layout = QHBoxLayout()  # Input box for second equation
-        button_layout = QHBoxLayout()
-
+        
+        # Layouts for user-definable parameters
         self.parameter_layouts = (
             {}
         )  # Each layout contains two input boxes (parameter name and value) and an equals sign
@@ -205,20 +223,6 @@ class MainWindow(QMainWindow):
                 self.parameter_input_boxes["param_" + str(param_num) + "_val"]
             )
 
-        x_prime_layout.addWidget(self.x_prime_label)
-        x_prime_layout.addWidget(self.x_prime_entry)
-        y_prime_layout.addWidget(self.y_prime_label)
-        y_prime_layout.addWidget(self.y_prime_entry)
-
-        button_layout.addStretch()
-        button_layout.addWidget(self.plot_button)
-        button_layout.addStretch()
-
-        equation_entry_layout = QVBoxLayout()  # Contains input boxes for both eqations
-        equation_entry_layout.addLayout(x_prime_layout)
-        equation_entry_layout.addLayout(y_prime_layout)
-        equation_entry_layout.addLayout(button_layout)
-
         parameters_layout = QVBoxLayout()  # Inputs for all parameters
         parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
         for param_num in range(self.no_of_params):
@@ -226,6 +230,7 @@ class MainWindow(QMainWindow):
                 self.parameter_layouts["param_" + str(param_num) + "_layout"]
             )
 
+        # Combine the system input area into one layout
         inputs_layout = QVBoxLayout()  # All input boxes
         inputs_layout.addLayout(equation_entry_layout)
 
@@ -235,11 +240,13 @@ class MainWindow(QMainWindow):
 
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
-
+    
+        # Create a laout to hold the canvas (phase plot) and matplotlib toolbar
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
         plot_layout.addWidget(self.phase_plot)
-
+        
+        # Create the final laout, and place on the central widget
         self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
         self.overall_layout.addLayout(inputs_layout)
         self.overall_layout.addLayout(plot_layout)
