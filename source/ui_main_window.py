@@ -21,8 +21,6 @@ from equations import DifferentialEquation, SystemOfEquations
 from trajectory import PhaseSpacePlotter
 from defaults import psp_by_dimensions, default_1D, default_2D
 
-VERSION = "0.0-pre-alpha"
-
 
 class MainWindow(QMainWindow):
     """
@@ -32,9 +30,15 @@ class MainWindow(QMainWindow):
     as well as a menu bar for access to common options.
     """
 
-    def __init__(self) -> None:
+    def __init__(self: QMainWindow) -> None:
         super().__init__()
         self.init_ui()
+        self.draw_window()
+        
+    def draw_window(self: QMainWindow, app_name = "PyPLANE", app_version = "almost 0.1") -> None:
+        self.setWindowTitle(app_name + " " + app_version)
+        self.show()
+        
     
     def setup_canvas(self: QMainWindow) -> None:
         """
@@ -236,10 +240,6 @@ class MainWindow(QMainWindow):
         self.overall_layout.addLayout(plot_layout)
 
         cent_widget.setLayout(self.overall_layout)
-
-        # Set window title and show
-        self.setWindowTitle("PyPLANE " + VERSION)
-        self.show()
 
     def psp_canvas_default(self: QMainWindow, dimensions: int) -> None:
         """
