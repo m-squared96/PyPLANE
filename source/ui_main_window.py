@@ -121,6 +121,8 @@ class MainWindow(QMainWindow):
         on the x and y axes of the phase plot
         """
         self.limits_heading = QLabel("Limits of Axes:")
+        
+        # The x axis
         self.x_max_label = QLabel(
             "Max " + self.phase_plot.system.system_coords[0] + " ="
         )
@@ -129,6 +131,16 @@ class MainWindow(QMainWindow):
             "Min " + self.phase_plot.system.system_coords[0] + " ="
         )
         self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
+        
+        # And the y axis
+        self.y_max_label = QLabel(
+            "Max " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
+        self.y_min_label = QLabel(
+            "Min " + self.phase_plot.system.system_coords[1] + " ="
+        )
+        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
         
     
     def init_ui(self: QMainWindow) -> None:
@@ -158,20 +170,13 @@ class MainWindow(QMainWindow):
         
         
         # Layouts
+        
         xlim_layout = QHBoxLayout()
         xlim_layout.addWidget(self.x_max_label)
         xlim_layout.addWidget(self.x_max_input)
         xlim_layout.addWidget(self.x_min_label)
         xlim_layout.addWidget(self.x_min_input)
-
-        self.y_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
-        self.y_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+        
         ylim_layout = QHBoxLayout()
         ylim_layout.addWidget(self.y_max_label)
         ylim_layout.addWidget(self.y_max_input)
