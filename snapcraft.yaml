@@ -1,0 +1,25 @@
+name: pyplane
+summary: PyPLANE
+description: 
+  An open source replacement to the traditional DFIELD and PPLANE applications for solving systems of ODEs
+base: core18
+version: "almost0.1"
+
+parts:
+  pyplane:
+    source: https://github.com/m-squared96/PyPLANE.git
+    source-branch: "dev" 
+    plugin: python
+    python-version: "python3"
+    python-packages:
+      - numpy
+      - sympy
+      - scipy
+      - matplotlib
+      - pyqt5
+    
+apps:
+  pyplane:
+    command: python3
+
+confinement: strict
