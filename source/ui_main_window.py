@@ -309,7 +309,7 @@ class MainWindow(QMainWindow):
         y_min = float(self.y_min_input.text())
         y_max = float(self.y_max_input.text())
 
-        self.phase_plot.update_system(
+        self.phase_plot.init_space(
             system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
         )
 

@@ -37,21 +37,6 @@ class PhaseSpaceParent(FigCanvas):
         FigCanvas.__init__(self, self.fig)
         self.ax = self.fig.add_subplot(111)
 
-        # Initialise button click event on local figure object
-        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        # self.update_system(
-        #     system,
-        #     fw_time_lim=fw_time_lim,
-        #     bw_time_lim=bw_time_lim,
-        #     axes_limits=axes_limits,
-        #     max_trajectories=max_trajectories,
-        #     quiver_expansion_factor=quiver_expansion_factor,
-        #     axes_points=axes_points,
-        #     mesh_density=mesh_density,
-        # )
-
-
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
         Returns R and Rprime, lists of mesh grids for coordinate positions and phase
@@ -106,77 +91,6 @@ class PhaseSpaceParent(FigCanvas):
         min_lim = lims[0] - extension
         max_lim = lims[1] + extension
         return min_lim, max_lim
-
-    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
-        """
-        Function called upon mouse click event
-        """
-        # if event.dblclick:
-        #    print("\nActivated")
-        #    print(event.inaxes == self.ax)
-        #    print(self.trajectory_count, self.max_trajectories)
-        #    print(event.dblclick)
-
-        # print(type(event))
-        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if not (
-            event.inaxes == self.ax
-            and self.trajectory_count < self.max_trajectories
-            and event.dblclick
-        ):
-            return
-
-        # Mouse click coordinates
-        x_event = event.xdata
-        y_event = event.ydata
-
-        # Plots a red "x" on the position of the user's click
-        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
-
-        # Seperate blocks of code for handling one and two dimensions are required as, from an SOE point of view, they are
-        # fundamentally different, as t is not a system variable in the same way that, for example, x is.
-        if self.dimensions == 2:
-            # Trajectory production and plotting
-
-            # eval_point is the point on the quiverplot that has been clicked by the user. However, the coordinates are made
-            # consistent with the ordering of the system coordinates. For example, on a graph with y vs x, the x_event variable
-            # will correspond to a value on x-axis, which represents the y variable of the system. Similarly with the y_event variable
-            # representing the x variable of the system. In this case, eval_point = (y_event, x_event) such that the coordinates
-            # are in the order (x, y) for the SOE to solve and evaluate.
-            eval_point = self.derivative_expression_resolve(
-                self.display_vars, self.dimensions, (x_event, y_event)
-            )
-            solution_f = self.system.solve((0, self.time_f), r0=eval_point)
-            solution_r = self.system.solve((0, self.time_r), r0=eval_point)
-
-            for sol in (solution_f, solution_r):
-                if sol.success:
-                    # sol.y has shape (2, n_points) for a 2-D system
-                    # print(len(sol.t))
-                    x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
-                    y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
-                    self.fig.canvas.draw()
-                else:
-                    print(sol.message)
-
-        elif self.dimensions == 1:
-            # Recall that in a 1D scenario, the x_event variable is essentially the inital time of the trajectory
-            solution_f = self.system.solve((x_event, self.time_f), r0=[y_event])
-            solution_r = self.system.solve((x_event, self.time_r), r0=[y_event])
-            for sol, t in zip((solution_f, solution_r), (self.time_f, self.time_r)):
-                if sol.success:
-                    y = sol.y[0, :]
-                    if x_event != t:
-                        x = np.linspace(x_event, t, y.size)
-                    elif x_event == t:
-                        x = x_event
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
-                    self.fig.canvas.draw()
-                else:
-                    print(sol.message)
-
-        self.trajectory_count += 1
 
     def derivative_expression_resolve(
         self, display_vars: list, dimensions: int, positions: list
@@ -257,11 +171,8 @@ class PhaseSpaceParent(FigCanvas):
             step = int(array.shape[0] / axes_points)
             return array[::step, ::step]
 
+
 class PhaseSpace1D(PhaseSpaceParent):
-    pass
-
-class PhaseSpace2D(PhaseSpaceParent):
-
     def __init__(
         self,
         system: SystemOfEquations,
@@ -276,9 +187,12 @@ class PhaseSpace2D(PhaseSpaceParent):
         **kwargs,
     ) -> None:
 
-        super().__init__(2)
+        super().__init__(1)
 
-        self.update_system(
+        # Initialise button click event on local figure object
+        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+
+        self.init_space(
             system,
             fw_time_lim,
             bw_time_lim,
@@ -286,10 +200,10 @@ class PhaseSpace2D(PhaseSpaceParent):
             max_trajectories,
             quiver_expansion_factor,
             axes_points,
-            mesh_density
+            mesh_density,
         )
 
-    def update_system(
+    def init_space(
         self,
         system: SystemOfEquations,
         fw_time_lim: float = 5.0,
@@ -300,6 +214,7 @@ class PhaseSpace2D(PhaseSpaceParent):
         axes_points: int = 20,
         mesh_density: int = 200,
     ) -> None:
+
         self.ax.cla()
         self.system = system
 
@@ -326,30 +241,197 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.mesh_density = mesh_density
 
         self.max_trajectories = (
-            max_trajectories
-        )  # Maximum number of trajectories that can be visualised
+            max_trajectories  # Maximum number of trajectories that can be visualised
+        )
         self.trajectory_count = 0  # Trajectory increment variable
 
-        R, Rprime = (
+        (
+            R,
+            Rprime,
+        ) = (
             self.generate_meshes()
         )  # Returns R (coordinate grids) and Rprime (slope grids)
         quiver_data = {}
 
-        # if self.system.dims == 1:
-        #     quiver_data["t"] = (
-        #         R[0],
-        #         Rprime[0],
-        #         self.axes_limits[0][0],
-        #         self.axes_limits[0][1],
-        #     )
-        #     quiver_data[self.system.system_coords[0]] = (
-        #         R[1],
-        #         Rprime[1],
-        #         self.axes_limits[1][0],
-        #         self.axes_limits[1][1],
-        #     )
+        quiver_data["t"] = (
+            R[0],
+            Rprime[0],
+            self.axes_limits[0][0],
+            self.axes_limits[0][1],
+        )
+        quiver_data[self.system.system_coords[0]] = (
+            R[1],
+            Rprime[1],
+            self.axes_limits[1][0],
+            self.axes_limits[1][1],
+        )
 
-        # elif self.system.dims in (2, 3):
+        self.quiver_data = quiver_data
+
+        # Set to True only by toggle_nullclines method
+        self.nullclines_init = False
+
+        # List of references to the contour sets returned by plt.contour
+        self.nullcline_contour_sets = None
+
+        # Set to True only by toggle_fixed_points method
+        self.fixed_points_init = False
+
+        # list of references to fixed point markers
+        self.fixed_point_markers = None
+
+        display_vars = self.system.system_coords
+
+        for var in display_vars:
+            if not (var in self.system.system_coords):
+                return
+
+        # Display vars are the system variables to be plotted.
+        # Given a system with coords [x, y], display_vars can take 4 forms:
+        # 1. ["x"], 2. ["y"], 3. ["x", "y"], 4. ["y", "x"]
+        # In the one-dimensional cases, the quiverplot will be t vs x, or t vs y.
+        # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
+        # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
+        self.display_vars = display_vars
+
+        X, U, xmin, xmax = self.quiver_data["t"]
+        Y, V, ymin, ymax = self.quiver_data[display_vars[0]]
+
+        self.ax.set_xlim(xmin, xmax)
+        self.ax.set_ylim(ymin, ymax)
+
+        # Sets up quiver plot
+        self.quiver = self.ax.quiver(
+            self.reduce_array_density(X, self.axes_points),
+            self.reduce_array_density(Y, self.axes_points),
+            self.reduce_array_density(U, self.axes_points),
+            self.reduce_array_density(V, self.axes_points),
+            pivot="middle",
+            angles="xy",
+        )
+
+        self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
+
+        self.draw()
+
+    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
+        """
+        Function called upon mouse click event
+        """
+        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
+        if not (
+            event.inaxes == self.ax
+            and self.trajectory_count < self.max_trajectories
+            and event.dblclick
+        ):
+            return
+
+        # Mouse click coordinates
+        x_event = event.xdata
+        y_event = event.ydata
+
+        # Plots a red "x" on the position of the user's click
+        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
+
+        # Recall that in a 1D scenario, the x_event variable is essentially the inital time of the trajectory
+        solution_f = self.system.solve((x_event, self.time_f), r0=[y_event])
+        solution_r = self.system.solve((x_event, self.time_r), r0=[y_event])
+        for sol, t in zip((solution_f, solution_r), (self.time_f, self.time_r)):
+            if sol.success:
+                y = sol.y[0, :]
+                if x_event != t:
+                    x = np.linspace(x_event, t, y.size)
+                elif x_event == t:
+                    x = x_event
+                self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                self.fig.canvas.draw()
+            else:
+                print(sol.message)
+
+        self.trajectory_count += 1
+
+
+class PhaseSpace2D(PhaseSpaceParent):
+    def __init__(
+        self,
+        system: SystemOfEquations,
+        fw_time_lim: float = 5.0,
+        bw_time_lim: float = -5.0,
+        axes_limits: tuple = ((-5, 5), (-5, 5)),
+        max_trajectories: int = 10,
+        quiver_expansion_factor: float = 0.2,
+        axes_points: int = 20,
+        mesh_density: int = 200,
+        *args,
+        **kwargs,
+    ) -> None:
+
+        super().__init__(2)
+
+        # Initialise button click event on local figure object
+        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+
+        self.init_space(
+            system,
+            fw_time_lim,
+            bw_time_lim,
+            axes_limits,
+            max_trajectories,
+            quiver_expansion_factor,
+            axes_points,
+            mesh_density,
+        )
+
+    def init_space(
+        self,
+        system: SystemOfEquations,
+        fw_time_lim: float = 5.0,
+        bw_time_lim: float = -5.0,
+        axes_limits: tuple = ((-5, 5), (-5, 5)),
+        max_trajectories: int = 10,
+        quiver_expansion_factor: float = 0.2,
+        axes_points: int = 20,
+        mesh_density: int = 200,
+    ) -> None:
+
+        self.ax.cla()
+        self.system = system
+
+        # Time at which to stop forward trajectory evaluation
+        self.time_f = fw_time_lim
+        # Time at which to stop backward trajectory evaluation
+        self.time_r = bw_time_lim
+
+        # Factor to expand quiverplot to ensure all visible regions plotted
+        self.quiver_expansion_factor = quiver_expansion_factor
+
+        # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
+        self.axes_limits = np.array(axes_limits)
+
+        # axes_points = number of points along each axis if quiver_expansion_factor = 0
+        # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
+        # whilst preserving as much as possible the spacing between individual vectors.
+        # Another possible approach would be to explicitly define the spacing between vectors, but this method
+        # could cause performance issues if large axis limits are required and the vector spacing is not adjusted
+        # accordingly.
+        self.axes_points = int(axes_points * (1 + self.quiver_expansion_factor))
+
+        # TODO: explain
+        self.mesh_density = mesh_density
+
+        self.max_trajectories = (
+            max_trajectories  # Maximum number of trajectories that can be visualised
+        )
+        self.trajectory_count = 0  # Trajectory increment variable
+
+        (
+            R,
+            Rprime,
+        ) = (
+            self.generate_meshes()
+        )  # Returns R (coordinate grids) and Rprime (slope grids)
+        quiver_data = {}
+
         for label, mesh, prime_mesh, axlims in zip(
             self.system.system_coords, R, Rprime, self.axes_limits
         ):
@@ -383,27 +465,7 @@ class PhaseSpace2D(PhaseSpaceParent):
         # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
         # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
         self.display_vars = display_vars
-        # self.dimensions = len(self.display_vars)
 
-        # if self.dimensions < 1 or self.dimensions > 3:
-        #     raise ValueError("Must be between 1 and 3 variables to display")
-
-        # elif self.dimensions in (1, 2):
-        #     one_or_two_dimensions(display_vars, self.dimensions)
-
-        # elif self.dimensions == 3:
-        #     three_dimensions(display_vars, axes_limits)
-
-        # def one_or_two_dimensions(display_vars: list, dimensions: int) -> None:
-
-        #     # Initialise button click event on local figure object
-        #     self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        #     if dimensions == 1:
-        #         X, U, xmin, xmax = self.quiver_data["t"]
-        #         Y, V, ymin, ymax = self.quiver_data[display_vars[0]]
-
-        #     if dimensions == 2:
         X, U, xmin, xmax = self.quiver_data[display_vars[0]]
         Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
 
@@ -423,3 +485,47 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
         self.draw()
+
+    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
+        """
+        Function called upon mouse click event
+        """
+        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
+        if not (
+            event.inaxes == self.ax
+            and self.trajectory_count < self.max_trajectories
+            and event.dblclick
+        ):
+            return
+
+        # Mouse click coordinates
+        x_event = event.xdata
+        y_event = event.ydata
+
+        # Plots a red "x" on the position of the user's click
+        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
+
+        # Trajectory production and plotting
+        # eval_point is the point on the quiverplot that has been clicked by the user. However, the coordinates are made
+        # consistent with the ordering of the system coordinates. For example, on a graph with y vs x, the x_event variable
+        # will correspond to a value on x-axis, which represents the y variable of the system. Similarly with the y_event variable
+        # representing the x variable of the system. In this case, eval_point = (y_event, x_event) such that the coordinates
+        # are in the order (x, y) for the SOE to solve and evaluate.
+        eval_point = self.derivative_expression_resolve(
+            self.display_vars, self.dimensions, (x_event, y_event)
+        )
+        solution_f = self.system.solve((0, self.time_f), r0=eval_point)
+        solution_r = self.system.solve((0, self.time_r), r0=eval_point)
+
+        for sol in (solution_f, solution_r):
+            if sol.success:
+                # sol.y has shape (2, n_points) for a 2-D system
+                # print(len(sol.t))
+                x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
+                y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
+                self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                self.fig.canvas.draw()
+            else:
+                print(sol.message)
+
+        self.trajectory_count += 1
