@@ -7,8 +7,7 @@ version: "almost0.1"
 
 parts:
   pyplane:
-    source: https://github.com/m-squared96/PyPLANE.git
-    source-branch: "snap_testing" 
+    source: . 
     plugin: python
     python-version: "python3"
     python-packages:
