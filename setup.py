@@ -5,4 +5,5 @@ from setuptools import setup
 setup (
     name = "PyPLANE",
     packages = ["source"],
+    license = "GPL V3"
 )
