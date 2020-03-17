@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from equations import DifferentialEquation, SystemOfEquations
-from trajectory import PhaseSpacePlotter
+from trajectory import PhaseSpace1D, PhaseSpace2D
 from defaults import psp_by_dimensions, default_1D, default_2D
 
 
@@ -262,7 +262,7 @@ class MainWindow(QMainWindow):
 
         # Unpacks self.setup_dict into SOE.
         sys = SystemOfEquations(**self.setup_dict)
-        self.phase_plot = PhaseSpacePlotter(sys, **self.setup_dict)
+        self.phase_plot = PhaseSpace2D(sys, **self.setup_dict)
 
     def plot_button_clicked(self) -> None:
         """

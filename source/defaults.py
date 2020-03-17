@@ -1,10 +1,10 @@
 import numpy as np
 
 from equations import SystemOfEquations
-from trajectory import PhaseSpacePlotter
+from trajectory import PhaseSpace2D
 
 
-def psp_by_dimensions(dims) -> PhaseSpacePlotter:
+def psp_by_dimensions(dims) -> PhaseSpace2D:
 
     if dims == 1:
         return one_dimensional_default()
@@ -13,7 +13,7 @@ def psp_by_dimensions(dims) -> PhaseSpacePlotter:
     # TODO what do we do in other dimensions?
 
 
-def one_dimensional_default() -> PhaseSpacePlotter:
+def one_dimensional_default() -> PhaseSpace2D:
 
     phase_coords = ["x"]
     eqns = ["sin(x)"]
@@ -27,12 +27,12 @@ def one_dimensional_default() -> PhaseSpacePlotter:
     ymax = 10
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    return PhaseSpacePlotter(
+    return PhaseSpace2D(
         sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2
     )
 
 
-def two_dimensional_default() -> PhaseSpacePlotter:
+def two_dimensional_default() -> PhaseSpace2D:
 
     phase_coords = ["x", "y"]
     eqns = ["ax - y + b(x^2-y^2) + axy", "x - cy - d(x^2-y^2) + cxy"]
@@ -46,7 +46,7 @@ def two_dimensional_default() -> PhaseSpacePlotter:
     ymax = 10
 
     sys = SystemOfEquations(phase_coords, eqns, params=params)
-    return PhaseSpacePlotter(sys, t_f, t_r, np.array(((xmin, xmax), (ymin, ymax))))
+    return PhaseSpace2D(sys, t_f, t_r, np.array(((xmin, xmax), (ymin, ymax))))
 
 
 default_1D = {
