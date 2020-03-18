@@ -19,6 +19,6 @@ parts:
     
 apps:
   pyplane:
-    command: python3
+    command: run_gui
 
 confinement: strict
