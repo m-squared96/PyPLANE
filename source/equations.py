@@ -60,8 +60,6 @@ class DifferentialEquation:
             [self.indep_var, self.phase_coords, *self.params], self.expr
         )
 
-        self.set_solve_method("RK45")
-
     def set_param(self, param, value) -> None:
         """
         Sets self.param_values[param] to value.
@@ -118,6 +116,8 @@ class SystemOfEquations:
 
         # calculated fixed points are cached here
         self.fixed_points = self.calc_fixed_points()
+
+        self.set_solve_method("RK45")
 
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
