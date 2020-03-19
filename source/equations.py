@@ -117,7 +117,7 @@ class SystemOfEquations:
         # calculated fixed points are cached here
         self.fixed_points = self.calc_fixed_points()
 
-        self.valid_solve_methods = {"RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"}
+        self.valid_solve_methods = ["RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"]
         self.set_solve_method("RK45")
 
     def __str__(self) -> str:
