@@ -80,12 +80,16 @@ class MainWindow(QMainWindow):
         self.solve_method_combo = QComboBox(self)
         for method in self.phase_plot.system.valid_solve_methods:
             self.solve_method_combo.addItem(method)
+        self.solve_method_combo.setCurrentText(self.phase_plot.system.solve_method)
+        self.solve_method = self.phase_plot.system.solve_method
+
         self.solve_method_list = QWidgetAction(None)
         self.solve_method_list.setDefaultWidget(self.solve_method_combo)
 
         self.solve_method_menu = QMenu("Solver Method", self)
         self.solve_method_menu.addAction(self.solve_method_list)
         menu_edit.addMenu(self.solve_method_menu)
+        self.solve_method_combo.currentIndexChanged.connect(self.solve_method_changed)
 
     def setup_equation_inputs(self) -> None:
         """
@@ -306,6 +310,10 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
+    def solve_method_changed(self):
+        self.solve_method = self.solve_method_combo.currentText()
+        self.phase_plot.system.set_solve_method(self.solve_method)
+
     def update_psp(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -314,7 +322,9 @@ class MainWindow(QMainWindow):
         f_2 = self.y_prime_entry.text()
         eqns = [f_1, f_2]
 
-        system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
+        system_of_eqns = SystemOfEquations(
+            phase_coords, eqns, params=passed_params, solve_method=self.solve_method
+        )
 
         self.action_nullclines.setChecked(False)
 

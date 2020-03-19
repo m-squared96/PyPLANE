@@ -84,7 +84,13 @@ class SystemOfEquations:
     """
 
     def __init__(
-        self, system_coords, ode_expr_strings, params=None, *args, **kwargs
+        self,
+        system_coords,
+        ode_expr_strings,
+        params=None,
+        solve_method="LSODA",
+        *args,
+        **kwargs,
     ) -> None:
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding
@@ -118,7 +124,7 @@ class SystemOfEquations:
         self.fixed_points = self.calc_fixed_points()
 
         self.valid_solve_methods = ["RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"]
-        self.set_solve_method("RK45")
+        self.set_solve_method(solve_method)
 
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
