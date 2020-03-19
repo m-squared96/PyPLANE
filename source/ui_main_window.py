@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QAction,
+    QWidgetAction,
+    QComboBox,
+    QMenu,
 )
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -72,6 +75,17 @@ class MainWindow(QMainWindow):
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
+
+        # Edit > Select Solver Method
+        self.solve_method_combo = QComboBox(self)
+        for method in self.phase_plot.system.valid_solve_methods:
+            self.solve_method_combo.addItem(method)
+        self.solve_method_list = QWidgetAction(None)
+        self.solve_method_list.setDefaultWidget(self.solve_method_combo)
+
+        self.solve_method_menu = QMenu("Solver Method", self)
+        self.solve_method_menu.addAction(self.solve_method_list)
+        menu_edit.addMenu(self.solve_method_menu)
 
     def setup_equation_inputs(self) -> None:
         """
@@ -345,7 +359,7 @@ class MainWindow(QMainWindow):
         return False
 
     def params_undefined(
-        self, dep_var: str, phase_coords: list, ode_str: str, passed_params: dict,
+        self, dep_var: str, phase_coords: list, ode_str: str, passed_params: dict
     ) -> bool:
         """
         Checks for undefined parameters in ODE expressions.

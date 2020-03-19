@@ -117,6 +117,7 @@ class SystemOfEquations:
         # calculated fixed points are cached here
         self.fixed_points = self.calc_fixed_points()
 
+        self.valid_solve_methods = {"RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"}
         self.set_solve_method("RK45")
 
     def __str__(self) -> str:
@@ -139,10 +140,11 @@ class SystemOfEquations:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html
         """
 
-        valid_methods = {"RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"}
-        if method not in valid_methods:
+        if method not in self.valid_solve_methods:
             raise ValueError(
-                "Solver method must be one of the following: {}".format(valid_methods)
+                "Solver method must be one of the following: {}".format(
+                    self.valid_solve_methods
+                )
             )
         else:
             self.solve_method = method
