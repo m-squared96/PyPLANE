@@ -52,6 +52,8 @@ class MainWindow(QMainWindow):
         """
         Draws the menu bar that appears at the top of the window
         TODO: File > New Window
+        TODO: Help > About
+        TODO: Help > Documentation (also TODO: Write Documentation)
         """
         menu_bar = self.menuBar()
 
