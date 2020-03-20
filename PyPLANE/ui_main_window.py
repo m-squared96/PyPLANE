@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpacePlotter
 from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
@@ -35,7 +36,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self.draw_window()
 
-    def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
+    def draw_window(self, app_name="PyPLANE", app_version=VERSION) -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
