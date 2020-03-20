@@ -19,6 +19,6 @@ parts:
     
 apps:
   pyplane:
-    command: run
+    command: bin/run
 
 confinement: strict
