@@ -121,7 +121,10 @@ class SystemOfEquations:
         # print(f"Jacobian: {self.jac}")
 
         # calculated fixed points are cached here
-        self.fixed_points = self.calc_fixed_points()
+        try:
+            self.fixed_points = self.calc_fixed_points()
+        except:
+            print("Could not symbolically calculate fixed points.")
 
         self.valid_solve_methods = ["RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"]
         self.set_solve_method(solve_method)
