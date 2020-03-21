@@ -18,8 +18,8 @@ def one_dimensional_default() -> PhaseSpace2D:
     phase_coords = ["x"]
     eqns = ["sin(x)"]
     params = {"a": 1, "b": 0}
-    t_f = 20
-    t_r = -20
+    t_f = 100
+    t_r = -100
 
     xmin = -10
     xmax = 10
@@ -53,8 +53,8 @@ default_1D = {
     "system_coords": ["x"],
     "ode_expr_strings": ["a*sin(bx)"],
     "params": {"a": 1, "b": 1},
-    "t_f": 20,
-    "t_r": -20,
+    "t_f": 100,
+    "t_r": -100,
     "axes_limits": ((-10, 10), (-10, 10)),
     "xmin": -10,
     "xmax": 10,

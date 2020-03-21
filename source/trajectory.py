@@ -206,8 +206,8 @@ class PhaseSpace1D(PhaseSpaceParent):
     def init_space(
         self,
         system: SystemOfEquations,
-        fw_time_lim: float = 5.0,
-        bw_time_lim: float = -5.0,
+        fw_time_lim: float = 100,
+        bw_time_lim: float = -100,
         axes_limits: tuple = ((-5, 5), (-5, 5)),
         max_trajectories: int = 10,
         quiver_expansion_factor: float = 0.2,
