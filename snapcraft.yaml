@@ -3,12 +3,12 @@ summary: PyPLANE
 description: 
   An open source replacement to the traditional DFIELD and PPLANE applications for solving systems of ODEs
 base: core18
-version: "git+snap_testing" # git+branch
-licence: GPL-3.0-or-later
+version: "git"
 
 parts:
   pyplane:
-    source: . 
+    source: .
+    source-branch: snap_testing
     plugin: python
     python-version: "python3"
     python-packages:
