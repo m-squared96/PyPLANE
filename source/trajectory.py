@@ -19,8 +19,8 @@ class PhaseSpaceParent(FigCanvas):
         self,
         dimensions: int,
         # system: SystemOfEquations,
-        # fw_time_lim: float = 5.0,
-        # bw_time_lim: float = -5.0,
+        fw_time_lim: float = 5.0,
+        bw_time_lim: float = -5.0,
         # axes_limits: tuple = ((-5, 5), (-5, 5)),
         # max_trajectories: int = 10,
         # quiver_expansion_factor: float = 0.2,
@@ -37,14 +37,17 @@ class PhaseSpaceParent(FigCanvas):
         FigCanvas.__init__(self, self.fig)
         self.ax = self.fig.add_subplot(111)
 
+        self.time_f = fw_time_lim
+        self.time_r = bw_time_lim
+
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
         Returns R and Rprime, lists of mesh grids for coordinate positions and phase
         space slopes respectively
         """
         if self.system.dims == 1:
-            tmin, tmax = self.get_calc_limits(self.axes_limits[0])
-            xmin, xmax = self.get_calc_limits(self.axes_limits[1])
+            tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
+            xmin, xmax = self.get_calc_limits(self.axes_limits)
 
             R = np.meshgrid(
                 np.linspace(tmin, tmax, self.mesh_density),
@@ -187,7 +190,7 @@ class PhaseSpace1D(PhaseSpaceParent):
         **kwargs,
     ) -> None:
 
-        super().__init__(1)
+        super().__init__(1, fw_time_lim, bw_time_lim)
 
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
@@ -218,10 +221,10 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.ax.cla()
         self.system = system
 
-        # Time at which to stop forward trajectory evaluation
-        self.time_f = fw_time_lim
-        # Time at which to stop backward trajectory evaluation
-        self.time_r = bw_time_lim
+        # # Time at which to stop forward trajectory evaluation
+        # self.time_f = fw_time_lim
+        # # Time at which to stop backward trajectory evaluation
+        # self.time_r = bw_time_lim
 
         # Factor to expand quiverplot to ensure all visible regions plotted
         self.quiver_expansion_factor = quiver_expansion_factor

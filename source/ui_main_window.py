@@ -67,13 +67,6 @@ class MainWindow(QMainWindow):
         menu_edit.addAction(self.action_nullclines)
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
-        # try:
-        #     self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
-
-        # except AttributeError:
-        #     self.psp_canvas_default_2D()
-        #     self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
-
         # Edit > Show Fixed Points
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
@@ -158,22 +151,12 @@ class MainWindow(QMainWindow):
         return False
 
     def show_1D(self) -> None:
-        self.init_ui_1D()
+        self.active_dims = 1
+        self.init_ui()
 
     def show_2D(self) -> None:
-        self.init_ui_2D()
-
-    def setup_equation_inputs_1D(self) -> None:
-        """
-        Draw the labels and widgets to allow inputing
-        of equations (Including the plot button)
-        """
-        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
-        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
-        self.plot_button = QPushButton("Plot")
-
-        # Action on clicking plot button
-        self.plot_button.clicked.connect(self.plot_button_clicked_1D)
+        self.active_dims = 2
+        self.init_ui()
 
     def setup_parameter_inputs(self) -> None:
         """
@@ -202,7 +185,24 @@ class MainWindow(QMainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
-    def setup_limit_inputs_1D(self) -> None:
+    def setup_equation_inputs(self) -> None:
+        """
+        Draw the labels and widgets to allow inputing
+        of equations (Including the plot button)
+        """
+        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
+        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
+
+        if self.active_dims == 2:
+            self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
+            self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
+
+        self.plot_button = QPushButton("Plot")
+
+        # Action on clicking plot button
+        self.plot_button.clicked.connect(self.plot_button_clicked)
+
+    def setup_limit_inputs(self) -> None:
         """
         Entry boxes for the max and min values to be plotted
         on the x and y axes of the phase plot
@@ -219,7 +219,18 @@ class MainWindow(QMainWindow):
         )
         self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
 
-    def init_ui_1D(self) -> None:
+        if self.active_dims == 2:
+            # And the y axis
+            self.y_max_label = QLabel(
+                "Max " + self.phase_plot.system.system_coords[1] + " ="
+            )
+            self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
+            self.y_min_label = QLabel(
+                "Min " + self.phase_plot.system.system_coords[1] + " ="
+            )
+            self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+
+    def init_ui(self) -> None:
         """
         Puts together various compnents of the UI
         """
@@ -230,16 +241,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(cent_widget)
 
         # matplotlib canvas which shows the plot
-        self.psp_canvas_default_1D()
+        self.psp_canvas_default()
 
         # Menu bar at the top of the window
-        # self.draw_menubar()
+        self.draw_menubar()
 
         # Fields to enter values for x' and y' (and a plot button)
-        self.setup_equation_inputs_1D()
+        self.setup_equation_inputs()
 
         # Where the user enter limits for the plot's x and y axes
-        self.setup_limit_inputs_1D()
+        self.setup_limit_inputs()
 
         # These take parameters which can be used in x' and y'
         self.setup_parameter_inputs()
@@ -250,6 +261,11 @@ class MainWindow(QMainWindow):
         x_prime_layout.addWidget(self.x_prime_label)
         x_prime_layout.addWidget(self.x_prime_entry)
 
+        if self.active_dims == 2:
+            y_prime_layout = QHBoxLayout()
+            y_prime_layout.addWidget(self.y_prime_label)
+            y_prime_layout.addWidget(self.y_prime_entry)
+
         # Then do the plot button
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -259,6 +275,10 @@ class MainWindow(QMainWindow):
         # Combine these into one layout
         equation_entry_layout = QVBoxLayout()
         equation_entry_layout.addLayout(x_prime_layout)
+
+        if self.active_dims == 2:
+            equation_entry_layout.addLayout(y_prime_layout)
+
         equation_entry_layout.addLayout(button_layout)
 
         # And the axes limit inputs
@@ -267,6 +287,13 @@ class MainWindow(QMainWindow):
         xlim_layout.addWidget(self.x_max_input)
         xlim_layout.addWidget(self.x_min_label)
         xlim_layout.addWidget(self.x_min_input)
+
+        if self.active_dims == 2:
+            ylim_layout = QHBoxLayout()
+            ylim_layout.addWidget(self.y_max_label)
+            ylim_layout.addWidget(self.y_max_input)
+            ylim_layout.addWidget(self.y_min_label)
+            ylim_layout.addWidget(self.y_min_input)
 
         # Layouts for user-definable parameters
         self.parameter_layouts = (
@@ -300,6 +327,8 @@ class MainWindow(QMainWindow):
 
         inputs_layout.addWidget(self.limits_heading)
         inputs_layout.addLayout(xlim_layout)
+        if self.active_dims == 2:
+            inputs_layout.addLayout(ylim_layout)
 
         inputs_layout.addLayout(parameters_layout)
         inputs_layout.addStretch()
@@ -316,23 +345,32 @@ class MainWindow(QMainWindow):
 
         cent_widget.setLayout(self.overall_layout)
 
-    def psp_canvas_default_1D(self) -> None:
+    def psp_canvas_default(self) -> None:
         """
         Initialises default PSP
         """
-        self.setup_dict = default_1D
+        if self.active_dims == 1:
+            self.setup_dict = default_1D
+            correct_phase_space = PhaseSpace1D
+        elif self.active_dims == 2:
+            self.setup_dict = default_2D
+            correct_phase_space = PhaseSpace2D
 
         # Unpacks self.setup_dict into SOE.
         sys = SystemOfEquations(**self.setup_dict)
-        self.phase_plot = PhaseSpace1D(sys, **self.setup_dict)
+        self.phase_plot = correct_phase_space(sys, **self.setup_dict)
 
-    def plot_button_clicked_1D(self) -> None:
+    def plot_button_clicked(self) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
         If GUI checks pass, self.update_psp is called.
         Else, self.handle_empty_entry is called.
         """
-        phase_coords = ["x"]
+
+        if self.active_dims == 1:
+            phase_coords = ["x"]
+        elif self.active_dims == 2:
+            phase_coords = ["x", "y"]
 
         # Grab parameters
         passed_params = {}
@@ -348,8 +386,18 @@ class MainWindow(QMainWindow):
                     ].text()
                 )
 
-        self.eqn_entries = [self.x_prime_entry.text()]
-        self.lim_entries = [self.x_min_input.text(), self.x_max_input.text()]
+        if self.active_dims == 1:
+            self.eqn_entries = [self.x_prime_entry.text()]
+            self.lim_entries = [self.x_min_input.text(), self.x_max_input.text()]
+
+        elif self.active_dims == 2:
+            self.eqn_entries = [self.x_prime_entry.text(), self.y_prime_entry.text()]
+            self.lim_entries = [
+                self.x_min_input.text(),
+                self.x_max_input.text(),
+                self.y_min_input.text(),
+                self.y_max_input.text(),
+            ]
 
         if self.required_fields_full(phase_coords, passed_params):
             self.update_psp(phase_coords, passed_params)
@@ -357,225 +405,17 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
-    def update_psp_1D(self, phase_coords: list, passed_params: dict) -> None:
+    def update_psp(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
         """
         f_1 = self.x_prime_entry.text()
+        f_2 = None
         eqns = [f_1]
 
-        system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
-
-        self.action_nullclines.setChecked(False)
-
-        x_min = float(self.x_min_input.text())
-        x_max = float(self.x_max_input.text())
-
-        self.phase_plot.init_space(system_of_eqns, axes_limits=((x_min, x_max)))
-
-    def setup_equation_inputs_2D(self) -> None:
-        """
-        Draw the labels and widgets to allow inputing
-        of equations (Including the plot button)
-        """
-        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
-        self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
-        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
-        self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
-        self.plot_button = QPushButton("Plot")
-
-        # Action on clicking plot button
-        self.plot_button.clicked.connect(self.plot_button_clicked_2D)
-
-    def setup_limit_inputs_2D(self) -> None:
-        """
-        Entry boxes for the max and min values to be plotted
-        on the x and y axes of the phase plot
-        """
-        self.limits_heading = QLabel("Limits of Axes:")
-
-        # The x axis
-        self.x_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
-        self.x_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
-
-        # And the y axis
-        self.y_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
-        self.y_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[1] + " ="
-        )
-        self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
-
-    def init_ui_2D(self) -> None:
-        """
-        Puts together various compnents of the UI
-        """
-
-        # Define central widget
-        # This will hold all UI elements apart from the menu bar
-        cent_widget = QWidget(self)
-        self.setCentralWidget(cent_widget)
-
-        # matplotlib canvas which shows the plot
-        self.psp_canvas_default_2D()
-
-        # Menu bar at the top of the window
-        self.draw_menubar()
-
-        # Fields to enter values for x' and y' (and a plot button)
-        self.setup_equation_inputs_2D()
-
-        # Where the user enter limits for the plot's x and y axes
-        self.setup_limit_inputs_2D()
-
-        # These take parameters which can be used in x' and y'
-        self.setup_parameter_inputs()
-
-        # Generate layots to arrange UI elements on the window
-        # Begin with the equatiom entry boxes
-        x_prime_layout = QHBoxLayout()
-        x_prime_layout.addWidget(self.x_prime_label)
-        x_prime_layout.addWidget(self.x_prime_entry)
-
-        y_prime_layout = QHBoxLayout()
-        y_prime_layout.addWidget(self.y_prime_label)
-        y_prime_layout.addWidget(self.y_prime_entry)
-
-        # Then do the plot button
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(self.plot_button)
-        button_layout.addStretch()
-
-        # Combine these into one layout
-        equation_entry_layout = QVBoxLayout()
-        equation_entry_layout.addLayout(x_prime_layout)
-        equation_entry_layout.addLayout(y_prime_layout)
-        equation_entry_layout.addLayout(button_layout)
-
-        # And the axes limit inputs
-        xlim_layout = QHBoxLayout()
-        xlim_layout.addWidget(self.x_max_label)
-        xlim_layout.addWidget(self.x_max_input)
-        xlim_layout.addWidget(self.x_min_label)
-        xlim_layout.addWidget(self.x_min_input)
-
-        ylim_layout = QHBoxLayout()
-        ylim_layout.addWidget(self.y_max_label)
-        ylim_layout.addWidget(self.y_max_input)
-        ylim_layout.addWidget(self.y_min_label)
-        ylim_layout.addWidget(self.y_min_input)
-
-        # Layouts for user-definable parameters
-        self.parameter_layouts = (
-            {}
-        )  # Each layout contains two input boxes (parameter name and value) and an equals sign
-        for param_num in range(self.no_of_params):
-            self.parameter_layouts[
-                "param_" + str(param_num) + "_layout"
-            ] = QHBoxLayout()
-            self.equals_sign = QLabel("=")
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_name"]
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.equals_sign
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_val"]
-            )
-
-        parameters_layout = QVBoxLayout()  # Inputs for all parameters
-        parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
-        for param_num in range(self.no_of_params):
-            parameters_layout.addLayout(
-                self.parameter_layouts["param_" + str(param_num) + "_layout"]
-            )
-
-        # Combine the system input area into one layout
-        inputs_layout = QVBoxLayout()  # All input boxes
-        inputs_layout.addLayout(equation_entry_layout)
-
-        inputs_layout.addWidget(self.limits_heading)
-        inputs_layout.addLayout(xlim_layout)
-        inputs_layout.addLayout(ylim_layout)
-
-        inputs_layout.addLayout(parameters_layout)
-        inputs_layout.addStretch()
-
-        # Create a laout to hold the canvas (phase plot) and matplotlib toolbar
-        plot_layout = QVBoxLayout()
-        plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
-        plot_layout.addWidget(self.phase_plot)
-
-        # Create the final laout, and place on the central widget
-        self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
-        self.overall_layout.addLayout(inputs_layout)
-        self.overall_layout.addLayout(plot_layout)
-
-        cent_widget.setLayout(self.overall_layout)
-
-    def psp_canvas_default_2D(self) -> None:
-        """
-        Initialises default PSP
-        """
-        self.setup_dict = default_2D
-
-        # Unpacks self.setup_dict into SOE.
-        sys = SystemOfEquations(**self.setup_dict)
-        self.phase_plot = PhaseSpace2D(sys, **self.setup_dict)
-
-    def plot_button_clicked_2D(self) -> None:
-        """
-        Gathers phase_coords and passed_params to feed into GUI checks.
-        If GUI checks pass, self.update_psp is called.
-        Else, self.handle_empty_entry is called.
-        """
-        phase_coords = ["x", "y"]
-
-        # Grab parameters
-        passed_params = {}
-        for param_num in range(self.no_of_params):
-            if self.parameter_input_boxes["param_" + str(param_num) + "_name"].text():
-                passed_params[
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_name"
-                    ].text()
-                ] = float(
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-                )
-
-        self.eqn_entries = [self.x_prime_entry.text(), self.y_prime_entry.text()]
-        self.lim_entries = [
-            self.x_min_input.text(),
-            self.x_max_input.text(),
-            self.y_min_input.text(),
-            self.y_max_input.text(),
-        ]
-
-        if self.required_fields_full(phase_coords, passed_params):
-            self.update_psp_2D(phase_coords, passed_params)
-
-        else:
-            self.handle_empty_entry(phase_coords, passed_params)
-
-    def update_psp_2D(self, phase_coords: list, passed_params: dict) -> None:
-        """
-        Gathers entry information from GUI and updates phase plot
-        """
-        f_1 = self.x_prime_entry.text()
-        f_2 = self.y_prime_entry.text()
-        eqns = [f_1, f_2]
+        if self.active_dims == 2:
+            f_2 = self.y_prime_entry.text()
+            eqns.append(f_2)
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
@@ -583,12 +423,16 @@ class MainWindow(QMainWindow):
 
         x_min = float(self.x_min_input.text())
         x_max = float(self.x_max_input.text())
-        y_min = float(self.y_min_input.text())
-        y_max = float(self.y_max_input.text())
 
-        self.phase_plot.init_space(
-            system_of_eqns, axes_limits=((x_min, x_max), (y_min, y_max))
-        )
+        if self.active_dims == 1:
+            axes_limits = (x_min, x_max)
+
+        elif self.active_dims == 2:
+            y_min = float(self.y_min_input.text())
+            y_max = float(self.y_max_input.text())
+            axes_limits((x_min, x_max), (y_min, y_max))
+
+        self.phase_plot.init_space(system_of_eqns, axes_limits=axes_limits)
 
 
 if __name__ == "__main__":
