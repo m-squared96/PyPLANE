@@ -33,20 +33,29 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
+        # self.draw_menubar()
+
+        self.show_2D()
+        self.draw_window()
+
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
     def draw_menubar(self) -> None:
         """
-        Draws the menu bar that appears at the top of the window
+        Draws the menu bar that appears at the top of the window. If method is recalled, existing menu bar
+        is cleared and redrawn.
         TODO: File > New Window
         """
+
         menu_bar = self.menuBar()
+        menu_bar.clear()  # If menu_bar already exists, clears and redraws.
 
         # Add menus to the bar
         menu_file = menu_bar.addMenu("File")
         menu_edit = menu_bar.addMenu("Edit")
+        menu_dims = menu_bar.addMenu("Dimensions")
 
         # File > Quit
         self.action_quit = QAction("Quit", self)
@@ -58,10 +67,27 @@ class MainWindow(QMainWindow):
         menu_edit.addAction(self.action_nullclines)
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
+        # try:
+        #     self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
+
+        # except AttributeError:
+        #     self.psp_canvas_default_2D()
+        #     self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
+
         # Edit > Show Fixed Points
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
         menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
+
+        # Dimensions > 1D
+        self.action_1D = QAction("One-Dimensional PyPLANE", self)
+        menu_dims.addAction(self.action_1D)
+        self.action_1D.triggered.connect(self.show_1D)
+
+        # Dimensions > 2D
+        self.action_2D = QAction("Two-Dimensional PyPLANE", self)
+        menu_dims.addAction(self.action_2D)
+        self.action_2D.triggered.connect(self.show_2D)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
@@ -131,22 +157,13 @@ class MainWindow(QMainWindow):
                 return True
         return False
 
+    def show_1D(self) -> None:
+        self.init_ui_1D()
 
-class Display1d(MainWindow):
-    def __init__(self):
-        super().__init__()
-        self.init_ui()
+    def show_2D(self) -> None:
+        self.init_ui_2D()
 
-        self.draw_window()
-
-    def setup_canvas(self) -> None:
-        """
-        Canvas to show the phase plot as part of the main window
-        By default, open application displaying a two dimensional system
-        """
-        self.psp_canvas_default()
-
-    def setup_equation_inputs(self) -> None:
+    def setup_equation_inputs_1D(self) -> None:
         """
         Draw the labels and widgets to allow inputing
         of equations (Including the plot button)
@@ -156,7 +173,7 @@ class Display1d(MainWindow):
         self.plot_button = QPushButton("Plot")
 
         # Action on clicking plot button
-        self.plot_button.clicked.connect(self.plot_button_clicked)
+        self.plot_button.clicked.connect(self.plot_button_clicked_1D)
 
     def setup_parameter_inputs(self) -> None:
         """
@@ -185,7 +202,7 @@ class Display1d(MainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
-    def setup_limit_inputs(self) -> None:
+    def setup_limit_inputs_1D(self) -> None:
         """
         Entry boxes for the max and min values to be plotted
         on the x and y axes of the phase plot
@@ -202,7 +219,7 @@ class Display1d(MainWindow):
         )
         self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
 
-    def init_ui(self) -> None:
+    def init_ui_1D(self) -> None:
         """
         Puts together various compnents of the UI
         """
@@ -213,16 +230,16 @@ class Display1d(MainWindow):
         self.setCentralWidget(cent_widget)
 
         # matplotlib canvas which shows the plot
-        self.psp_canvas_default()
+        self.psp_canvas_default_1D()
 
         # Menu bar at the top of the window
-        self.draw_menubar()
+        # self.draw_menubar()
 
         # Fields to enter values for x' and y' (and a plot button)
-        self.setup_equation_inputs()
+        self.setup_equation_inputs_1D()
 
         # Where the user enter limits for the plot's x and y axes
-        self.setup_limit_inputs()
+        self.setup_limit_inputs_1D()
 
         # These take parameters which can be used in x' and y'
         self.setup_parameter_inputs()
@@ -299,7 +316,7 @@ class Display1d(MainWindow):
 
         cent_widget.setLayout(self.overall_layout)
 
-    def psp_canvas_default(self) -> None:
+    def psp_canvas_default_1D(self) -> None:
         """
         Initialises default PSP
         """
@@ -309,7 +326,7 @@ class Display1d(MainWindow):
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = PhaseSpace1D(sys, **self.setup_dict)
 
-    def plot_button_clicked(self) -> None:
+    def plot_button_clicked_1D(self) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
         If GUI checks pass, self.update_psp is called.
@@ -340,7 +357,7 @@ class Display1d(MainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
-    def update_psp(self, phase_coords: list, passed_params: dict) -> None:
+    def update_psp_1D(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
         """
@@ -356,23 +373,7 @@ class Display1d(MainWindow):
 
         self.phase_plot.init_space(system_of_eqns, axes_limits=((x_min, x_max)))
 
-
-class Display2d(MainWindow):
-    def __init__(self):
-        super().__init__()
-        self.init_ui()  # Sets up UI elements
-
-        # Draws window - drawn to size required to fit UI elements, they need to be rendered first
-        self.draw_window()
-
-    def setup_canvas(self) -> None:
-        """
-        Canvas to show the phase plot as part of the main window
-        By default, open application displaying a two dimensional system
-        """
-        self.psp_canvas_default()
-
-    def setup_equation_inputs(self) -> None:
+    def setup_equation_inputs_2D(self) -> None:
         """
         Draw the labels and widgets to allow inputing
         of equations (Including the plot button)
@@ -384,36 +385,9 @@ class Display2d(MainWindow):
         self.plot_button = QPushButton("Plot")
 
         # Action on clicking plot button
-        self.plot_button.clicked.connect(self.plot_button_clicked)
+        self.plot_button.clicked.connect(self.plot_button_clicked_2D)
 
-    def setup_parameter_inputs(self) -> None:
-        """
-        Allow user to enter a number of parameters
-        """
-        param_names = list(self.setup_dict["params"].keys())
-        param_vals = list(self.setup_dict["params"].values())
-
-        self.parameter_input_boxes = {}
-        self.no_of_params = 5  # Number of user defined parameters
-        for param_num in range(self.no_of_params):
-            # Fills parameter input boxes with parameter vars and corresponding vals
-            if param_num < len(self.setup_dict["params"].keys()):
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit(param_names[param_num])
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit(str(param_vals[param_num]))
-            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
-            else:
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit()
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit()
-
-    def setup_limit_inputs(self) -> None:
+    def setup_limit_inputs_2D(self) -> None:
         """
         Entry boxes for the max and min values to be plotted
         on the x and y axes of the phase plot
@@ -440,7 +414,7 @@ class Display2d(MainWindow):
         )
         self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
 
-    def init_ui(self) -> None:
+    def init_ui_2D(self) -> None:
         """
         Puts together various compnents of the UI
         """
@@ -451,16 +425,16 @@ class Display2d(MainWindow):
         self.setCentralWidget(cent_widget)
 
         # matplotlib canvas which shows the plot
-        self.setup_canvas()
+        self.psp_canvas_default_2D()
 
         # Menu bar at the top of the window
         self.draw_menubar()
 
         # Fields to enter values for x' and y' (and a plot button)
-        self.setup_equation_inputs()
+        self.setup_equation_inputs_2D()
 
         # Where the user enter limits for the plot's x and y axes
-        self.setup_limit_inputs()
+        self.setup_limit_inputs_2D()
 
         # These take parameters which can be used in x' and y'
         self.setup_parameter_inputs()
@@ -549,7 +523,7 @@ class Display2d(MainWindow):
 
         cent_widget.setLayout(self.overall_layout)
 
-    def psp_canvas_default(self) -> None:
+    def psp_canvas_default_2D(self) -> None:
         """
         Initialises default PSP
         """
@@ -559,7 +533,7 @@ class Display2d(MainWindow):
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = PhaseSpace2D(sys, **self.setup_dict)
 
-    def plot_button_clicked(self) -> None:
+    def plot_button_clicked_2D(self) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
         If GUI checks pass, self.update_psp is called.
@@ -590,12 +564,12 @@ class Display2d(MainWindow):
         ]
 
         if self.required_fields_full(phase_coords, passed_params):
-            self.update_psp(phase_coords, passed_params)
+            self.update_psp_2D(phase_coords, passed_params)
 
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
-    def update_psp(self, phase_coords: list, passed_params: dict) -> None:
+    def update_psp_2D(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
         """
@@ -619,5 +593,5 @@ class Display2d(MainWindow):
 
 if __name__ == "__main__":
     PyPLANE = QApplication(sys.argv)
-    PyPLANE_main_window = Display1d()
+    PyPLANE_main_window = MainWindow()
     sys.exit(PyPLANE.exec_())
