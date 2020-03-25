@@ -17,6 +17,9 @@ parts:
       - scipy
       - matplotlib
       - pyqt5
+    stage-packages:
+      - libfreetype6
+      - libpng16-16
     
 apps:
   pyplane:
