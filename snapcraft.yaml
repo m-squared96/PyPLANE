@@ -83,6 +83,10 @@ parts:
     
 apps:
   pyplane:
-    command: bin/desktop-launch python3 bin/run
+    adapter: full
+    command: bin/run
+    command-chain:
+      - bin/desktop-launch
+    plugs: [[unity7, x11, wayland, opengl, desktop, desktop-legacy]
 
 confinement: strict
