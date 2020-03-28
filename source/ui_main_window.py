@@ -420,17 +420,14 @@ class MainWindow(QMainWindow):
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
 
         self.action_nullclines.setChecked(False)
-
-        x_min = float(self.x_min_input.text())
-        x_max = float(self.x_max_input.text())
+        lim_floats = [float(lim) for lim in self.lim_entries]
 
         if self.active_dims == 1:
-            axes_limits = (x_min, x_max)
+            axes_limits = (lim_floats[0], lim_floats[1])
 
         elif self.active_dims == 2:
-            y_min = float(self.y_min_input.text())
-            y_max = float(self.y_max_input.text())
-            axes_limits((x_min, x_max), (y_min, y_max))
+            axes_limits = ((lim_floats[0],lim_floats[1]),
+                            (lim_floats[2],lim_floats[3]))
 
         self.phase_plot.init_space(system_of_eqns, axes_limits=axes_limits)
 

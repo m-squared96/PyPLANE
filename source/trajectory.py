@@ -165,14 +165,14 @@ class PhaseSpaceParent(FigCanvas):
                 fp.set_visible(not fp.get_visible())
             self.draw()
 
-    def reduce_array_density(self, array: np.ndarray, axes_points: int) -> np.ndarray:
+    def reduce_array_density(self, full_array: np.ndarray, axes_points: int) -> np.ndarray:
         """
         Accepts a square, 2D Numpy array (array) and an integer variable (axes_points).
         Returns a less dense, 2D, square Numpy array with a size of (at least) axes_points squared.
         """
-        if len(array.shape) == 2 and array.shape[0] == array.shape[1]:
-            step = int(array.shape[0] / axes_points)
-            return array[::step, ::step]
+        if len(full_array.shape) == 2 and full_array.shape[0] == full_array.shape[1]:
+            step = int(full_array.shape[0] / axes_points)
+            return np.array(full_array[::step, ::step], dtype=float)
 
 
 class PhaseSpace1D(PhaseSpaceParent):
@@ -302,6 +302,12 @@ class PhaseSpace1D(PhaseSpaceParent):
 
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
+
+        # for var in (X,U,Y,V):
+        #     print("\n")
+        #     print(type(var))
+        #     print(var.shape)
+        # print("\n")
 
         # Sets up quiver plot
         self.quiver = self.ax.quiver(
