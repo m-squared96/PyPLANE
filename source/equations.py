@@ -160,7 +160,9 @@ class SystemOfEquations:
 
     def solve(self, t_span, r0, method=None):
         method = method if method is not None else self.solve_method
-        return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
+        return solve_ivp(
+            self.phasespace_eval, t_span, r0, method=method, max_step=0.005
+        )
 
     def phasespace_eval(self, t, r) -> tuple:
         """
