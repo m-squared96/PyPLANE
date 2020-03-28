@@ -87,6 +87,6 @@ apps:
     command: bin/run
     command-chain:
       - bin/desktop-launch
-    plugs: [[unity7, x11, wayland, opengl, desktop, desktop-legacy]
+    plugs: [unity7, x11, wayland, opengl, desktop, desktop-legacy]
 
 confinement: strict
