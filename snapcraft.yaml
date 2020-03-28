@@ -83,6 +83,6 @@ parts:
     
 apps:
   pyplane:
-    command: bin/desktop-launch bin/run
+    command: bin/desktop-launch python3 bin/run
 
 confinement: strict
