@@ -7,6 +7,20 @@ base: core18
 icon: snap/gui/pyplane.png
 version: "git"
 
+plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes:gtk-3-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes:icon-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes:sounds-themes
+
 parts:
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
@@ -88,6 +102,6 @@ apps:
     command: bin/run
     command-chain:
       - bin/desktop-launch
-    plugs: [unity7, x11, wayland, opengl, desktop, desktop-legacy]
+    plugs: [unity7, x11, wayland, opengl, gsettings, desktop, desktop-legacy]
 
 confinement: strict
