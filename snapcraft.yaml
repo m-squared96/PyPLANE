@@ -30,8 +30,7 @@ parts:
       - locales-all
 
   pyplane:
-    source: ..
-    source-branch: snap_testing
+    source: .
     plugin: python
     python-version: "python3"
     python-packages:
