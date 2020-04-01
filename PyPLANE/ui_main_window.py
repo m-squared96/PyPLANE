@@ -20,9 +20,10 @@ from PyQt5.QtWidgets import (
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from equations import DifferentialEquation, SystemOfEquations
-from trajectory import PhaseSpacePlotter
-from defaults import psp_by_dimensions, default_1D, default_2D
+from PyPLANE.core_info import VERSION
+from PyPLANE.equations import DifferentialEquation, SystemOfEquations
+from PyPLANE.trajectory import PhaseSpacePlotter
+from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
 
 
 class MainWindow(QMainWindow):
@@ -38,7 +39,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self.draw_window()
 
-    def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
+    def draw_window(self, app_name="PyPLANE", app_version=VERSION) -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
@@ -54,6 +55,8 @@ class MainWindow(QMainWindow):
         """
         Draws the menu bar that appears at the top of the window
         TODO: File > New Window
+        TODO: Help > About
+        TODO: Help > Documentation (also TODO: Write Documentation)
         """
         menu_bar = self.menuBar()
 
@@ -414,6 +417,6 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    PyPLANE = QApplication(sys.argv)
-    PyPLANE_main_window = MainWindow()
-    sys.exit(PyPLANE.exec_())
+    app = QApplication(sys.argv)
+    app_main_window = MainWindow()
+    sys.exit(app.exec_())

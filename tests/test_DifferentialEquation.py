@@ -4,7 +4,7 @@ import sympy as sp
 from sympy import symbols
 
 import context
-from source.equations import DifferentialEquation
+from PyPLANE.equations import DifferentialEquation
 
 
 class TestDifferentialEquation(unittest.TestCase):

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib  # Imported seperately for type hinting in onclick function signature
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from equations import SystemOfEquations
+from PyPLANE.equations import SystemOfEquations
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
 

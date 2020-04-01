@@ -1,7 +1,7 @@
 import numpy as np
 
-from equations import SystemOfEquations
-from trajectory import PhaseSpacePlotter
+from PyPLANE.equations import SystemOfEquations
+from PyPLANE.trajectory import PhaseSpacePlotter
 
 
 def psp_by_dimensions(dims) -> PhaseSpacePlotter:
