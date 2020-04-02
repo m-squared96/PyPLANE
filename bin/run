@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+This is used to execute PyPLANE from the snap package
+"""
 
 import sys
 from PyQt5.QtWidgets import QApplication
