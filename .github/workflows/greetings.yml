@@ -1,0 +1,13 @@
+name: Greetings
+
+on: [pull_request, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: 'Hi and thanks for taking the time to contribute to PyPLANE, the little ODE solver that can! Feel free to fork the repo to get started on this issue if you have a solution in mind.'
+        pr-message: 'Hi and thanks for submitting the pull request. This will be seen all the sooner if you assign a reviewer!'
