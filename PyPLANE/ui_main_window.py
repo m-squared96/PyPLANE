@@ -39,8 +39,8 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self.draw_window()
 
-    def draw_window(self, app_name="PyPLANE", app_version=VERSION) -> None:
-        self.setWindowTitle(app_name + " " + app_version)
+    def draw_window(self, app_name="PyPLANE") -> None:
+        self.setWindowTitle(app_name)
         self.show()
 
     def setup_canvas(self) -> None:
