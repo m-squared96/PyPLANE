@@ -5,6 +5,6 @@ setup (
     name = "PyPLANE",
     packages = ["PyPLANE"],
     version = VERSION,
-    scripts = ['bin/run'],
+    scripts = ['bin/run.py'],
     license = "GPL V3"
 )
