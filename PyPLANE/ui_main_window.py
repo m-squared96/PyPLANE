@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.init_ui()
         self.draw_window()
+        self.setStyleSheet(open("stylesheet.css").read())
 
     def draw_window(self, app_name="PyPLANE") -> None:
         self.setWindowTitle(app_name)
@@ -169,8 +170,8 @@ class MainWindow(QMainWindow):
 
         # Define central widget
         # This will hold all UI elements apart from the menu bar
-        cent_widget = QWidget(self)
-        self.setCentralWidget(cent_widget)
+        self.cent_widget = QWidget(self)
+        self.setCentralWidget(self.cent_widget)
 
         # matplotlib canvas which shows the plot
         self.setup_canvas()
@@ -269,7 +270,7 @@ class MainWindow(QMainWindow):
         self.overall_layout.addLayout(inputs_layout)
         self.overall_layout.addLayout(plot_layout)
 
-        cent_widget.setLayout(self.overall_layout)
+        self.cent_widget.setLayout(self.overall_layout)
 
     def psp_canvas_default(self, dimensions: int) -> None:
         """
