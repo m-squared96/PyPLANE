@@ -1,6 +1,7 @@
 
 QLineEdit {
-    border: 2px solid black;
+    color: black;
+    border: 2px solid lightgray;
     border-radius: 5px;
-    background-color: rgb(255, 255, 255);
+    background-color: white;
     }
