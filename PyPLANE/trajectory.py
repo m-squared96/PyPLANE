@@ -246,13 +246,7 @@ class PhaseSpacePlotter(FigCanvas):
         """
         Function called upon mouse click event
         """
-        # if event.dblclick:
-        #    print("\nActivated")
-        #    print(event.inaxes == self.ax)
-        #    print(self.trajectory_count, self.max_trajectories)
-        #    print(event.dblclick)
 
-        print(type(event))
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
         if not (
             event.inaxes == self.ax
