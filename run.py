@@ -15,4 +15,5 @@ from PyPLANE.ui_main_window import MainWindow
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("snap/gui/pyplane.png"))
 app_main_window = MainWindow()
+app.setWindowIcon(QIcon("snap/gui/pyplane.png"))
 sys.exit(app.exec())
