@@ -336,6 +336,12 @@ class MainWindow(QMainWindow):
         # Create a laout to hold the canvas (phase plot) and matplotlib toolbar
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
+
+        try:
+            plot_layout.removeWidget(self.phase_plot)
+        except AttributeError:
+            pass
+        
         plot_layout.addWidget(self.phase_plot)
 
         # Create the final laout, and place on the central widget
@@ -423,13 +429,14 @@ class MainWindow(QMainWindow):
         lim_floats = [float(lim) for lim in self.lim_entries]
 
         if self.active_dims == 1:
-            axes_limits = (lim_floats[0], lim_floats[1])
+            axes_limits = ((-5, 5),
+                            (lim_floats[0], lim_floats[1]))
 
         elif self.active_dims == 2:
             axes_limits = ((lim_floats[0],lim_floats[1]),
                             (lim_floats[2],lim_floats[3]))
 
-        self.phase_plot.init_space(system_of_eqns, axes_limits=axes_limits)
+        self.phase_plot.init_space(system_of_eqns, axes_limits=axes_limits, axes_points=20)
 
 
 if __name__ == "__main__":

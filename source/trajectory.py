@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 import numpy as np
 import matplotlib  # Imported seperately for type hinting in onclick function signature
 import matplotlib.pyplot as plt
@@ -46,8 +48,8 @@ class PhaseSpaceParent(FigCanvas):
         space slopes respectively
         """
         if self.system.dims == 1:
-            tmin, tmax = self.get_calc_limits((self.time_r, self.time_f))
-            xmin, xmax = self.get_calc_limits(self.axes_limits)
+            tmin, tmax = self.get_calc_limits(self.axes_limits[0])
+            xmin, xmax = self.get_calc_limits(self.axes_limits[1])
 
             R = np.meshgrid(
                 np.linspace(tmin, tmax, self.mesh_density),
@@ -93,6 +95,7 @@ class PhaseSpaceParent(FigCanvas):
         extension = np.abs(lims[1] - lims[0]) * self.quiver_expansion_factor * 0.5
         min_lim = lims[0] - extension
         max_lim = lims[1] + extension
+        
         return min_lim, max_lim
 
     def derivative_expression_resolve(
@@ -209,8 +212,8 @@ class PhaseSpace1D(PhaseSpaceParent):
     def init_space(
         self,
         system: SystemOfEquations,
-        fw_time_lim: float = 100,
-        bw_time_lim: float = -100,
+        fw_time_lim: float = 5,
+        bw_time_lim: float = -5,
         axes_limits: tuple = ((-5, 5), (-5, 5)),
         max_trajectories: int = 10,
         quiver_expansion_factor: float = 0.2,
@@ -230,7 +233,10 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.quiver_expansion_factor = quiver_expansion_factor
 
         # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
-        self.axes_limits = np.array(axes_limits)
+        if isinstance(axes_limits[0], Iterable):
+            self.axes_limits = np.array(axes_limits)
+        else:
+            self.axes_limits = np.array((float(bw_time_lim), float(fw_time_lim)),(axes_limits[0], axes_limits[1])) 
 
         # axes_points = number of points along each axis if quiver_expansion_factor = 0
         # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
