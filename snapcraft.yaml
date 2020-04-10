@@ -99,7 +99,7 @@ parts:
 apps:
   pyplane:
     adapter: full
-    command: bin/run
+    command: bin/run.py
     command-chain:
       - bin/desktop-launch
     plugs: [unity7, x11, wayland, opengl, gsettings, desktop, desktop-legacy]
