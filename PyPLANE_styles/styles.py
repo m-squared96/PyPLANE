@@ -12,5 +12,5 @@ QLineEdit {
     border: 3px solid grey;
     border-radius: 5px;
     background-color: white;
-    }
+}
 """
