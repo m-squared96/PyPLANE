@@ -1,8 +1,10 @@
-light_css = """
-QWidget{
-    background-color: lightgrey;
-    font: sans-serif;
-    font-size: 14px;
+default_light = """
+QWidget {
+  background-color: white;
+  padding: 0px;
+  color: black;
+  selection-background-color: #1464A0;
+  selection-color: #F0F0F0;
 }
 
 QLineEdit {
