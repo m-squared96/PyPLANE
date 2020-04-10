@@ -1,6 +1,6 @@
 default_light = """
 QWidget {
-  background-color: white;
+  background-color: #EEFFEE;
   padding: 0px;
   color: black;
   selection-background-color: #1464A0;
@@ -13,11 +13,4 @@ QLineEdit {
     border-radius: 5px;
     background-color: white;
     }
-
-/* QPushButton{
-    border: 2px solid black;
-    border-radius: 8px;
-    color: white;
-    background-color: red;
-} */
 """
