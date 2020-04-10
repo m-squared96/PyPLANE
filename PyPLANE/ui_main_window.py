@@ -25,7 +25,7 @@ from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpacePlotter
 from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
 
-from PyPLANE_styles import default_light_style
+from PyPLANE_styles import apply_styles
 
 
 class MainWindow(QMainWindow):
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.init_ui()
         self.draw_window()
-        self.cent_widget.setStyleSheet(default_light_style())
+        self.cent_widget.setStyleSheet(apply_styles.default_light_style())
 
     def draw_window(self, app_name="PyPLANE") -> None:
         self.setWindowTitle(app_name)

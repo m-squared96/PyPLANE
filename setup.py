@@ -6,5 +6,5 @@ setup (
     packages = ["PyPLANE", "PyPLANE_styles"],
     version = VERSION,
     scripts = ['bin/run.py'],
-    license = "GPL V3"
+    license = "GPL V3",
 )

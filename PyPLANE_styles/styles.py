@@ -1,4 +1,4 @@
-
+light_css = """
 QWidget{
     background-color: lightgrey;
     font: sans-serif;
@@ -18,3 +18,4 @@ QLineEdit {
     color: white;
     background-color: red;
 } */
+"""
