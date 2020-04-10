@@ -9,7 +9,7 @@ QWidget {
 
 QLineEdit {
     color: black;
-    border: 3px solid grey;
+    border: 2px solid grey;
     border-radius: 5px;
     background-color: white;
 }
