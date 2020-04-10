@@ -1,10 +1,10 @@
 default_light = """
 QWidget {
-  background-color: #EEFFEE;
+  background-color: #cad3f5;
   padding: 0px;
-  color: black;
-  selection-background-color: #1464A0;
-  selection-color: #F0F0F0;
+  color:  black;
+  selection-background-color: pink;
+  selection-color: green;
 }
 
 QLineEdit {
