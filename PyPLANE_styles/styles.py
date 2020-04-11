@@ -5,8 +5,8 @@ QWidget {
   background-color: #cbdce5;
   padding: 0px;
   color:  black;
-  selection-background-color: pink;
-  selection-color: green;
+  selection-background-color: #187388;
+  selection-color: #FAEDD2;
 }
 
 QLineEdit {
@@ -29,10 +29,5 @@ QPushButton {
 
 QPushButton:hover {
   background-color: red;
-  border: 1px solid grey;
-  color: white;
-  border-radius: 4px;
-  padding: 3px;
-  min-width: 80px;
 }
 """
