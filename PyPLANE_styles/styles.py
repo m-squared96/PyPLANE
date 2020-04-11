@@ -2,7 +2,7 @@
 
 default_light = """
 QWidget {
-  background-color: #cbdce5;
+  background-color: #e1eff7;
   padding: 0px;
   color: #2C5E84;
   selection-background-color: #187388;
@@ -18,7 +18,7 @@ QLineEdit {
 /* Multiple stages of buttons */
 
 QPushButton {
-  background-color: darkred;
+  background-color: rgb(1, 7, 66);
   border: 2px solid #2C5E84;
   color: white;
   border-radius: 4px;
@@ -27,7 +27,7 @@ QPushButton {
 }
 
 QPushButton:hover {
-  background-color: red;
+  background-color: blue;
 }
 
 QPushButton:pressed {
@@ -49,7 +49,7 @@ QMenuBar::item:selected {
 }
 
 QMenuBar::item:pressed {
-  border: 2px solid #cbdce5;
+  border: 2px solid #e1eff7;
   color: #cbdce5;
   background-color: #2C5E84;
 }
