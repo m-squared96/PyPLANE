@@ -15,7 +15,7 @@ QWidget {
   /* Multiple stages of buttons */
   
   QPushButton {
-    background-color: rgb(1, 7, 66);
+    background-color: #4c6e88;
     border: 2px solid #2C5E84;
     color: white;
     border-radius: 4px;
@@ -24,7 +24,7 @@ QWidget {
   }
   
   QPushButton:hover {
-    background-color: #4c6e88;
+    background-color: rgb(1, 7, 66);
   }
   
   QPushButton:pressed {

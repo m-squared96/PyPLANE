@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.init_ui()
         self.draw_window()
-        self.cent_widget.setStyleSheet(apply_styles.default_dark())
+        self.cent_widget.setStyleSheet(apply_styles.default_light())
 
     def draw_window(self, app_name="PyPLANE") -> None:
         self.setWindowTitle(app_name)
