@@ -2,8 +2,8 @@ QWidget {
     background-color: #e1eff7;
     padding: 0px;
     color: #2C5E84;
-    selection-background-color: #187388;
-    selection-color: #FAEDD2;
+    selection-background-color: #2C5E84;
+    selection-color: #e1eff7;
   }
   
   QLineEdit {
