@@ -4,23 +4,22 @@ default_light = """
 QWidget {
   background-color: #cbdce5;
   padding: 0px;
-  color:  black;
+  color: #2C5E84;
   selection-background-color: #187388;
   selection-color: #FAEDD2;
 }
 
 QLineEdit {
-  color: black;
   border: 2px solid #2C5E84;
   border-radius: 5px;
   background-color: white;
 }
 
-/* The only button in PyPLANE (so far) is the big red plot button */
+/* Multiple stages of buttons */
 
 QPushButton {
   background-color: darkred;
-  border: 1px solid grey;
+  border: 2px solid #2C5E84;
   color: white;
   border-radius: 4px;
   padding: 3px;
@@ -29,5 +28,9 @@ QPushButton {
 
 QPushButton:hover {
   background-color: red;
+}
+
+QPushButton:pressed {
+  background-color: #2C5E84;
 }
 """
