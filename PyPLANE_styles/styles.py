@@ -33,4 +33,25 @@ QPushButton:hover {
 QPushButton:pressed {
   background-color: #2C5E84;
 }
+
+/* Menu bar (mostly fixes) */
+
+QMenuBar {
+  padding: 2px; 
+}
+
+QMenuBar::item {
+  padding: 5px;
+}
+
+QMenuBar::item:selected {
+  border: 2px solid #2C5E84;
+}
+
+QMenuBar::item:pressed {
+  border: 2px solid #cbdce5;
+  color: #cbdce5;
+  background-color: #2C5E84;
+}
+
 """
