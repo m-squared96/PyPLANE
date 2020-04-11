@@ -24,7 +24,7 @@ QWidget {
   }
   
   QPushButton:hover {
-    background-color: blue;
+    background-color: #4c6e88;
   }
   
   QPushButton:pressed {
