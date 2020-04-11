@@ -7,4 +7,5 @@ setup (
     version = VERSION,
     scripts = ['bin/run.py'],
     license = "GPL V3",
+    include_package_data = True,
 )
