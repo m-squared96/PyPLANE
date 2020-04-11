@@ -34,24 +34,8 @@ QPushButton:pressed {
   background-color: #2C5E84;
 }
 
-/* Menu bar (mostly fixes) */
-
-QMenuBar {
-  padding: 2px; 
-}
-
-QMenuBar::item {
-  padding: 5px;
-}
-
-QMenuBar::item:selected {
-  border: 2px solid #2C5E84;
-}
-
-QMenuBar::item:pressed {
-  border: 2px solid #e1eff7;
-  color: #cbdce5;
-  background-color: #2C5E84;
-}
+/* TODO: Menu bar (once I actually figure out how
+to include css and image files in a python package
+and reference them properly) */
 
 """
