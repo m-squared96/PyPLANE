@@ -15,6 +15,4 @@ def default_dark():
     """
     Because dark themes are awesome
     """
-    css_file = os.path.abspath(os.path.join(module_dir, "default_dark.css"))
-    return open(css_file).read()
     pass
