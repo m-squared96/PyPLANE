@@ -14,3 +14,6 @@ env/
 
 # snap packages
 *.snap
+
+# Kde Advanced Text Editor (Kate) Project file
+.kateproject
