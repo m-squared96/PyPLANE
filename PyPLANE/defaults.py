@@ -24,7 +24,7 @@ def one_dimensional_default() -> PhaseSpace2D:
     ymin = -10
     ymax = 10
 
-    sys = SystemOfEquations(phase_coords, eqns, params=params)
+    sys = SystemOfEquations(phase_coords, eqns, solve_method="RK45", params=params)
     return PhaseSpace2D(
         sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2
     )
@@ -42,7 +42,7 @@ def two_dimensional_default() -> PhaseSpace2D:
     ymin = -10
     ymax = 10
 
-    sys = SystemOfEquations(phase_coords, eqns, params=params)
+    sys = SystemOfEquations(phase_coords, eqns, solve_method="RK45", params=params)
     return PhaseSpace2D(sys, t_f, t_r, np.array(((xmin, xmax), (ymin, ymax))))
 
 
