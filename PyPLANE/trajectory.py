@@ -33,12 +33,10 @@ class PhaseSpaceParent(FigCanvas):
     ) -> None:
 
         self.dimensions = dimensions
-
         self.fig = Figure()
         object.__init__(self)
         FigCanvas.__init__(self, self.fig)
         self.ax = self.fig.add_subplot(111)
-
         self.time_f = fw_time_lim
         self.time_r = bw_time_lim
 

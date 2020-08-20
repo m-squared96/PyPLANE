@@ -12,7 +12,6 @@ def psp_by_dimensions(dims) -> PhaseSpace2D:
         return two_dimensional_default()
     # TODO what do we do in other dimensions?
 
-
 def one_dimensional_default() -> PhaseSpace2D:
 
     phase_coords = ["x"]
@@ -20,7 +19,6 @@ def one_dimensional_default() -> PhaseSpace2D:
     params = {"a": 1, "b": 0}
     t_f = 100
     t_r = -100
-
     xmin = -10
     xmax = 10
     ymin = -10
@@ -30,7 +28,6 @@ def one_dimensional_default() -> PhaseSpace2D:
     return PhaseSpace2D(
         sys, t_f, t_r, np.array(((0, 10), (0, 10))), quiver_expansion_factor=0.2
     )
-
 
 def two_dimensional_default() -> PhaseSpace2D:
 

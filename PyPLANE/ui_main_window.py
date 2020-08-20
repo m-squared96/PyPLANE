@@ -13,10 +13,14 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QAction,
+    QWidgetAction,
+    QComboBox,
+    QMenu,
 )
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpace1D, PhaseSpace2D
 from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
@@ -287,7 +291,7 @@ class MainWindow(QMainWindow):
         xlim_layout.addWidget(self.x_max_input)
         xlim_layout.addWidget(self.x_min_label)
         xlim_layout.addWidget(self.x_min_input)
-
+        
         if self.active_dims == 2:
             ylim_layout = QHBoxLayout()
             ylim_layout.addWidget(self.y_max_label)
@@ -327,6 +331,7 @@ class MainWindow(QMainWindow):
 
         inputs_layout.addWidget(self.limits_heading)
         inputs_layout.addLayout(xlim_layout)
+        
         if self.active_dims == 2:
             inputs_layout.addLayout(ylim_layout)
 
@@ -411,6 +416,10 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
+    def solve_method_changed(self):
+        self.solve_method = self.solve_method_combo.currentText()
+        self.phase_plot.system.set_solve_method(self.solve_method)
+
     def update_psp(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -438,8 +447,83 @@ class MainWindow(QMainWindow):
 
         self.phase_plot.init_space(system_of_eqns, axes_limits=axes_limits, axes_points=20)
 
+    def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
+        print("Blank detected")
+
+    def required_fields_full(self, phase_coords: list, passed_params: dict) -> bool:
+        """
+        Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable.
+        Returns True if all full.
+        Returns False if any are empty
+        """
+        if self.equations_undefined():
+            return False
+
+        for var, eqn in zip(
+            phase_coords, (self.x_prime_entry.text(), self.y_prime_entry.text())
+        ):
+            if self.params_undefined(var, phase_coords, eqn, passed_params):
+                return False
+
+        return not self.lims_undefined()
+
+    def equations_undefined(self) -> bool:
+        """
+        Checks if either ODE expression entry boxes are entry. Returns True if either
+        are empty. Returns False if both are not empty
+        """
+        for string_eqn in (self.x_prime_entry.text(), self.y_prime_entry.text()):
+            if string_eqn == "":
+                return True
+
+        return False
+
+    def params_undefined(
+        self, dep_var: str, phase_coords: list, ode_str: str, passed_params: dict
+    ) -> bool:
+        """
+        Checks for undefined parameters in ODE expressions.
+        Returns True if undefined parameters found.
+        Returns False otherwise
+        """
+        for val in passed_params.values():
+            try:
+                float(val)
+            except ValueError:
+                return True
+
+        ode = DifferentialEquation(dep_var, phase_coords, ode_str)
+
+        # Currently unused, except to determine that there are undefined params.
+        # Could be used later to highlight offending ode expression?
+        undefined_params = [
+            str(sym) for sym in ode.params if str(sym) not in passed_params.keys()
+        ]
+
+        return len(undefined_params) != 0
+
+    def lims_undefined(self) -> bool:
+        """
+        Checks for undefined axes limits. Returns True if any of the axes limits
+        entry boxes are empty or contain non-numerical characters.
+        Returns False if all contain text that can be converted to floats.
+        """
+        for lim in (
+            self.x_min_input.text(),
+            self.x_max_input.text(),
+            self.y_min_input.text(),
+            self.y_max_input.text(),
+        ):
+            if lim == "":
+                return True
+            try:
+                float(lim)
+            except ValueError:
+                return True
+        return False
+
 
 if __name__ == "__main__":
-    PyPLANE = QApplication(sys.argv)
-    PyPLANE_main_window = MainWindow()
-    sys.exit(PyPLANE.exec_())
+    app = QApplication(sys.argv)
+    app_main_window = MainWindow()
+    sys.exit(app.exec_())

@@ -115,13 +115,48 @@ class SystemOfEquations:
         # print(f"Jacobian: {self.jac}")
 
         # calculated fixed points are cached here
-        self.fixed_points = self.calc_fixed_points()
+        try:
+            self.fixed_points = self.calc_fixed_points()
+        except:
+            print("Could not symbolically calculate fixed points.")
+
+        self.valid_solve_methods = ["RK45", "RK23", "DOP853", "Radau", "BDF", "LSODA"]
+        self.set_solve_method(solve_method)
 
     def __str__(self) -> str:
         return f"{self.__repr__()}" + "\n".join(f"{eqn}" for eqn in self.equations)
 
-    def solve(self, t_span, r0, method="LSODA"):
-        return solve_ivp(self.phasespace_eval, t_span, r0, method=method, max_step=0.02)
+    def set_solve_method(self, method: str):
+        """
+        Sets the method for solving the system of ODEs.
+
+        The solver method can be one of the following:
+        RK45   - Explicit Runge-Kutta method of order 5(4).
+        RK23   - Explicit Runge-Kutta method of order 3(2).
+        DOP853 - Explicit Runge-Kutta method of order 8.
+        Radau  - Implicit Runge-Kutta method of the Radau IIA family of order 5
+        BDF    - Implicit multi-step variable-order (1 to 5) method based on a
+                 backward differentiation formula for the derivative approximation.
+        LSODA - Adams/BDF method with automatic stiffness detection and switching.
+
+        For more information, see the solve_ivp documentation:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html
+        """
+
+        if method not in self.valid_solve_methods:
+            raise ValueError(
+                "Solver method must be one of the following: {}".format(
+                    self.valid_solve_methods
+                )
+            )
+        else:
+            self.solve_method = method
+
+    def solve(self, t_span, r0, method=None):
+        method = method if method is not None else self.solve_method
+        return solve_ivp(
+            self.phasespace_eval, t_span, r0, method=method, max_step=0.005
+        )
 
     def phasespace_eval(self, t, r) -> tuple:
         """
