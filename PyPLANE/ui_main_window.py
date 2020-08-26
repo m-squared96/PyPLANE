@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self.show_2D()
         self.draw_window()
 
-    def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
+    def draw_window(self, app_name="PyPLANE", app_version=VERSION) -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
