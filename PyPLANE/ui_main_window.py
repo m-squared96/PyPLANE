@@ -43,7 +43,6 @@ class MainWindow(QMainWindow):
 
         self.show_2D()
         self.draw_window()
-        self.cent_widget.setStyleSheet(apply_styles.default_light())
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
@@ -358,6 +357,7 @@ class MainWindow(QMainWindow):
         self.overall_layout.addLayout(plot_layout)
 
         self.cent_widget.setLayout(self.overall_layout)
+        self.cent_widget.setStyleSheet(apply_styles.default_dark())
 
     def psp_canvas_default(self) -> None:
         """
