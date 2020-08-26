@@ -1,7 +1,7 @@
 QWidget {
-    background-color: #e1eff7;
+    background-color: #27283B;
     padding: 0px;
-    color: #2C5E84;
+    color: #B9C9C1;
     selection-background-color: #2C5E84;
     selection-color: #e1eff7;
   }
@@ -9,7 +9,7 @@ QWidget {
   QLineEdit {
     border: 2px solid #2C5E84;
     border-radius: 5px;
-    background-color: white;
+    background-color: #2F3347;
   }
   
   /* Multiple stages of buttons */
@@ -24,14 +24,10 @@ QWidget {
   }
   
   QPushButton:hover {
-    background-color: rgb(1, 7, 66);
+    background-color: #3C4452;
   }
   
   QPushButton:pressed {
     background-color: #2C5E84;
   }
-  
-  /* TODO: Menu bar (once I actually figure out how
-  to include image files in a python package
-  and reference them properly) */
   
