@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
+from matplotlib.pyplot import style
+style.use("dark_background")
+
 from PyPLANE.equations import SystemOfEquations
 
 class PhaseSpaceParent(FigCanvas):
