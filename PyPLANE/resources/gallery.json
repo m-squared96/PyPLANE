@@ -1,0 +1,77 @@
+{
+    "gallery_2D" : [
+        {
+            "system_name": "Default 2D system",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["ax-y+b(x^2-y^2)+axy", "x-cy-d(x^2-y^2)+cxy"],
+            "params": {"a": 2, "b": 3, "c": 3, "d": 3},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-10, 10], [-10, 10]]
+        },
+        {
+            "system_name": "Linear system",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["ax + by", "cx + dy"],
+            "params": {"a": 1, "b": -1, "c": 1, "d": 1},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-5, 5], [-5, 5]]
+        },
+        {
+            "system_name":"Vibrating string",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["y", "-(kx + dy)/m"],
+            "params": {"k": 3, "d": 0, "m": 1},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-5, 5], [-5, 5]]
+        },
+        {
+            "system_name":"Pendulum",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["y", "-(g/l) * sin(x) - (c/ml) * y"],
+            "params": {"g": 9.8, "l": 9.8, "m": 1, "c": 0},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-10, 10], [-4, 4]]
+        },
+
+        {
+            "system_name":"Predator / Prey",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["(a-by)x", "(dx-c)y"],
+            "params": {"a": 0.4, "b": 0.01, "c": 0.3, "d": 0.005},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[0, 120], [80, 0]]
+        },
+        {
+            "system_name":"Competing Species",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["(1-x-y)x", "(a-bx-cy)y"],
+            "params": {"a": 4, "b": 2, "c": 7},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[0, 1], [0, 1]]
+        },
+        {
+            "system_name":"Van der Pol's Equation",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["mx - y - x^3", "x"],
+            "params": {"m": 2},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-5, 5], [-5, 5]]
+        },
+        {
+            "system_name":"Duffing Equation",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["y", "-(kx - cy + lx^3)/m"],
+            "params": {"k": -1, "c": 0, "l": 1, "m": 1},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[-5, 5], [-5, 5]]
+        }
+    ]
+}
