@@ -8,6 +8,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
 from PyPLANE.equations import SystemOfEquations
 
+
 class PhaseSpaceParent(FigCanvas):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
@@ -93,7 +94,7 @@ class PhaseSpaceParent(FigCanvas):
         extension = np.abs(lims[1] - lims[0]) * self.quiver_expansion_factor * 0.5
         min_lim = lims[0] - extension
         max_lim = lims[1] + extension
-        
+
         return min_lim, max_lim
 
     def derivative_expression_resolve(
@@ -166,7 +167,9 @@ class PhaseSpaceParent(FigCanvas):
                 fp.set_visible(not fp.get_visible())
             self.draw()
 
-    def reduce_array_density(self, full_array: np.ndarray, axes_points: int) -> np.ndarray:
+    def reduce_array_density(
+        self, full_array: np.ndarray, axes_points: int
+    ) -> np.ndarray:
         """
         Accepts a square, 2D Numpy array (array) and an integer variable (axes_points).
         Returns a less dense, 2D, square Numpy array with a size of (at least) axes_points squared.
@@ -234,7 +237,10 @@ class PhaseSpace1D(PhaseSpaceParent):
         if isinstance(axes_limits[0], Iterable):
             self.axes_limits = np.array(axes_limits)
         else:
-            self.axes_limits = np.array((float(bw_time_lim), float(fw_time_lim)),(axes_limits[0], axes_limits[1])) 
+            self.axes_limits = np.array(
+                (float(bw_time_lim), float(fw_time_lim)),
+                (axes_limits[0], axes_limits[1]),
+            )
 
         # axes_points = number of points along each axis if quiver_expansion_factor = 0
         # self.axes_points = axes_points * (1 + self.quiver_expansion_factor) ==> expands vector field beyond FOV
@@ -338,6 +344,10 @@ class PhaseSpace1D(PhaseSpaceParent):
             and event.dblclick
         ):
             return
+
+        self.plot_trajectory(event)
+
+    def plot_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
         # Mouse click coordinates
         x_event = event.xdata
@@ -499,17 +509,21 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.draw()
 
+    # TODO: Can we de-duplicate the onclick methods?
+    # onlick used in both dimension classes BUT needs to point at different trajectory pointing methods.
     def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
         """
         Function called upon mouse click event
         """
         # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if not (
+        if (
             event.inaxes == self.ax
             and self.trajectory_count < self.max_trajectories
             and event.dblclick
         ):
-            return
+            self.plot_trajectory(event)
+
+    def plot_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
         # Mouse click coordinates
         x_event = event.xdata
