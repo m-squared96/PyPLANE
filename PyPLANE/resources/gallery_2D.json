@@ -1,5 +1,5 @@
 {
-    "gallery_2D" : [
+    "gallery" : [
         {
             "system_name": "Default 2D system",
             "system_coords": ["x", "y"],
