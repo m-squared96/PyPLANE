@@ -57,9 +57,10 @@ class MainWindow(QMainWindow):
         menu_bar.clear()  # If menu_bar already exists, clears and redraws.
 
         # Add menus to the bar
-        menu_file = menu_bar.addMenu("File")
-        menu_edit = menu_bar.addMenu("Edit")
-        menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_file = menu_bar.addMenu("File")
+        self.menu_edit = menu_bar.addMenu("Edit")
+        self.menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_gallery = menu_bar.addMenu("Gallery")
 
         # File > Quit
         self.action_quit = QAction("Quit", self)
