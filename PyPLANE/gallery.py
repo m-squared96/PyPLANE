@@ -15,6 +15,9 @@ class Gallery:
         gallery_str = json.dumps(self.SOE_params, sort_keys=True, indent=4)
         return gallery_str
 
+    def get_system_names(self):
+        return self.SOE_params.keys()
+
 
 if __name__ == "__main__":
     g = Gallery("resources/gallery_2D.json", 2)
