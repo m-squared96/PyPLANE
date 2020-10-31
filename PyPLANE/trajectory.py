@@ -145,6 +145,7 @@ class PhaseSpaceParent(FigCanvas):
                 # with a single LineCollection object in it
                 nc = contour.collections[0]
                 nc.set_visible(not nc.get_visible())
+            self.nullclines_init = False
 
         self.draw()
 
@@ -193,6 +194,8 @@ class PhaseSpaceParent(FigCanvas):
             self.clear_plane()
             self.draw_quiver()
             self.plot_trajectories()
+            self.toggle_nullclines()
+            self.toggle_nullclines()
 
     def clear_plane(self) -> None:
         self.ax.cla()
@@ -221,7 +224,9 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
         # Initialise button release event on local figure object -> adapt quiver to FOV
-        self.release_cid = self.fig.canvas.mpl_connect("button_release_event", self.regen_quiver)
+        self.release_cid = self.fig.canvas.mpl_connect(
+            "button_release_event", self.regen_quiver
+        )
 
         self.init_space(
             system,
@@ -422,7 +427,9 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
         # Initialise button release event on local figure object -> adapt quiver to FOV
-        self.release_cid = self.fig.canvas.mpl_connect("button_release_event", self.regen_quiver)
+        self.release_cid = self.fig.canvas.mpl_connect(
+            "button_release_event", self.regen_quiver
+        )
 
         self.init_space(
             system,
