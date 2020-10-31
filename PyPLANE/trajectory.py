@@ -18,18 +18,11 @@ class PhaseSpaceParent(FigCanvas):
     may require a lot of work.
     """
 
-    #TODO: I think we can get rid of these commented-out args
     def __init__(
         self,
         dimensions: int,
-        # system: SystemOfEquations,
         fw_time_lim: float = 5.0,
         bw_time_lim: float = -5.0,
-        # axes_limits: tuple = ((-5, 5), (-5, 5)),
-        # max_trajectories: int = 10,
-        # quiver_expansion_factor: float = 0.2,
-        # axes_points: int = 20,
-        # mesh_density: int = 200,
         *args,
         **kwargs,
     ) -> None:
@@ -145,7 +138,6 @@ class PhaseSpaceParent(FigCanvas):
 
         if not self.nullclines_init:
             self.nullcline_contour_sets = self.plot_nullclines()
-            # self.plot_nullclines()
             self.nullclines_init = True
         else:
             for contour in self.nullcline_contour_sets:
@@ -178,6 +170,34 @@ class PhaseSpaceParent(FigCanvas):
         if len(full_array.shape) == 2 and full_array.shape[0] == full_array.shape[1]:
             step = int(full_array.shape[0] / axes_points)
             return np.array(full_array[::step, ::step], dtype=float)
+
+    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
+        """
+        Function called upon mouse click event
+        """
+        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
+        if not event.inaxes == self.ax:
+            return
+
+        if event.dblclick and self.trajectory_count < self.max_trajectories:
+            self.add_trajectory(event)
+            self.plot_trajectories()
+        else:
+            self.regen_quiver(event)
+
+    def regen_quiver(self, event) -> None:
+        new_lims = np.asarray((tuple(self.ax.get_xlim()), tuple(self.ax.get_ylim())))
+
+        if not np.all(self.axes_limits == new_lims):
+            self.axes_limits = new_lims
+            self.clear_plane()
+            self.draw_quiver()
+            self.plot_trajectories()
+
+    def clear_plane(self) -> None:
+        self.ax.cla()
+        for traj in list(self.trajectories.keys()):
+            self.trajectories[traj]["plotted"] = False
 
 
 class PhaseSpace1D(PhaseSpaceParent):
@@ -328,34 +348,6 @@ class PhaseSpace1D(PhaseSpaceParent):
 
         self.draw()
 
-    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
-        """
-        Function called upon mouse click event
-        """
-        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if not event.inaxes == self.ax:
-            return
-
-        if event.dblclick and self.trajectory_count < self.max_trajectories:
-            self.add_trajectory(event)
-            self.plot_trajectories()
-        else:
-            self.regen_quiver(event)
-
-    def regen_quiver(self, event) -> None:
-        new_lims = np.asarray((tuple(self.ax.get_xlim()), tuple(self.ax.get_ylim())))
-
-        if not np.all(self.axes_limits == new_lims):
-            self.axes_limits = new_lims
-            self.clear_plane()
-            self.draw_quiver()
-            self.plot_trajectories()
-
-    def clear_plane(self) -> None:
-        self.ax.cla()
-        for traj in list(self.trajectories.keys()):
-            self.trajectories[traj]["plotted"] = False
-
     def add_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
         # Mouse click coordinates
@@ -378,7 +370,7 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.trajectories[self.trajectory_count] = traj_dict
 
     def plot_trajectories(self) -> None:
-        
+
         for traj in list(self.trajectories.keys()):
             traj_dict = self.trajectories[traj]
 
@@ -404,7 +396,6 @@ class PhaseSpace1D(PhaseSpaceParent):
                     self.fig.canvas.draw()
                 else:
                     print(sol.message)
-
 
 
 class PhaseSpace2D(PhaseSpaceParent):
@@ -479,22 +470,7 @@ class PhaseSpace2D(PhaseSpaceParent):
             max_trajectories  # Maximum number of trajectories that can be visualised
         )
         self.trajectory_count = 0  # Trajectory increment variable
-
-        (
-            R,
-            Rprime,
-        ) = (
-            self.generate_meshes()
-        )  # Returns R (coordinate grids) and Rprime (slope grids)
-        quiver_data = {}
-
-        for label, mesh, prime_mesh, axlims in zip(
-            self.system.system_coords, R, Rprime, self.axes_limits
-        ):
-            axmin, axmax = tuple(axlims)
-            quiver_data[label] = (mesh, prime_mesh, axmin, axmax)
-
-        self.quiver_data = quiver_data
+        self.trajectories = {}
 
         # Set to True only by toggle_nullclines method
         self.nullclines_init = False
@@ -508,11 +484,25 @@ class PhaseSpace2D(PhaseSpaceParent):
         # list of references to fixed point markers
         self.fixed_point_markers = None
 
-        display_vars = self.system.system_coords
-
-        for var in display_vars:
+        self.display_vars = self.system.system_coords
+        for var in self.display_vars:
             if not (var in self.system.system_coords):
                 return
+
+        self.draw_quiver()
+
+    def draw_quiver(self) -> None:
+        # Returns R (coordinate grids) and Rprime (slope grids)
+        R, Rprime = self.generate_meshes()
+        quiver_data = {}
+
+        for label, mesh, prime_mesh, axlims in zip(
+            self.system.system_coords, R, Rprime, self.axes_limits
+        ):
+            axmin, axmax = tuple(axlims)
+            quiver_data[label] = (mesh, prime_mesh, axmin, axmax)
+
+        self.quiver_data = quiver_data
 
         # Display vars are the system variables to be plotted.
         # Given a system with coords [x, y], display_vars can take 4 forms:
@@ -520,10 +510,9 @@ class PhaseSpace2D(PhaseSpaceParent):
         # In the one-dimensional cases, the quiverplot will be t vs x, or t vs y.
         # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
         # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
-        self.display_vars = display_vars
 
-        X, U, xmin, xmax = self.quiver_data[display_vars[0]]
-        Y, V, ymin, ymax = self.quiver_data[display_vars[1]]
+        X, U, xmin, xmax = self.quiver_data[self.display_vars[0]]
+        Y, V, ymin, ymax = self.quiver_data[self.display_vars[1]]
 
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
@@ -542,28 +531,40 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.draw()
 
-    # TODO: Can we de-duplicate the onclick methods?
-    # onlick used in both dimension classes BUT needs to point at different trajectory pointing methods.
-    def onclick(self, event: matplotlib.backend_bases.MouseEvent) -> None:
-        """
-        Function called upon mouse click event
-        """
-        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
-        if (
-            event.inaxes == self.ax
-            and self.trajectory_count < self.max_trajectories
-            and event.dblclick
-        ):
-            self.add_trajectory(event)
+    def plot_trajectories(self) -> None:
+
+        for traj in list(self.trajectories.keys()):
+            traj_dict = self.trajectories[traj]
+
+            if traj_dict["plotted"]:
+                continue
+
+            x_event = traj_dict["x_event"]
+            y_event = traj_dict["y_event"]
+            solution_f = traj_dict["sol_f"]
+            solution_r = traj_dict["sol_r"]
+
+            # Plots a red "x" on the position of the user's click
+            self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
+
+            for sol in (solution_f, solution_r):
+                if sol.success:
+                    # sol.y has shape (2, n_points) for a 2-D system
+                    # print(len(sol.t))
+                    x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
+                    y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
+                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                    self.fig.canvas.draw()
+                else:
+                    print(sol.message)
+
+        self.draw()
 
     def add_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
         # Mouse click coordinates
         x_event = event.xdata
         y_event = event.ydata
-
-        # Plots a red "x" on the position of the user's click
-        self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
         # Trajectory production and plotting
         # eval_point is the point on the quiverplot that has been clicked by the user. However, the coordinates are made
@@ -577,15 +578,13 @@ class PhaseSpace2D(PhaseSpaceParent):
         solution_f = self.system.solve((0, self.time_f), r0=eval_point)
         solution_r = self.system.solve((0, self.time_r), r0=eval_point)
 
-        for sol in (solution_f, solution_r):
-            if sol.success:
-                # sol.y has shape (2, n_points) for a 2-D system
-                # print(len(sol.t))
-                x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
-                y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
-                self.trajectory = self.ax.plot(x, y, c="#0066FF")
-                self.fig.canvas.draw()
-            else:
-                print(sol.message)
-
         self.trajectory_count += 1
+
+        traj_dict = {}
+        traj_dict["x_event"] = x_event
+        traj_dict["y_event"] = y_event
+        traj_dict["sol_f"] = solution_f
+        traj_dict["sol_r"] = solution_r
+        traj_dict["plotted"] = False
+
+        self.trajectories[self.trajectory_count] = traj_dict
