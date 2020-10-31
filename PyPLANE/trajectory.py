@@ -220,6 +220,9 @@ class PhaseSpace1D(PhaseSpaceParent):
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
+        # Initialise button release event on local figure object -> adapt quiver to FOV
+        self.release_cid = self.fig.canvas.mpl_connect("button_release_event", self.regen_quiver)
+
         self.init_space(
             system,
             fw_time_lim,
@@ -417,6 +420,9 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+
+        # Initialise button release event on local figure object -> adapt quiver to FOV
+        self.release_cid = self.fig.canvas.mpl_connect("button_release_event", self.regen_quiver)
 
         self.init_space(
             system,
