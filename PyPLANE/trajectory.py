@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib  # Imported seperately for type hinting in onclick function signature
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.backend_bases import NavigationToolbar2, Event
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
 
 from PyPLANE.equations import SystemOfEquations
@@ -34,6 +35,9 @@ class PhaseSpaceParent(FigCanvas):
         self.ax = self.fig.add_subplot(111)
         self.time_f = fw_time_lim
         self.time_r = bw_time_lim
+
+        NavigationToolbar2.home = self.handle_home
+        # self.fig.canvas.mpl_connect('home_event', self.handle_home)
 
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
@@ -186,7 +190,7 @@ class PhaseSpaceParent(FigCanvas):
         else:
             self.regen_quiver(event)
 
-    def regen_quiver(self, event) -> None:
+    def regen_quiver(self, event=None) -> None:
         new_lims = np.asarray((tuple(self.ax.get_xlim()), tuple(self.ax.get_ylim())))
 
         if not np.all(self.axes_limits == new_lims):
@@ -201,6 +205,12 @@ class PhaseSpaceParent(FigCanvas):
         self.ax.cla()
         for traj in list(self.trajectories.keys()):
             self.trajectories[traj]["plotted"] = False
+
+    def handle_home(self) -> None:
+        self.ax.set_xlim(self.original_axes_limits[0])
+        self.ax.set_ylim(self.original_axes_limits[1])
+
+        self.regen_quiver()
 
 
 class PhaseSpace1D(PhaseSpaceParent):
@@ -227,6 +237,8 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.release_cid = self.fig.canvas.mpl_connect(
             "button_release_event", self.regen_quiver
         )
+
+        self.original_axes_limits = axes_limits
 
         self.init_space(
             system,
@@ -430,6 +442,8 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.release_cid = self.fig.canvas.mpl_connect(
             "button_release_event", self.regen_quiver
         )
+
+        self.original_axes_limits = axes_limits
 
         self.init_space(
             system,
