@@ -159,11 +159,12 @@ class PhaseSpaceParent(FigCanvas):
                 *zip(*self.system.fixed_points), "ro", markersize=5
             )
             self.fixed_points_init = True
-            self.draw()
         else:
             for fp in self.fixed_point_markers:
                 fp.set_visible(not fp.get_visible())
-            self.draw()
+            self.fixed_points_init = False
+
+        self.draw()
 
     def reduce_array_density(
         self, full_array: np.ndarray, axes_points: int
@@ -200,6 +201,9 @@ class PhaseSpaceParent(FigCanvas):
             self.plot_trajectories()
             self.toggle_nullclines()
             self.toggle_nullclines()
+
+            self.toggle_fixed_points()
+            self.toggle_fixed_points()
 
     def clear_plane(self) -> None:
         self.ax.cla()
