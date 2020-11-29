@@ -2,7 +2,8 @@
 
 An open source replacement to the traditional DFIELD and PPLANE applications for solving systems of ODEs
 
-![Alt Text](demo_20190831.gif)
+![Alt Text](Screenshot_1.png)
+![Alt Text](Screenshot_2.png)
 
 ## About
 
