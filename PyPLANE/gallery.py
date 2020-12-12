@@ -16,7 +16,28 @@ class Gallery:
         return gallery_str
 
     def get_system_names(self):
-        return self.SOE_params.keys()
+        return list(self.SOE_params.keys())
+
+    def get_system(self, sys_name):
+        return self.SOE_params[sys_name]
+
+    def __iter__(self):
+        return GalleryIterator(self)
+
+
+class GalleryIterator:
+    def __init__(self, gallery):
+        self.gallery = gallery
+        self.index = 0
+        self.gallery_items = gallery.get_system_names()
+        self.gallery_len = len(self.gallery_items)
+
+    def __next__(self):
+        if self.index >= self.gallery_len - 1:
+            raise StopIteration
+        self.index += 1
+        sys_name = self.gallery_items[self.index]
+        return self.gallery.get_system(sys_name)
 
 
 if __name__ == "__main__":
