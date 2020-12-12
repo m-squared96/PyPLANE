@@ -3,6 +3,7 @@ Draws the main window of the PyPLANE Qt5 interface
 """
 
 import sys
+import os
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -23,6 +24,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpace1D, PhaseSpace2D
+from PyPLANE.gallery import Gallery
 from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
 
 
@@ -39,8 +41,12 @@ class MainWindow(QMainWindow):
 
         # self.draw_menubar()
 
+        self.load_gallery("PyPLANE/resources/gallery_2D.json", 2)
         self.show_2D()
         self.draw_window()
+
+    def load_gallery(self, filename, num_dims):
+        self.gallery = Gallery(filename, num_dims)
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
@@ -86,6 +92,8 @@ class MainWindow(QMainWindow):
         self.action_2D = QAction("Two-Dimensional PyPLANE", self)
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
+
+        # Gallery - add systems
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
