@@ -4,6 +4,7 @@ Draws the main window of the PyPLANE Qt5 interface
 
 import sys
 import os
+import functools
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -94,6 +95,14 @@ class MainWindow(QMainWindow):
         self.action_2D.triggered.connect(self.show_2D)
 
         # Gallery - add systems
+        self.actions_gallery = []
+        for system in self.gallery:
+            print(system)
+            gall_item_action = QAction(system["system_name"], self)
+            plot_sys_func = functools.partial(self.plot_gallery_item, system)
+            gall_item_action.triggered.connect(plot_sys_func)
+            self.menu_gallery.addAction(gall_item_action)
+            self.actions_gallery.append(gall_item_action)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
@@ -458,6 +467,9 @@ class MainWindow(QMainWindow):
         self.phase_plot.init_space(
             system_of_eqns, axes_limits=axes_limits, axes_points=20
         )
+
+    def plot_gallery_item(self, sys_name):
+        print("Plotting system - {}".format(sys_name))
 
 
 if __name__ == "__main__":
