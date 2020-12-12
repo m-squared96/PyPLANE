@@ -64,27 +64,27 @@ class MainWindow(QMainWindow):
 
         # File > Quit
         self.action_quit = QAction("Quit", self)
-        menu_file.addAction(self.action_quit)
+        self.menu_file.addAction(self.action_quit)
         self.action_quit.triggered.connect(self.close)
 
         # Edit > Show Nullclines
         self.action_nullclines = QAction("Show Nullclines", self, checkable=True)
-        menu_edit.addAction(self.action_nullclines)
+        self.menu_edit.addAction(self.action_nullclines)
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Edit > Show Fixed Points
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
-        menu_edit.addAction(self.action_fixed_points)
+        self.menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
 
         # Dimensions > 1D
         self.action_1D = QAction("One-Dimensional PyPLANE", self)
-        menu_dims.addAction(self.action_1D)
+        self.menu_dims.addAction(self.action_1D)
         self.action_1D.triggered.connect(self.show_1D)
 
         # Dimensions > 2D
         self.action_2D = QAction("Two-Dimensional PyPLANE", self)
-        menu_dims.addAction(self.action_2D)
+        self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
