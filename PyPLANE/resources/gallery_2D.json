@@ -44,7 +44,7 @@
             "params": {"a": 0.4, "b": 0.01, "c": 0.3, "d": 0.005},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[0, 120], [80, 0]]
+            "axes_limits": [[0, 120], [0, 80]]
         },
         {
             "system_name":"Competing Species",
