@@ -521,12 +521,12 @@ class MainWindow(QMainWindow):
         axes_limits = system["axes_limits"]
         x_min, x_max = [str(lim) for lim in axes_limits[0]]
         y_min, y_max = [str(lim) for lim in axes_limits[1]]
-        self.x_max_input.setText(x_min)
-        self.x_min_input.setText(x_max)
+        self.x_max_input.setText(x_max)
+        self.x_min_input.setText(x_min)
 
         if self.active_dims == 2:
-            self.y_max_input.setText(y_min)
-            self.y_min_input.setText(y_max)
+            self.y_max_input.setText(y_max)
+            self.y_min_input.setText(y_min)
 
         # Parameters
         sys_name = system["system_name"]
