@@ -42,12 +42,12 @@ class MainWindow(QMainWindow):
 
         # self.draw_menubar()
 
-        self.load_gallery("PyPLANE/resources/gallery_2D.json", 2)
+        self.load_2D_gallery("PyPLANE/resources/gallery_2D.json")
         self.show_2D()
         self.draw_window()
 
-    def load_gallery(self, filename, num_dims):
-        self.gallery = Gallery(filename, num_dims)
+    def load_2D_gallery(self, filename):
+        self.gallery_2D = Gallery(filename, 2)
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
