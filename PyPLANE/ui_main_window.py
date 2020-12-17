@@ -180,6 +180,14 @@ class MainWindow(QMainWindow):
         self.active_dims = 2
         self.init_ui()
 
+    def show_ND(self, num_dims):
+        show_ND_funcs = {1: self.show_1D, 2: self.show_2D}
+        try:
+            if self.active_dims != num_dims:
+                show_ND_funcs[num_dims]()
+        except KeyError:
+            raise ValueError("Trying to set to an unsupported number of dimensions")
+
     def setup_parameter_inputs(self) -> None:
         """
         Allow user to enter a number of parameters
