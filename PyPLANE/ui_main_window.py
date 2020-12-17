@@ -95,14 +95,15 @@ class MainWindow(QMainWindow):
         self.action_2D.triggered.connect(self.show_2D)
 
         # Gallery - add systems
-        self.actions_gallery = []
-        for system in self.gallery:
+        self.menu_gallery_2D = self.menu_gallery.addMenu("Two-Dimensional")
+        self.actions_gallery_2D = []
+        for system in self.gallery_2D:
             print(system)
             gall_item_action = QAction(system["system_name"], self)
-            plot_sys_func = functools.partial(self.plot_gallery_item, system)
+            plot_sys_func = functools.partial(self.plot_gallery_item, system, 2)
             gall_item_action.triggered.connect(plot_sys_func)
-            self.menu_gallery.addAction(gall_item_action)
-            self.actions_gallery.append(gall_item_action)
+            self.menu_gallery_2D.addAction(gall_item_action)
+            self.actions_gallery_2D.append(gall_item_action)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
