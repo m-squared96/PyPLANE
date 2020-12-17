@@ -477,8 +477,74 @@ class MainWindow(QMainWindow):
             system_of_eqns, axes_limits=axes_limits, axes_points=20
         )
 
-    def plot_gallery_item(self, sys_name):
-        print("Plotting system - {}".format(sys_name))
+    def clear_param_inputs(self):
+        for i in range(self.no_of_params):
+            param_name_key = "param_{}_name".format(i)
+            param_val_key = "param_{}_val".format(i)
+            self.parameter_input_boxes[param_name_key].setText("")
+            self.parameter_input_boxes[param_val_key].setText("")
+
+    def clear_equation_inputs(self):
+        self.x_prime_entry.setText("")
+        if self.active_dims == 2:
+            self.y_prime_entry.setText("")
+
+    def clear_limits_inputs(self):
+        self.x_max_input.setText("")
+        self.x_min_input.setText("")
+
+        if self.active_dims == 2:
+            self.y_max_input.setText("")
+            self.y_min_input.setText("")
+
+    def clear_all_inputs(self):
+        self.clear_equation_inputs()
+        self.clear_limits_inputs()
+        self.clear_param_inputs()
+
+    def plot_gallery_item(self, system, num_dims):
+        print("Plotting system - {}".format(system))
+
+        self.show_ND(num_dims)
+
+        self.clear_all_inputs()
+
+        # Equations
+        system_equations = system["ode_expr_strings"]
+        x_prime_equation = system_equations[0]
+        self.x_prime_entry.setText(x_prime_equation)
+        if self.active_dims == 2:
+            y_prime_equation = system_equations[1]
+            self.y_prime_entry.setText(y_prime_equation)
+
+        # Limits
+        axes_limits = system["axes_limits"]
+        x_min, x_max = [str(lim) for lim in axes_limits[0]]
+        y_min, y_max = [str(lim) for lim in axes_limits[1]]
+        self.x_max_input.setText(x_min)
+        self.x_min_input.setText(x_max)
+
+        if self.active_dims == 2:
+            self.y_max_input.setText(y_min)
+            self.y_min_input.setText(y_max)
+
+        # Parameters
+        sys_name = system["system_name"]
+        print("Plotting", sys_name)
+        sys_params = system["params"]
+        param_names = list(sys_params.keys())
+        num_sys_params = len(param_names)
+
+        for param_num in range(num_sys_params):
+            param_name = str(param_names[param_num])
+            param_val = str(sys_params[param_name])
+
+            param_name_key = "param_{}_name".format(param_num)
+            param_val_key = "param_{}_val".format(param_num)
+            self.parameter_input_boxes[param_name_key].setText(param_name)
+            self.parameter_input_boxes[param_val_key].setText(param_val)
+
+        self.plot_button_clicked()
 
 
 if __name__ == "__main__":
