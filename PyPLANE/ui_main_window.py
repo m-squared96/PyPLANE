@@ -26,7 +26,7 @@ from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpace1D, PhaseSpace2D
 from PyPLANE.gallery import Gallery
-from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
+from PyPLANE.defaults import psp_by_dimensions
 
 
 class MainWindow(QMainWindow):
@@ -393,11 +393,11 @@ class MainWindow(QMainWindow):
         """
         Initialises default PSP
         """
+
+        self.setup_dict = psp_by_dimensions(self.active_dims)
         if self.active_dims == 1:
-            self.setup_dict = default_1D
             correct_phase_space = PhaseSpace1D
         elif self.active_dims == 2:
-            self.setup_dict = default_2D
             correct_phase_space = PhaseSpace2D
 
         # Unpacks self.setup_dict into SOE.
