@@ -1,3 +1,13 @@
 {
-    "gallery" : []
+    "gallery" : [
+        {
+            "system_name": "Example system - sine wave",
+            "system_coords": ["x"],
+            "ode_expr_strings": ["a*sin(bx)"],
+            "params": {"a": 1, "b": 1},
+            "t_f": 5,
+            "t_r": -5,
+            "axes_limits": [[-5, 5], [-10, 10]],
+        }
+    ]
 }
