@@ -33,10 +33,10 @@ class GalleryIterator:
         self.gallery_len = len(self.gallery_items)
 
     def __next__(self):
-        if self.index >= self.gallery_len - 1:
+        if self.index > self.gallery_len - 1:
             raise StopIteration
-        self.index += 1
         sys_name = self.gallery_items[self.index]
+        self.index += 1
         return self.gallery.get_system(sys_name)
 
 
