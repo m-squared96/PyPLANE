@@ -40,14 +40,13 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
-        # self.draw_menubar()
-
-        self.load_2D_gallery("PyPLANE/resources/gallery_2D.json")
+        self.load_gallery("PyPLANE/resources/gallery_2D.json", "gallery_2D", 2)
+        self.load_gallery("PyPLANE/resources/gallery_1D.json", "gallery_1D", 1)
         self.show_2D()
         self.draw_window()
 
-    def load_2D_gallery(self, filename):
-        self.gallery_2D = Gallery(filename, 2)
+    def load_gallery(self, filename, gallery_name, num_dims):
+        setattr(self, gallery_name, Gallery(filename, num_dims))
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
@@ -94,16 +93,23 @@ class MainWindow(QMainWindow):
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
-        # Gallery - add systems
-        self.menu_gallery_2D = self.menu_gallery.addMenu("Two-Dimensional")
-        self.actions_gallery_2D = []
-        for system in self.gallery_2D:
-            print(system)
+        self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
+        self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
+
+    def create_gallery_menu(self, gallery_name, submenu_name, num_dims):
+        gallery_menu = self.menu_gallery.addMenu(submenu_name)
+        gallery_actions = []
+        gallery = getattr(self, gallery_name)
+
+        for system in gallery:
             gall_item_action = QAction(system["system_name"], self)
-            plot_sys_func = functools.partial(self.plot_gallery_item, system, 2)
+            plot_sys_func = functools.partial(self.plot_gallery_item, system, num_dims)
             gall_item_action.triggered.connect(plot_sys_func)
-            self.menu_gallery_2D.addAction(gall_item_action)
-            self.actions_gallery_2D.append(gall_item_action)
+            gallery_menu.addAction(gall_item_action)
+            gallery_actions.append(gall_item_action)
+
+        setattr(self, "menu_" + gallery_name, gallery_menu)
+        setattr(self, "actions_" + gallery_name, gallery_actions)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
