@@ -16,13 +16,13 @@ def psp_by_dimensions(dims) -> PhaseSpace2D:
 
 def one_dimensional_default() -> dict:
 
-    gallery_1D = Gallery("PyPLANE/resources/gallery_1D.json", 1)
+    gallery_1D = Gallery("resources/gallery_1D.json", 1)
     default_sys = "Example system - sine wave"
     sys_params = gallery_1D.get_system(default_sys)
     return sys_params
 
 
-def two_dimensional_default() -> PhaseSpace2D:
+def two_dimensional_default() -> dict:
 
     gallery_2D = Gallery("resources/gallery_2D.json", 2)
     default_sys = "Van der Pol's Equation"

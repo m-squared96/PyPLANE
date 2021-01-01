@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.show_2D()
         self.draw_window()
 
-    def load_gallery(self, filename, gallery_name, num_dims):
+    def load_gallery(self, filename: str, gallery_name: str, num_dims: int) -> None:
         setattr(self, gallery_name, Gallery(filename, num_dims))
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
@@ -103,7 +103,9 @@ class MainWindow(QMainWindow):
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
 
-    def create_gallery_menu(self, gallery_name, submenu_name, num_dims):
+    def create_gallery_menu(
+        self, gallery_name: str, submenu_name: str, num_dims: int
+    ) -> None:
         gallery_menu = self.menu_gallery.addMenu(submenu_name)
         gallery_actions = []
         gallery = getattr(self, gallery_name)
@@ -194,7 +196,7 @@ class MainWindow(QMainWindow):
         self.active_dims = 2
         self.init_ui()
 
-    def show_ND(self, num_dims):
+    def show_ND(self, num_dims: int) -> None:
         show_ND_funcs = {1: self.show_1D, 2: self.show_2D}
         try:
             if self.active_dims != num_dims:
@@ -456,7 +458,7 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
-    def solve_method_changed(self):
+    def solve_method_changed(self) -> None:
         self.solve_method = self.solve_method_combo.currentText()
         self.phase_plot.system.set_solve_method(self.solve_method)
 
@@ -490,19 +492,19 @@ class MainWindow(QMainWindow):
             system_of_eqns, axes_limits=axes_limits, axes_points=20
         )
 
-    def clear_param_inputs(self):
+    def clear_param_inputs(self) -> None:
         for i in range(self.no_of_params):
             param_name_key = "param_{}_name".format(i)
             param_val_key = "param_{}_val".format(i)
             self.parameter_input_boxes[param_name_key].setText("")
             self.parameter_input_boxes[param_val_key].setText("")
 
-    def clear_equation_inputs(self):
+    def clear_equation_inputs(self) -> None:
         self.x_prime_entry.setText("")
         if self.active_dims == 2:
             self.y_prime_entry.setText("")
 
-    def clear_limits_inputs(self):
+    def clear_limits_inputs(self) -> None:
         self.x_max_input.setText("")
         self.x_min_input.setText("")
 
@@ -510,12 +512,12 @@ class MainWindow(QMainWindow):
             self.y_max_input.setText("")
             self.y_min_input.setText("")
 
-    def clear_all_inputs(self):
+    def clear_all_inputs(self) -> None:
         self.clear_equation_inputs()
         self.clear_limits_inputs()
         self.clear_param_inputs()
 
-    def plot_gallery_item(self, system, num_dims):
+    def plot_gallery_item(self, system: SystemOfEquations, num_dims: int) -> None:
         print("Plotting system - {}".format(system))
 
         self.show_ND(num_dims)
