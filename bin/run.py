@@ -4,9 +4,12 @@ This is used to execute PyPLANE from the snap package
 """
 
 import sys
+import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from PyPLANE.ui_main_window import MainWindow
+
+print(os.getcwd())
 
 app = QApplication(sys.argv)
 app_main_window = MainWindow()
