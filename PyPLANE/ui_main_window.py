@@ -40,8 +40,15 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
-        self.load_gallery("PyPLANE/resources/gallery_2D.json", "gallery_2D", 2)
-        self.load_gallery("PyPLANE/resources/gallery_1D.json", "gallery_1D", 1)
+        # Working directory changed so that resources can be loaded
+        main_window_file_path = os.path.abspath(__file__)
+        main_window_file_dir = os.path.dirname(main_window_file_path)
+        os.chdir(main_window_file_dir)
+        self.working_dir = main_window_file_dir
+        print("New working directory: {}".format(self.working_dir))
+
+        self.load_gallery("resources/gallery_2D.json", "gallery_2D", 2)
+        self.load_gallery("resources/gallery_1D.json", "gallery_1D", 1)
         self.show_2D()
         self.draw_window()
 

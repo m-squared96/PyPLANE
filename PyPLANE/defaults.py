@@ -24,7 +24,7 @@ def one_dimensional_default() -> dict:
 
 def two_dimensional_default() -> PhaseSpace2D:
 
-    gallery_2D = Gallery("PyPLANE/resources/gallery_2D.json", 1)
+    gallery_2D = Gallery("resources/gallery_2D.json", 2)
     default_sys = "Van der Pol's Equation"
     sys_params = gallery_2D.get_system(default_sys)
     return sys_params
