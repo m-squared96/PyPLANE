@@ -72,6 +72,15 @@
             "t_f": 10,
             "t_r": -10,
             "axes_limits": [[-5, 5], [-5, 5]]
+        },
+        {
+            "system_name":"Milonni-Eberly laser model",
+            "system_coords": ["x", "y"],
+            "ode_expr_strings": ["gxy - kx", "-gxy - fy + p"],
+            "params": {"g": 2, "k": 1, "f": 1, "p": 1},
+            "t_f": 10,
+            "t_r": -10,
+            "axes_limits": [[0, 4], [0, 4]]
         }
     ]
 }
