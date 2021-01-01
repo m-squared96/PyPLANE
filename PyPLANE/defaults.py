@@ -11,7 +11,8 @@ def psp_by_dimensions(dims) -> PhaseSpace2D:
         return one_dimensional_default()
     if dims == 2:
         return two_dimensional_default()
-    # TODO what do we do in other dimensions?
+    else:
+        raise ValueError("Unsupported number of ODE system dimensions")
 
 
 def one_dimensional_default() -> dict:
