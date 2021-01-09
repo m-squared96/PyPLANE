@@ -3,6 +3,8 @@ Draws the main window of the PyPLANE Qt5 interface
 """
 
 import sys
+import os
+import functools
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -23,7 +25,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpace1D, PhaseSpace2D
-from PyPLANE.defaults import psp_by_dimensions, default_1D, default_2D
+from PyPLANE.gallery import Gallery
+from PyPLANE.defaults import psp_by_dimensions
 
 
 class MainWindow(QMainWindow):
@@ -37,10 +40,20 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
-        # self.draw_menubar()
+        # Working directory changed so that resources can be loaded
+        main_window_file_path = os.path.abspath(__file__)
+        main_window_file_dir = os.path.dirname(main_window_file_path)
+        os.chdir(main_window_file_dir)
+        self.working_dir = main_window_file_dir
+        print("New working directory: {}".format(self.working_dir))
 
+        self.load_gallery("resources/gallery_2D.json", "gallery_2D", 2)
+        self.load_gallery("resources/gallery_1D.json", "gallery_1D", 1)
         self.show_2D()
         self.draw_window()
+
+    def load_gallery(self, filename: str, gallery_name: str, num_dims: int) -> None:
+        setattr(self, gallery_name, Gallery(filename, num_dims))
 
     def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
@@ -57,34 +70,55 @@ class MainWindow(QMainWindow):
         menu_bar.clear()  # If menu_bar already exists, clears and redraws.
 
         # Add menus to the bar
-        menu_file = menu_bar.addMenu("File")
-        menu_edit = menu_bar.addMenu("Edit")
-        menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_file = menu_bar.addMenu("File")
+        self.menu_edit = menu_bar.addMenu("Edit")
+        self.menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_gallery = menu_bar.addMenu("Gallery")
 
         # File > Quit
         self.action_quit = QAction("Quit", self)
-        menu_file.addAction(self.action_quit)
+        self.menu_file.addAction(self.action_quit)
         self.action_quit.triggered.connect(self.close)
 
         # Edit > Show Nullclines
         self.action_nullclines = QAction("Show Nullclines", self, checkable=True)
-        menu_edit.addAction(self.action_nullclines)
+        self.menu_edit.addAction(self.action_nullclines)
         self.action_nullclines.changed.connect(self.phase_plot.toggle_nullclines)
 
         # Edit > Show Fixed Points
         self.action_fixed_points = QAction("Show Fixed Points", self, checkable=True)
-        menu_edit.addAction(self.action_fixed_points)
+        self.menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
 
         # Dimensions > 1D
         self.action_1D = QAction("One-Dimensional PyPLANE", self)
-        menu_dims.addAction(self.action_1D)
+        self.menu_dims.addAction(self.action_1D)
         self.action_1D.triggered.connect(self.show_1D)
 
         # Dimensions > 2D
         self.action_2D = QAction("Two-Dimensional PyPLANE", self)
-        menu_dims.addAction(self.action_2D)
+        self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
+
+        self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
+        self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
+
+    def create_gallery_menu(
+        self, gallery_name: str, submenu_name: str, num_dims: int
+    ) -> None:
+        gallery_menu = self.menu_gallery.addMenu(submenu_name)
+        gallery_actions = []
+        gallery = getattr(self, gallery_name)
+
+        for system in gallery:
+            gall_item_action = QAction(system["system_name"], self)
+            plot_sys_func = functools.partial(self.plot_gallery_item, system, num_dims)
+            gall_item_action.triggered.connect(plot_sys_func)
+            gallery_menu.addAction(gall_item_action)
+            gallery_actions.append(gall_item_action)
+
+        setattr(self, "menu_" + gallery_name, gallery_menu)
+        setattr(self, "actions_" + gallery_name, gallery_actions)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         print("Blank detected")
@@ -161,6 +195,14 @@ class MainWindow(QMainWindow):
     def show_2D(self) -> None:
         self.active_dims = 2
         self.init_ui()
+
+    def show_ND(self, num_dims: int) -> None:
+        show_ND_funcs = {1: self.show_1D, 2: self.show_2D}
+        try:
+            if self.active_dims != num_dims:
+                show_ND_funcs[num_dims]()
+        except KeyError:
+            raise ValueError("Trying to set to an unsupported number of dimensions")
 
     def setup_parameter_inputs(self) -> None:
         """
@@ -360,11 +402,11 @@ class MainWindow(QMainWindow):
         """
         Initialises default PSP
         """
+
+        self.setup_dict = psp_by_dimensions(self.active_dims)
         if self.active_dims == 1:
-            self.setup_dict = default_1D
             correct_phase_space = PhaseSpace1D
         elif self.active_dims == 2:
-            self.setup_dict = default_2D
             correct_phase_space = PhaseSpace2D
 
         # Unpacks self.setup_dict into SOE.
@@ -416,7 +458,7 @@ class MainWindow(QMainWindow):
         else:
             self.handle_empty_entry(phase_coords, passed_params)
 
-    def solve_method_changed(self):
+    def solve_method_changed(self) -> None:
         self.solve_method = self.solve_method_combo.currentText()
         self.phase_plot.system.set_solve_method(self.solve_method)
 
@@ -449,6 +491,75 @@ class MainWindow(QMainWindow):
         self.phase_plot.init_space(
             system_of_eqns, axes_limits=axes_limits, axes_points=20
         )
+
+    def clear_param_inputs(self) -> None:
+        for i in range(self.no_of_params):
+            param_name_key = "param_{}_name".format(i)
+            param_val_key = "param_{}_val".format(i)
+            self.parameter_input_boxes[param_name_key].setText("")
+            self.parameter_input_boxes[param_val_key].setText("")
+
+    def clear_equation_inputs(self) -> None:
+        self.x_prime_entry.setText("")
+        if self.active_dims == 2:
+            self.y_prime_entry.setText("")
+
+    def clear_limits_inputs(self) -> None:
+        self.x_max_input.setText("")
+        self.x_min_input.setText("")
+
+        if self.active_dims == 2:
+            self.y_max_input.setText("")
+            self.y_min_input.setText("")
+
+    def clear_all_inputs(self) -> None:
+        self.clear_equation_inputs()
+        self.clear_limits_inputs()
+        self.clear_param_inputs()
+
+    def plot_gallery_item(self, system: SystemOfEquations, num_dims: int) -> None:
+        print("Plotting system - {}".format(system))
+
+        self.show_ND(num_dims)
+
+        self.clear_all_inputs()
+
+        # Equations
+        system_equations = system["ode_expr_strings"]
+        x_prime_equation = system_equations[0]
+        self.x_prime_entry.setText(x_prime_equation)
+        if self.active_dims == 2:
+            y_prime_equation = system_equations[1]
+            self.y_prime_entry.setText(y_prime_equation)
+
+        # Limits
+        axes_limits = system["axes_limits"]
+        x_min, x_max = [str(lim) for lim in axes_limits[0]]
+        y_min, y_max = [str(lim) for lim in axes_limits[1]]
+        self.x_max_input.setText(x_max)
+        self.x_min_input.setText(x_min)
+
+        if self.active_dims == 2:
+            self.y_max_input.setText(y_max)
+            self.y_min_input.setText(y_min)
+
+        # Parameters
+        sys_name = system["system_name"]
+        print("Plotting", sys_name)
+        sys_params = system["params"]
+        param_names = list(sys_params.keys())
+        num_sys_params = len(param_names)
+
+        for param_num in range(num_sys_params):
+            param_name = str(param_names[param_num])
+            param_val = str(sys_params[param_name])
+
+            param_name_key = "param_{}_name".format(param_num)
+            param_val_key = "param_{}_val".format(param_num)
+            self.parameter_input_boxes[param_name_key].setText(param_name)
+            self.parameter_input_boxes[param_val_key].setText(param_val)
+
+        self.plot_button_clicked()
 
 
 if __name__ == "__main__":
