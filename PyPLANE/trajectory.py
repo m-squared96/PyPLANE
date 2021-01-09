@@ -358,6 +358,9 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
 
+        # log-transform the vectors' lengths
+        U, V = log_transform(U, V)
+
         # Sets up quiver plot
         self.quiver = self.ax.quiver(
             self.reduce_array_density(X, self.axes_points),
@@ -548,6 +551,9 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
 
+        # log-transform the vectors' lengths
+        U, V = log_transform(U, V)
+
         # Sets up quiver plot
         self.quiver = self.ax.quiver(
             self.reduce_array_density(X, self.axes_points),
@@ -619,3 +625,9 @@ class PhaseSpace2D(PhaseSpaceParent):
         traj_dict["plotted"] = False
 
         self.trajectories[self.trajectory_count] = traj_dict
+
+
+def log_transform(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    arrow_lengths = np.sqrt(u * u + v * v)
+    len_adjust_factor = np.log10(arrow_lengths + 1) / arrow_lengths
+    return u * len_adjust_factor, v * len_adjust_factor
