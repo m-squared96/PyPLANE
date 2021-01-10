@@ -1,0 +1,22 @@
+# Byte-compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code directory files
+.vscode/
+
+# Python virtual environment
+env/
+
+# Vim swap files
+*.swp
+
+# PyCharm files
+.idea/
+
+# snap packages
+*.snap
+
+# Kde Advanced Text Editor (Kate) Project file
+.kateproject
