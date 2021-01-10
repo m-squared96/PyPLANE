@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
     def load_gallery(self, filename: str, gallery_name: str, num_dims: int) -> None:
         setattr(self, gallery_name, Gallery(filename, num_dims))
 
-    def draw_window(self, app_name="PyPLANE", app_version="almost 0.1") -> None:
+    def draw_window(self, app_name="PyPLANE", app_version="v0.1") -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
