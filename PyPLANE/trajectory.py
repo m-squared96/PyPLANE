@@ -360,20 +360,22 @@ class PhaseSpace1D(PhaseSpaceParent):
 
         # log-transform the vectors' lengths
         U, V = log_transform(U, V)
+        try: 
+            # Sets up quiver plot
+            self.quiver = self.ax.quiver(
+                self.reduce_array_density(X, self.axes_points),
+                self.reduce_array_density(Y, self.axes_points),
+                self.reduce_array_density(U, self.axes_points),
+                self.reduce_array_density(V, self.axes_points),
+                pivot="middle",
+                angles="xy",
+            )
 
-        # Sets up quiver plot
-        self.quiver = self.ax.quiver(
-            self.reduce_array_density(X, self.axes_points),
-            self.reduce_array_density(Y, self.axes_points),
-            self.reduce_array_density(U, self.axes_points),
-            self.reduce_array_density(V, self.axes_points),
-            pivot="middle",
-            angles="xy",
-        )
+            self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
-        self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
-
-        self.draw()
+            self.draw()
+        except:
+            print("Error encountered")
 
     def add_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
