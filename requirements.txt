@@ -1,6 +1,6 @@
 numpy
 sympy
-scipy
 matplotlib
 PyQt5
+scipy
 pre-commit

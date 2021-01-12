@@ -16,33 +16,59 @@ PyPLANE is available on the Snap Store for Linux
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/pyplane)
 
-## Code of Conduct
+## Quick Start
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
+If you are using Linux and have installed via the Snap store PyPLANE should appear in your application. If you use
+Windows or Mac instead, or don't use the Snap store on Linux, you can clone the repository from GitHub and run the top-level
+run.py file using Python 3. Note that you will need to have installed the following Python libraries for this method:
+* NumPy
+* SymPy
+* SciPy
+* Matplotlib
+* PyQt5
 
-The Contributor Covenant has been adopted as a probationary CoC for the PyPLANE project.
+The code snippet below will set up a Python environment to run PyPLANE in isolation without affecting the global Python
+install. The required libraries listed above will also be installed:
 
-## Development environment
-
-Python 3.7 is used for development. Dependencies (listed in requirements.txt) are as follows:
-
-* NumPy 1.17.0
-* SymPy 1.4
-* SciPy 1.3.1
-* Matplotlib 3.1.1
-* PyQt5 5.13.0
-
-To generate a consistent development environment for PyPLANE, run the following lines of code:
-
+#### Linux
 ```bash
-python --version # Ensure output says "Python 3.7.X" with X being another number
-python -m venv pyplanedev/
-cd pyplanedev/
-git clone https://github.com/m-squared96/PyPLANE
-source bin/activate
-pip install -r PyPLANE/requirements.txt
-pre-commit install
+python3 -m venv pyplanedev/
+mkdir -p pyplanedev/master
+git clone https://github.com/m-squared96/PyPLANE pyplanedev/master
+cd pyplanedev/master
+git checkout master
+source ../bin/activate
+pip install -r requirements.txt
 ```
 
-Note that all Python code should be formatted using the Black Python code formatter. This is achieved automatically
-through the use of pre-commit hooks.
+PyPLANE can then be launched using:
+```bash
+cd /path/to/pyplanedev/master
+python3 run.py
+```
+
+One way or another, you should now have launched PyPLANE!
+
+## Quick User Guide
+
+### The Phase Space Plot
+The phase space plot on the right hand side of the application GUI can be interfaced directly with the mouse. By
+double-clicking on the plot a trajectory is plotted, with the click-coordinates used as an initial condition.
+
+Furthermore, nullclines and fixed points can be toggle on/off from the Edit menu.
+
+### Editing the System
+One of PyPLANE's main features is its ability to analyse both one- and two-dimensional systems. To change the number of
+dimensions select the appropriate option from the Dimensions menu.
+
+On the one-dimensional interface, the only dependent variable is $x$, with the independent variable being $t$. For two
+dimensions the dependent variables are $x$ and $y$. 
+
+In the text box(es) in the top left of the screen, the user can define the expressions used for the system's
+derivative(s). Any symbols in the text boxes should conform to one of the points below:
+* Mathematical operators/functions (i.e. +,-,*,/,sin,cos etc.);
+* References to the dependent or independent variables (t,x,y);
+* References to parameters;
+
+Parameters are constants which can take any value; they can be edited in the text boxes provided below the axes limits.
+Any constant parameters referenced in the derivative definitions should be defined in the boxes provided.
