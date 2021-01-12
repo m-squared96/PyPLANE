@@ -61,7 +61,7 @@ Furthermore, nullclines and fixed points can be toggle on/off from the Edit menu
 One of PyPLANE's main features is its ability to analyse both one- and two-dimensional systems. To change the number of
 dimensions select the appropriate option from the Dimensions menu.
 
-On the one-dimensional interface, the only dependent variable is $x$, with the independent variable being $t$. For two
+On the one-dimensional interface, the only dependent variable is /($x$/), with the independent variable being $t$. For two
 dimensions the dependent variables are $x$ and $y$. 
 
 In the text box(es) in the top left of the screen, the user can define the expressions used for the system's
