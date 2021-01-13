@@ -31,20 +31,20 @@ The code snippet below will set up a Python environment to run PyPLANE in isolat
 install. The required libraries listed above will also be installed:
 
 #### Linux
+Ensure that git, and Python3 and the corresponding venv package (`python3-venv` on Ubuntu) are installed. Then clone the PyPLANE repository and set up the virtual environment as follows.
 ```bash
-python3 -m venv pyplanedev/
-mkdir -p pyplanedev/master
-git clone https://github.com/m-squared96/PyPLANE pyplanedev/master
-cd pyplanedev/master
-git checkout master
-source ../bin/activate
-pip install -r requirements.txt
+$ git clone https://github.com/m-squared96/PyPLANE
+$ cd PyPLANE/
+$ python3 -m venv env
+$ source env/bin/activate
+$ pip install -r requirements.txt
 ```
 
 PyPLANE can then be launched using:
 ```bash
-cd /path/to/pyplanedev/master
-python3 run.py
+$ cd /path/to/PyPLANE
+$ source env/bin/activate
+$ python3 ./run.py
 ```
 
 One way or another, you should now have launched PyPLANE!
