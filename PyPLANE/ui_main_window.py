@@ -484,6 +484,8 @@ class MainWindow(QMainWindow):
         passed_params = {}
         for param_num in range(self.no_of_params):
             if self.parameter_input_boxes["param_" + str(param_num) + "_name"].text():
+                # For scenario where parameter label is entered but given no value
+                # Cannot convert empty string to float
                 try:
                     passed_params[
                         self.parameter_input_boxes[
@@ -495,6 +497,7 @@ class MainWindow(QMainWindow):
                         ].text()
                     )
 
+                # This will then be passed to DE object and rejected gracefully
                 except:
                     passed_params[
                         self.parameter_input_boxes[
