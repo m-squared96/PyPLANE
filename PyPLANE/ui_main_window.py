@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QWidgetAction,
     QComboBox,
     QMenu,
+    QMessageBox,
 )
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -58,6 +59,55 @@ class MainWindow(QMainWindow):
     def draw_window(self, app_name="PyPLANE", app_version=VERSION) -> None:
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
+
+    def basic_popup(
+            self, 
+            icon=QMessageBox.Information, 
+            button=QMessageBox.Ok,
+            text="Pop-Up"
+        ):
+        """
+        Basic pop-up window facility. Displays pop-up which grabs screen's attention.
+
+        icon -> Icon displayed in top-left corner. Can take the following values:
+            - QMessageBox.Critical
+            - QMessageBox.Warning
+            - QMessageBox.Information
+            - QMessageBox.Question
+
+        button -> Button displayed on bottom of pop-up. Can take the following values:
+            - QMessageBox.Ok
+            - QMessageBox.Open
+            - QMessageBox.Save
+            - QMessageBox.Cancel
+            - QMessageBox.Close
+            - QMessageBox.Yes
+            - QMessageBox.No
+            - QMessageBox.Abort
+            - QMessageBox.Retry
+            - QMessageBox.Ignore
+
+        text -> Main message of pop-up
+        """
+
+        msg = QMessageBox()
+        msg.setWindowTitle("PyPLANE")
+        msg.setText(text)
+        
+        # If a non-permitted icon value passed -> default to info
+        try:
+            msg.setIcon(icon)
+        except:
+            msg.setIcon(QMessageBox.Information)
+            
+        # If a non-permitted button value passed -> default to OK
+        try:
+            msg.setStandardButtons(button)
+        except:
+            msg.setStandardButtons(QMessageBox.Ok)
+
+        # Show pop-up
+        msg.exec_()
 
     def draw_menubar(self) -> None:
         """
@@ -100,6 +150,7 @@ class MainWindow(QMainWindow):
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
+        # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
 
@@ -121,7 +172,11 @@ class MainWindow(QMainWindow):
         setattr(self, "actions_" + gallery_name, gallery_actions)
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
-        print("Blank detected")
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Blank detected"
+        )
 
     def required_fields_full(self, phase_coords: list, passed_params: dict) -> bool:
         """
@@ -429,15 +484,30 @@ class MainWindow(QMainWindow):
         passed_params = {}
         for param_num in range(self.no_of_params):
             if self.parameter_input_boxes["param_" + str(param_num) + "_name"].text():
-                passed_params[
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_name"
-                    ].text()
-                ] = float(
-                    self.parameter_input_boxes[
-                        "param_" + str(param_num) + "_val"
-                    ].text()
-                )
+                # For scenario where parameter label is entered but given no value
+                # Cannot convert empty string to float
+                try:
+                    passed_params[
+                        self.parameter_input_boxes[
+                            "param_" + str(param_num) + "_name"
+                        ].text()
+                    ] = float(
+                        self.parameter_input_boxes[
+                            "param_" + str(param_num) + "_val"
+                        ].text()
+                    )
+
+                # This will then be passed to DE object and rejected gracefully
+                except:
+                    passed_params[
+                        self.parameter_input_boxes[
+                            "param_" + str(param_num) + "_name"
+                        ].text()
+                    ] = str(
+                        self.parameter_input_boxes[
+                            "param_" + str(param_num) + "_val"
+                        ].text()
+                    )
 
         if self.active_dims == 1:
             self.eqn_entries = [self.x_prime_entry.text()]
