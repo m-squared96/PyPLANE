@@ -178,6 +178,19 @@ class MainWindow(QMainWindow):
             text="Blank detected"
         )
 
+    def handle_invalid_eqns(self) -> None:
+        
+        warning = """
+            Equation string should not contain the following symbols:
+             I, E, S, N, C, O, or Q
+        """
+
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text=warning
+        )
+
     def required_fields_full(self, phase_coords: list, passed_params: dict) -> bool:
         """
         Checks if all of the required entry boxes on the GUI are full and are compatible, where applicable.
@@ -468,6 +481,23 @@ class MainWindow(QMainWindow):
         sys = SystemOfEquations(**self.setup_dict)
         self.phase_plot = correct_phase_space(sys, **self.setup_dict)
 
+    def equations_valid(self, equations: list) -> bool:
+        """
+        Parses equation inputs and checks for invalid/disallowed symbols.
+        Returns True if equation contains no offending characters.
+        
+        List of disallowed symbols can be found in the SymPy docs:
+        https://docs.sympy.org/latest/gotchas.html
+        """
+        disallowed_symbols = ("I","E","S","N","C","O","Q")
+        
+        for eqn in equations:
+            for sym in disallowed_symbols:
+                if eqn.find(sym) != -1:
+                    return False
+
+        return True
+
     def plot_button_clicked(self) -> None:
         """
         Gathers phase_coords and passed_params to feed into GUI checks.
@@ -522,11 +552,14 @@ class MainWindow(QMainWindow):
                 self.y_max_input.text(),
             ]
 
-        if self.required_fields_full(phase_coords, passed_params):
-            self.update_psp(phase_coords, passed_params)
+        if not self.required_fields_full(phase_coords, passed_params):
+            self.handle_empty_entry(phase_coords, passed_params)
+
+        elif not self.equations_valid(self.eqn_entries):
+            self.handle_invalid_eqns()
 
         else:
-            self.handle_empty_entry(phase_coords, passed_params)
+            self.update_psp(phase_coords, passed_params)
 
     def solve_method_changed(self) -> None:
         self.solve_method = self.solve_method_combo.currentText()
