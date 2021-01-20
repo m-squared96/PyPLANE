@@ -330,6 +330,8 @@ class MainWindow(QMainWindow):
                 "Min " + self.phase_plot.system.system_coords[1] + " ="
             )
             self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+        elif self.active_dims == 1:
+            print("1D Condition met")
 
     def init_ui(self) -> None:
         """
