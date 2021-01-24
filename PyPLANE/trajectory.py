@@ -268,6 +268,7 @@ class PhaseSpace1D(PhaseSpaceParent):
     ) -> None:
 
         self.ax.cla()
+        self.fig.tight_layout()
         self.system = system
 
         # # Time at which to stop forward trajectory evaluation
@@ -476,6 +477,7 @@ class PhaseSpace2D(PhaseSpaceParent):
     ) -> None:
 
         self.ax.cla()
+        self.fig.tight_layout()
         self.system = system
 
         # Time at which to stop forward trajectory evaluation
