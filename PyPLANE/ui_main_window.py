@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
         self.menu_file = menu_bar.addMenu("File")
         self.menu_edit = menu_bar.addMenu("Edit")
         self.menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_analysis = menu_bar.addMenu("Analysis")
         self.menu_gallery = menu_bar.addMenu("Gallery")
 
         # File > Quit
@@ -150,6 +151,9 @@ class MainWindow(QMainWindow):
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
+        # Analysis
+        self.create_analysis_menu()
+
         # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
@@ -170,6 +174,60 @@ class MainWindow(QMainWindow):
 
         setattr(self, "menu_" + gallery_name, gallery_menu)
         setattr(self, "actions_" + gallery_name, gallery_actions)
+
+    def create_analysis_menu(self) -> None:
+        """
+        Generates Analysis menu
+        """
+
+        # TCA submenu
+        self.menu_tca = self.menu_analysis.addMenu("Trajectory Component Analysis")
+
+        # Create actions
+        self.action_tvsx = QAction("t vs x(t)")
+        self.action_tvsy = QAction("t vs y(t)")
+        self.action_tvsxvsy = QAction("t vs x(t) vs y(t)")
+
+        # Add actions and connect functions
+        for action, func in zip((self.action_tvsx, self.action_tvsy, self.action_tvsxvsy),
+                (self.init_analysis_tvsx, self.init_analysis_tvsy, self.init_analysis_tvsxvsy)):
+            self.menu_tca.addAction(action)
+            action.triggered.connect(func)
+
+    def init_analysis_tvsx(self) -> None:
+
+        if self.phase_plot.system.dims == 1:
+            self.handle_tca_error()
+
+        self.phase_plot.tca_tvsx = not(self.phase_plot.tca_tvsx)
+        self.phase_plot.tca_tvsy = False
+        self.phase_plot.tca_tvsxvsy = False
+
+    def init_analysis_tvsy(self) -> None:
+
+        if self.phase_plot.system.dims == 1:
+            self.handle_tca_error()
+
+        self.phase_plot.tca_tvsx = False
+        self.phase_plot.tca_tvsy = not(self.phase_plot.tca_tvsy)
+        self.phase_plot.tca_tvsxvsy = False
+
+    def init_analysis_tvsxvsy(self) -> None:
+
+        if self.phase_plot.system.dims == 1:
+            self.handle_tca_error()
+
+        self.phase_plot.tca_tvsx = False
+        self.phase_plot.tca_tvsy = False
+        self.phase_plot.tca_tvsxvsy = not(self.phase_plot.tca_tvsxvsy)
+
+    def handle_tca_error(self) -> None:
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Trajectory component analysis only available for 2D systems"
+        )
+
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         self.basic_popup(

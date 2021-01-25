@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backend_bases import NavigationToolbar2, Event
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
+from mpl_toolkits.mplot3d import Axes3D
 
 from PyPLANE.equations import SystemOfEquations
 
+DEFAULT_TRAJ_COLOUR = "#0066FF" 
+DEFAULT_MARK_COLOUR = "#FF0000"
 
 class PhaseSpaceParent(FigCanvas):
     """
@@ -38,6 +41,10 @@ class PhaseSpaceParent(FigCanvas):
 
         NavigationToolbar2.home = self.handle_home
         # self.fig.canvas.mpl_connect('home_event', self.handle_home)
+
+        self.tca_tvsx = False
+        self.tca_tvsy = False
+        self.tca_tvsxvsy = False
 
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
@@ -185,16 +192,19 @@ class PhaseSpaceParent(FigCanvas):
         if not event.inaxes == self.ax:
             return
 
+        if (self.tca_tvsx or self.tca_tvsy or self.tca_tvsxvsy) and self.system.dims == 2:
+            self.tca(event)
+
         if event.dblclick and self.trajectory_count < self.max_trajectories:
             self.add_trajectory(event)
             self.plot_trajectories()
         else:
             self.regen_quiver(event)
 
-    def regen_quiver(self, event=None) -> None:
+    def regen_quiver(self, event=None, force=False) -> None:
         new_lims = np.asarray((tuple(self.ax.get_xlim()), tuple(self.ax.get_ylim())))
 
-        if not np.all(self.axes_limits == new_lims):
+        if not np.all(self.axes_limits == new_lims) or force:
             self.axes_limits = new_lims
             self.clear_plane()
             self.draw_quiver()
@@ -580,9 +590,10 @@ class PhaseSpace2D(PhaseSpaceParent):
             y_event = traj_dict["y_event"]
             solution_f = traj_dict["sol_f"]
             solution_r = traj_dict["sol_r"]
+            colour = traj_dict["colour"]
 
             # Plots a red "x" on the position of the user's click
-            self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
+            self.ax.plot(x_event, y_event, ls="", marker="x", c=DEFAULT_MARK_COLOUR)
 
             for sol in (solution_f, solution_r):
                 if sol.success:
@@ -590,7 +601,7 @@ class PhaseSpace2D(PhaseSpaceParent):
                     # print(len(sol.t))
                     x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
                     y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                    self.trajectory = self.ax.plot(x, y, c=colour)
                     self.fig.canvas.draw()
                 else:
                     print(sol.message)
@@ -615,6 +626,8 @@ class PhaseSpace2D(PhaseSpaceParent):
         solution_f = self.system.solve((0, self.time_f), r0=eval_point)
         solution_r = self.system.solve((0, self.time_r), r0=eval_point)
 
+        #print(solution_f.y.shape)
+
         self.trajectory_count += 1
 
         traj_dict = {}
@@ -623,8 +636,101 @@ class PhaseSpace2D(PhaseSpaceParent):
         traj_dict["sol_f"] = solution_f
         traj_dict["sol_r"] = solution_r
         traj_dict["plotted"] = False
+        traj_dict["colour"] = DEFAULT_TRAJ_COLOUR
 
         self.trajectories[self.trajectory_count] = traj_dict
+
+    def tca(self, event: matplotlib.backend_bases.MouseEvent) -> None:
+        """
+        Enable trajectory component analysis of a curve
+        """
+        # Figure out closest curve
+        closest_curve, distance = self.closest_curve(event)
+        self.trajectories[closest_curve + 1]["colour"] = "#227722"
+        self.regen_quiver(force=True)
+
+        # TODO: implement buffer
+
+        # Plot accordingly
+        curve_x_f = np.array(self.trajectories[closest_curve + 1]["sol_f"].y[0,:])
+        curve_x_r = np.flip(np.array(self.trajectories[closest_curve + 1]["sol_r"].y[0,:]))
+        curve_x = np.concatenate((curve_x_r, curve_x_f))
+
+        curve_y_f = np.array(self.trajectories[closest_curve + 1]["sol_f"].y[1,:])
+        curve_y_r = np.flip(np.array(self.trajectories[closest_curve + 1]["sol_r"].y[1,:]))
+        curve_y = np.concatenate((curve_y_r, curve_y_f))
+
+        curve_t = np.linspace(self.time_r, self.time_f, len(curve_x))
+
+        tca_fig = plt.figure(num="PyPLANE: TCA")
+
+        if self.tca_tvsx:
+            self.tca_tvsx = False
+
+            tca_ax = tca_fig.add_subplot(111)
+            tca_ax.plot(curve_t, curve_x)
+            tca_ax.set_title("t vs x(t)")
+            tca_ax.set_xlabel("t")
+            tca_ax.set_ylabel("x(t)")
+
+            plt.show()
+
+        if self.tca_tvsy:
+            self.tca_tvsy = False
+
+            tca_ax = tca_fig.add_subplot(111)
+            tca_ax.plot(curve_t, curve_y)
+            tca_ax.set_title("t vs y(t)")
+            tca_ax.set_xlabel("t")
+            tca_ax.set_ylabel("y(t)")
+
+            plt.show()
+
+        if self.tca_tvsxvsy:
+            self.tca_tvsxvsy = False
+            tca_ax = tca_fig.add_subplot(111, projection='3d')
+            tca_ax.plot(curve_t, curve_x, curve_y)
+            tca_ax.set_title("t vs x(t) vs y(t)")
+            tca_ax.set_xlabel("t")
+            tca_ax.set_ylabel("x(t)")
+            tca_ax.set_zlabel("y(t)")
+
+            plt.show()
+
+        #self.trajectories[closest_curve + 1]["colour"] = DEFAULT_TRAJ_COLOUR
+        #self.regen_quiver(force=True)
+
+    def closest_curve(self, event: matplotlib.backend_bases.MouseEvent) -> tuple:
+        """
+        Cycle through plotted trajectories and find curve with minimum distance to point
+        """
+
+        distances = []
+        for i in range(1, self.trajectory_count + 1):
+            curve_f = np.array(self.trajectories[i]["sol_f"].y)
+            curve_r = np.array(self.trajectories[i]["sol_r"].y)
+
+            #print(curve_f)
+            #print(curve_r)
+
+            full_curve = np.concatenate((curve_f, curve_r), axis=1)
+            distances.append(self.min_dist(full_curve, (event.xdata, event.ydata)))
+
+        return np.argmin(np.array(distances)), np.min(np.array(distances))
+
+    def min_dist(self, trajectory: np.ndarray, point: tuple) -> float:
+        """
+        Find minimum distance between trajectory and point
+        """
+        point_x = point[0]
+        point_y = point[1]
+        
+        traj_x = np.array(trajectory[0, :])
+        traj_y = np.array(trajectory[1, :])
+
+        distances = np.sqrt((point_x - traj_x)**2 + (point_y - traj_y)**2)
+
+        return min(distances)
 
 
 def log_transform(u: np.ndarray, v: np.ndarray) -> np.ndarray:
