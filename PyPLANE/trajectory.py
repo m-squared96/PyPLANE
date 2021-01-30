@@ -591,9 +591,10 @@ class PhaseSpace2D(PhaseSpaceParent):
             solution_f = traj_dict["sol_f"]
             solution_r = traj_dict["sol_r"]
             colour = traj_dict["colour"]
+            width = traj_dict["width"]
 
             # Plots a red "x" on the position of the user's click
-            self.ax.plot(x_event, y_event, ls="", marker="x", c=DEFAULT_MARK_COLOUR)
+            self.ax.plot(x_event, y_event, ls="", marker="x", c=DEFAULT_MARK_COLOUR, ms=10)
 
             for sol in (solution_f, solution_r):
                 if sol.success:
@@ -601,7 +602,7 @@ class PhaseSpace2D(PhaseSpaceParent):
                     # print(len(sol.t))
                     x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
                     y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
-                    self.trajectory = self.ax.plot(x, y, c=colour)
+                    self.trajectory = self.ax.plot(x, y, c=colour, linewidth=width)
                     self.fig.canvas.draw()
                 else:
                     print(sol.message)
@@ -637,6 +638,7 @@ class PhaseSpace2D(PhaseSpaceParent):
         traj_dict["sol_r"] = solution_r
         traj_dict["plotted"] = False
         traj_dict["colour"] = DEFAULT_TRAJ_COLOUR
+        traj_dict["width"] = 2.0
 
         self.trajectories[self.trajectory_count] = traj_dict
 
@@ -646,7 +648,15 @@ class PhaseSpace2D(PhaseSpaceParent):
         """
         # Figure out closest curve
         closest_curve, distance = self.closest_curve(event)
+
         self.trajectories[closest_curve + 1]["colour"] = "#227722"
+        self.trajectories[closest_curve + 1]["width"] = 5.0
+        
+        other_curves = [t for t in list(self.trajectories.keys()) if t != closest_curve + 1]
+        for c in other_curves:
+            self.trajectories[c]["colour"] = DEFAULT_TRAJ_COLOUR
+            self.trajectories[c]["width"] = 2.0
+
         self.regen_quiver(force=True)
 
         # TODO: implement buffer
@@ -663,15 +673,16 @@ class PhaseSpace2D(PhaseSpaceParent):
         curve_t = np.linspace(self.time_r, self.time_f, len(curve_x))
 
         tca_fig = plt.figure(num="PyPLANE: TCA")
+        tca_fig.tight_layout()
 
         if self.tca_tvsx:
             self.tca_tvsx = False
 
             tca_ax = tca_fig.add_subplot(111)
             tca_ax.plot(curve_t, curve_x)
-            tca_ax.set_title("t vs x(t)")
-            tca_ax.set_xlabel("t")
-            tca_ax.set_ylabel("x(t)")
+            tca_ax.set_title(r"$t$ vs $x(t)$")
+            tca_ax.set_xlabel(r"$t$")
+            tca_ax.set_ylabel(r"$x(t)$")
 
             plt.show()
 
@@ -680,9 +691,9 @@ class PhaseSpace2D(PhaseSpaceParent):
 
             tca_ax = tca_fig.add_subplot(111)
             tca_ax.plot(curve_t, curve_y)
-            tca_ax.set_title("t vs y(t)")
-            tca_ax.set_xlabel("t")
-            tca_ax.set_ylabel("y(t)")
+            tca_ax.set_title(r"$t$ vs $y(t)$")
+            tca_ax.set_xlabel(r"$t$")
+            tca_ax.set_ylabel(r"$y(t)$")
 
             plt.show()
 
@@ -690,10 +701,10 @@ class PhaseSpace2D(PhaseSpaceParent):
             self.tca_tvsxvsy = False
             tca_ax = tca_fig.add_subplot(111, projection='3d')
             tca_ax.plot(curve_t, curve_x, curve_y)
-            tca_ax.set_title("t vs x(t) vs y(t)")
-            tca_ax.set_xlabel("t")
-            tca_ax.set_ylabel("x(t)")
-            tca_ax.set_zlabel("y(t)")
+            tca_ax.set_title(r"$t$ vs $x(t)$ vs $y(t)$")
+            tca_ax.set_xlabel("$t$")
+            tca_ax.set_ylabel("$x(t)$")
+            tca_ax.set_zlabel("$y(t)$")
 
             plt.show()
 
