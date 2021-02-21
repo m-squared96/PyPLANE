@@ -5,6 +5,7 @@ Draws the main window of the PyPLANE Qt5 interface
 import sys
 import os
 import functools
+
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -19,9 +20,17 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QMenu,
     QMessageBox,
+    QListWidget,
+    QListWidgetItem,
+    QAbstractItemView,
+    QScrollBar,
+    QCheckBox,
+    QRadioButton,
 )
-
+import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from mpl_toolkits.mplot3d import Axes3D
 
 from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
@@ -123,6 +132,7 @@ class MainWindow(QMainWindow):
         self.menu_file = menu_bar.addMenu("File")
         self.menu_edit = menu_bar.addMenu("Edit")
         self.menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_analysis = menu_bar.addMenu("Analysis")
         self.menu_gallery = menu_bar.addMenu("Gallery")
 
         # File > Quit
@@ -150,6 +160,11 @@ class MainWindow(QMainWindow):
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
+        # Analysis
+        self.action_tca = QAction("Trajectory Component Analysis", self)
+        self.menu_analysis.addAction(self.action_tca)
+        self.action_tca.triggered.connect(self.tca_init)
+
         # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
@@ -170,6 +185,33 @@ class MainWindow(QMainWindow):
 
         setattr(self, "menu_" + gallery_name, gallery_menu)
         setattr(self, "actions_" + gallery_name, gallery_actions)
+
+    def tca_init(self) -> None:
+
+        if self.phase_plot.system.dims == 1:
+            self.handle_tca_dim_error()
+
+        self.phase_plot.toggle_annotation()
+
+        #if self.tca_window is None:
+        self.tca_window = TCAWindow(self.phase_plot.trajectories)
+        self.tca_window.show()
+
+        #self.phase_plot.toggle_annotation()
+
+    def handle_tca_dim_error(self) -> None:
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Trajectory component analysis only available for 2D systems"
+        )
+
+    def handle_tca_null_error(self) -> None:
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Trajectories must be plotted before TCA can occur"
+        )
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         self.basic_popup(
@@ -664,6 +706,196 @@ class MainWindow(QMainWindow):
 
         self.plot_button_clicked()
 
+
+class TCAWindow(QWidget):
+    """
+    Selection menu consisting of candidate trajectories for TCA.
+    """
+    def __init__(self, traj_dict) -> None:
+        super().__init__()
+
+        self.tvsx = True
+        self.tvsy = False
+        self.tvsxvsy = False
+
+        self.plot_separately = True
+        self.plot_together = False
+
+        # Define layout and widgets
+        self.layout = QVBoxLayout()
+
+        self.listwidget = QListWidget() # List widget for selecting trajectories
+        self.listwidget.setGeometry(50, 70, 150, 80) 
+        self.listwidget.setSelectionMode(QAbstractItemView.MultiSelection)
+        scroll_bar = QScrollBar(self)
+        self.listwidget.setVerticalScrollBar(scroll_bar)
+
+        self.traj_dict = traj_dict
+        self.list_traj()
+
+        # Tickboxes (AKA checkboxes) for components
+        self.component_tickbox_layout = QHBoxLayout()
+
+        self.tickbox_tvsx = QCheckBox("t vs x(t)",self)
+        self.tickbox_tvsx.setChecked(True)
+        self.tickbox_tvsx.stateChanged.connect(self.toggle_tvsx)
+
+        self.tickbox_tvsy = QCheckBox("t vs y(t)",self)
+        self.tickbox_tvsy.stateChanged.connect(self.toggle_tvsy)
+
+        self.tickbox_tvsxvsy = QCheckBox("t vs x(t) vs y(t)",self)
+        self.tickbox_tvsxvsy.stateChanged.connect(self.toggle_tvsxvsy)
+
+        self.component_tickbox_layout.addWidget(self.tickbox_tvsx)
+        self.component_tickbox_layout.addWidget(self.tickbox_tvsy)
+        self.component_tickbox_layout.addWidget(self.tickbox_tvsxvsy)
+
+        # Radio buttons for plotting method
+        self.plotting_method_layout = QHBoxLayout()
+
+        self.radiobutton_sep = QRadioButton("Separately", self)
+        self.radiobutton_sep.setChecked(True)
+        self.radiobutton_sep.toggled.connect(self.toggle_method_sep)
+
+        self.radiobutton_tog = QRadioButton("Together", self)
+        self.radiobutton_tog.setChecked(False)
+        self.radiobutton_tog.toggled.connect(self.toggle_method_tog)
+
+        self.plotting_method_layout.addWidget(self.radiobutton_sep)
+        self.plotting_method_layout.addWidget(self.radiobutton_tog)
+        
+        # Big ol' plot button
+        self.plot_button = QPushButton("Plot", self)
+        self.plot_button.clicked.connect(self.plot_button_clicked)
+
+        # Tying everything up
+        self.layout.addWidget(self.listwidget)
+        self.layout.addLayout(self.component_tickbox_layout)
+        self.layout.addLayout(self.plotting_method_layout)
+        self.layout.addWidget(self.plot_button)
+
+        self.setLayout(self.layout)
+
+    def list_traj(self) -> None:
+        """
+        Add trajectories to list widget
+        """
+        keys = tuple(self.traj_dict.keys())
+
+        for k in keys:
+            item = QListWidgetItem("Curve " + str(k))
+            self.listwidget.addItem(item)
+
+    def toggle_tvsx(self):
+        self.tvsx = not(self.tvsx)
+
+    def toggle_tvsy(self):
+        self.tvsy = not(self.tvsy)
+
+    def toggle_tvsxvsy(self):
+        self.tvsxvsy = not(self.tvsxvsy)
+
+    def toggle_method_sep(self) -> None:
+        self.plot_separately = True
+        self.plot_together = False
+
+    def toggle_method_tog(self) -> None:
+        self.plot_separately = False
+        self.plot_together = True
+
+    def plot_button_clicked(self) -> None:
+        curves = [int(i.text().replace("Curve ", "")) 
+                for i in self.listwidget.selectedItems()]
+        
+        self.tca_graphs(curves)
+
+        #self.close()
+
+    def tca_graphs(self, curves: list) -> None:
+        
+        if self.tvsx:
+            self.tca_tvsx(curves, sep=self.plot_separately)
+
+        if self.tvsy:
+            self.tca_tvsy(curves, sep=self.plot_separately)
+
+        if self.tvsxvsy:
+            self.tca_tvsxvsy(curves, sep=self.plot_separately)
+
+        plt.show()
+
+    def tca_tvsx(self, curves: list, sep: bool) -> None:
+        if not sep:
+            plt.figure()
+
+        for c in curves:
+            if sep:
+                plt.figure()
+
+            traj_data = self.traj_dict[c]
+
+            time_lims = traj_data["time_lims"]
+            sol_f = traj_data["sol_f"].y[0,:]
+            sol_r = np.flip(traj_data["sol_r"].y[0,:])
+
+            full_time = np.linspace(time_lims[0], time_lims[1], len(sol_f) + len(sol_r))
+            full_curve = np.concatenate((sol_r, sol_f))
+
+            plt.plot(full_time, full_curve, label="Curve " + str(c))
+            plt.legend()
+            plt.xlabel(r'$t$')
+            plt.ylabel(r'$x(t)$')
+            plt.title('PyPLANE: ' + r'$t$' + ' vs ' + r'$x(t)$')
+
+    def tca_tvsy(self, curves: list, sep: bool) -> None:
+        if not sep:
+            plt.figure()
+
+        for c in curves:
+            if sep:
+                plt.figure()
+
+            traj_data = self.traj_dict[c]
+
+            time_lims = traj_data["time_lims"]
+            sol_f = traj_data["sol_f"].y[1,:]
+            sol_r = np.flip(traj_data["sol_r"].y[1,:])
+
+            full_time = np.linspace(time_lims[0], time_lims[1], len(sol_f) + len(sol_r))
+            full_curve = np.concatenate((sol_r, sol_f))
+
+            plt.plot(full_time, full_curve, label="Curve " + str(c))
+            plt.legend()
+            plt.xlabel(r'$t$')
+            plt.ylabel(r'$y(t)$')
+            plt.title('PyPLANE: ' + r'$t$' + ' vs ' + r'$y(t)$')
+
+    def tca_tvsxvsy(self, curves: list, sep: bool) -> None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        for c in curves:
+            traj_data = self.traj_dict[c]
+
+            time_lims = traj_data["time_lims"]
+
+            sol_f_x = traj_data["sol_f"].y[0,:]
+            sol_r_x = np.flip(traj_data["sol_r"].y[0,:])
+            full_curve_x = np.concatenate((sol_r_x, sol_f_x))
+
+            sol_f_y = traj_data["sol_f"].y[1,:]
+            sol_r_y = np.flip(traj_data["sol_r"].y[1,:])
+            full_curve_y = np.concatenate((sol_r_y, sol_f_y))
+
+            full_time = np.linspace(time_lims[0], time_lims[1], len(full_curve_x))
+            
+            ax.plot(full_time, full_curve_x, full_curve_y, label="Curve " + str(c))
+
+        ax.set_title(r'$t$' + ' vs ' + r'$x(t)$'  + ' vs ' + r'$y(t)$')
+        ax.set_xlabel(r'$t$')
+        ax.set_ylabel(r'$x(t)$')
+        ax.set_zlabel(r'$y(t)$')
+        ax.legend()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
