@@ -190,6 +190,7 @@ class MainWindow(QMainWindow):
 
         if self.phase_plot.system.dims == 1:
             self.handle_tca_dim_error()
+            return
 
         self.phase_plot.toggle_annotation()
 
