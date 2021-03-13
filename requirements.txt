@@ -1,6 +1,6 @@
 numpy
 sympy
 matplotlib
-PyQt5
+PyQt5==5.15.2
 scipy
 pre-commit
