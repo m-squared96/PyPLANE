@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backend_bases import NavigationToolbar2, Event
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigCanvas
+from mpl_toolkits.mplot3d import Axes3D
 
 from PyPLANE.equations import SystemOfEquations
 
+DEFAULT_TRAJ_COLOUR = "#0066FF"
+DEFAULT_MARK_COLOUR = "#FF0000"
 
 class PhaseSpaceParent(FigCanvas):
     """
@@ -191,10 +194,10 @@ class PhaseSpaceParent(FigCanvas):
         else:
             self.regen_quiver(event)
 
-    def regen_quiver(self, event=None) -> None:
+    def regen_quiver(self, event=None, force=False) -> None:
         new_lims = np.asarray((tuple(self.ax.get_xlim()), tuple(self.ax.get_ylim())))
 
-        if not np.all(self.axes_limits == new_lims):
+        if not np.all(self.axes_limits == new_lims) or force:
             self.axes_limits = new_lims
             self.clear_plane()
             self.draw_quiver()
@@ -216,6 +219,9 @@ class PhaseSpaceParent(FigCanvas):
 
         self.regen_quiver()
 
+    def toggle_annotation(self) -> None:
+        self.annotate_plots = not(self.annotate_plots)
+        self.regen_quiver(force=True)
 
 class PhaseSpace1D(PhaseSpaceParent):
     def __init__(
@@ -233,6 +239,8 @@ class PhaseSpace1D(PhaseSpaceParent):
     ) -> None:
 
         super().__init__(1, fw_time_lim, bw_time_lim)
+
+        self.annotate_plots = False
 
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
@@ -443,6 +451,8 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         super().__init__(2)
 
+        self.annotate_plots = False
+
         # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
@@ -586,6 +596,9 @@ class PhaseSpace2D(PhaseSpaceParent):
             # Plots a red "x" on the position of the user's click
             self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
+            if self.annotate_plots:
+                self.ax.annotate("Curve " + str(traj), (x_event, y_event))
+
             for sol in (solution_f, solution_r):
                 if sol.success:
                     # sol.y has shape (2, n_points) for a 2-D system
@@ -624,6 +637,7 @@ class PhaseSpace2D(PhaseSpaceParent):
         traj_dict["y_event"] = y_event
         traj_dict["sol_f"] = solution_f
         traj_dict["sol_r"] = solution_r
+        traj_dict["time_lims"] = (self.time_r, self.time_f)
         traj_dict["plotted"] = False
 
         self.trajectories[self.trajectory_count] = traj_dict

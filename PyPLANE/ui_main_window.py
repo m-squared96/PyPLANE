@@ -5,6 +5,7 @@ Draws the main window of the PyPLANE Qt5 interface
 import sys
 import os
 import functools
+
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -19,15 +20,24 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QMenu,
     QMessageBox,
+    QListWidget,
+    QListWidgetItem,
+    QAbstractItemView,
+    QScrollBar,
+    QCheckBox,
+    QRadioButton,
 )
-
+import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from mpl_toolkits.mplot3d import Axes3D
 
 from PyPLANE.core_info import VERSION
 from PyPLANE.equations import DifferentialEquation, SystemOfEquations
 from PyPLANE.trajectory import PhaseSpace1D, PhaseSpace2D
 from PyPLANE.gallery import Gallery
 from PyPLANE.defaults import psp_by_dimensions
+from PyPLANE.analysis import TCAWindow
 
 
 class MainWindow(QMainWindow):
@@ -123,6 +133,7 @@ class MainWindow(QMainWindow):
         self.menu_file = menu_bar.addMenu("File")
         self.menu_edit = menu_bar.addMenu("Edit")
         self.menu_dims = menu_bar.addMenu("Dimensions")
+        self.menu_analysis = menu_bar.addMenu("Analysis")
         self.menu_gallery = menu_bar.addMenu("Gallery")
 
         # File > Quit
@@ -150,6 +161,11 @@ class MainWindow(QMainWindow):
         self.menu_dims.addAction(self.action_2D)
         self.action_2D.triggered.connect(self.show_2D)
 
+        # Analysis
+        self.action_tca = QAction("Trajectory Component Analysis", self)
+        self.menu_analysis.addAction(self.action_tca)
+        self.action_tca.triggered.connect(self.tca_init)
+
         # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
@@ -170,6 +186,34 @@ class MainWindow(QMainWindow):
 
         setattr(self, "menu_" + gallery_name, gallery_menu)
         setattr(self, "actions_" + gallery_name, gallery_actions)
+
+    def tca_init(self) -> None:
+
+        if self.phase_plot.system.dims == 1:
+            self.handle_tca_dim_error()
+            return
+
+        self.phase_plot.toggle_annotation()
+
+        #if self.tca_window is None:
+        self.tca_window = TCAWindow(self.phase_plot.trajectories)
+        self.tca_window.show()
+
+        #self.phase_plot.toggle_annotation()
+
+    def handle_tca_dim_error(self) -> None:
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Trajectory component analysis only available for 2D systems"
+        )
+
+    def handle_tca_null_error(self) -> None:
+        self.basic_popup(
+            icon=QMessageBox.Warning,
+            button=QMessageBox.Ok,
+            text="Trajectories must be plotted before TCA can occur"
+        )
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         self.basic_popup(
