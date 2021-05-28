@@ -84,7 +84,13 @@ class SystemOfEquations:
     """
 
     def __init__(
-        self, system_coords, ode_expr_strings, solve_method="RK45", params=None, *args, **kwargs
+        self,
+        system_coords,
+        ode_expr_strings,
+        solve_method="RK45",
+        params=None,
+        *args,
+        **kwargs,
     ) -> None:
         # ode_expr_strings is a dictionary that maps the dependent variable
         # of the equation (e.g. x in dx/dt = f(x,t)) to the corresponding

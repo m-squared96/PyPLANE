@@ -13,6 +13,7 @@ from PyPLANE.equations import SystemOfEquations
 DEFAULT_TRAJ_COLOUR = "#0066FF"
 DEFAULT_MARK_COLOUR = "#FF0000"
 
+
 class PhaseSpaceParent(FigCanvas):
     """
     Accepts a system of equations (equations.SystemOfEqutions object) and produces
@@ -25,8 +26,8 @@ class PhaseSpaceParent(FigCanvas):
     def __init__(
         self,
         dimensions: int,
-        fw_time_lim: float = 5.0,
-        bw_time_lim: float = -5.0,
+        fw_time_lim: float = 100.0,
+        bw_time_lim: float = -100.0,
         *args,
         **kwargs,
     ) -> None:
@@ -39,8 +40,15 @@ class PhaseSpaceParent(FigCanvas):
         self.time_f = fw_time_lim
         self.time_r = bw_time_lim
 
-        NavigationToolbar2.home = self.handle_home
-        # self.fig.canvas.mpl_connect('home_event', self.handle_home)
+        self.annotate_plots = False
+
+        # Initialise button click event on local figure object
+        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+
+        # Initialise button release event on local figure object -> adapt quiver to FOV
+        self.release_cid = self.fig.canvas.mpl_connect(
+            "button_release_event", self.regen_quiver
+        )
 
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         """
@@ -57,10 +65,10 @@ class PhaseSpaceParent(FigCanvas):
             )
 
             # Split the Rprime declaration into two lines for clarity
-            dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[
-                0
-            ]
-            Rprime = [np.ones(R[0].shape), dependent_primes]
+            dependent_primes, *_ = self.system.phasespace_eval(
+                t=None, r=np.array([R[1]])
+            )
+            Rprime = log_transform(np.ones(R[0].shape), dependent_primes)
 
         elif self.system.dims == 2:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
@@ -83,7 +91,8 @@ class PhaseSpaceParent(FigCanvas):
             )
 
         if self.system.dims in (2, 3):
-            Rprime = self.system.phasespace_eval(t=None, r=R)
+            _ = self.system.phasespace_eval(t=None, r=R)
+            Rprime = log_transform(_[0], _[1])
 
         return R, Rprime
 
@@ -213,22 +222,17 @@ class PhaseSpaceParent(FigCanvas):
         for traj in list(self.trajectories.keys()):
             self.trajectories[traj]["plotted"] = False
 
-    def handle_home(self) -> None:
-        self.ax.set_xlim(self.original_axes_limits[0])
-        self.ax.set_ylim(self.original_axes_limits[1])
-
-        self.regen_quiver()
-
     def toggle_annotation(self) -> None:
-        self.annotate_plots = not(self.annotate_plots)
+        self.annotate_plots = not (self.annotate_plots)
         self.regen_quiver(force=True)
+
 
 class PhaseSpace1D(PhaseSpaceParent):
     def __init__(
         self,
         system: SystemOfEquations,
-        fw_time_lim: float = 5.0,
-        bw_time_lim: float = -5.0,
+        fw_time_lim: float = 20.0,
+        bw_time_lim: float = -20.0,
         axes_limits: tuple = ((-5, 5), (-5, 5)),
         max_trajectories: int = 10,
         quiver_expansion_factor: float = 0.2,
@@ -239,16 +243,6 @@ class PhaseSpace1D(PhaseSpaceParent):
     ) -> None:
 
         super().__init__(1, fw_time_lim, bw_time_lim)
-
-        self.annotate_plots = False
-
-        # Initialise button click event on local figure object
-        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        # Initialise button release event on local figure object -> adapt quiver to FOV
-        self.release_cid = self.fig.canvas.mpl_connect(
-            "button_release_event", self.regen_quiver
-        )
 
         self.original_axes_limits = axes_limits
 
@@ -278,11 +272,6 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.ax.cla()
         self.fig.tight_layout()
         self.system = system
-
-        # # Time at which to stop forward trajectory evaluation
-        # self.time_f = fw_time_lim
-        # # Time at which to stop backward trajectory evaluation
-        # self.time_r = bw_time_lim
 
         # Factor to expand quiverplot to ensure all visible regions plotted
         self.quiver_expansion_factor = quiver_expansion_factor
@@ -334,7 +323,7 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.display_vars = display_vars
         self.draw_quiver()
 
-    def draw_quiver(self) -> None:
+    def set_quiver_data(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
         R, Rprime = self.generate_meshes()
         quiver_data = {}
@@ -354,6 +343,7 @@ class PhaseSpace1D(PhaseSpaceParent):
 
         self.quiver_data = quiver_data
 
+    def draw_quiver(self) -> None:
         # Display vars are the system variables to be plotted.
         # Given a system with coords [x, y], display_vars can take 4 forms:
         # 1. ["x"], 2. ["y"], 3. ["x", "y"], 4. ["y", "x"]
@@ -361,14 +351,13 @@ class PhaseSpace1D(PhaseSpaceParent):
         # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
         # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
 
+        self.set_quiver_data()
+
         X, U, xmin, xmax = self.quiver_data["t"]
         Y, V, ymin, ymax = self.quiver_data[self.display_vars[0]]
 
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
-
-        # log-transform the vectors' lengths
-        U, V = log_transform(U, V)
 
         # Sets up quiver plot
         self.quiver = self.ax.quiver(
@@ -379,8 +368,6 @@ class PhaseSpace1D(PhaseSpaceParent):
             pivot="middle",
             angles="xy",
         )
-
-        self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
         self.draw()
 
@@ -428,7 +415,7 @@ class PhaseSpace1D(PhaseSpaceParent):
                         x = np.linspace(x_event, t, y.size)
                     elif x_event == t:
                         x = x_event
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                    self.ax.plot(x, y, c="#0066FF")
                     self.fig.canvas.draw()
                 else:
                     print(sol.message)
@@ -453,14 +440,6 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.annotate_plots = False
 
-        # Initialise button click event on local figure object
-        self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        # Initialise button release event on local figure object -> adapt quiver to FOV
-        self.release_cid = self.fig.canvas.mpl_connect(
-            "button_release_event", self.regen_quiver
-        )
-
         self.original_axes_limits = axes_limits
 
         self.init_space(
@@ -477,8 +456,8 @@ class PhaseSpace2D(PhaseSpaceParent):
     def init_space(
         self,
         system: SystemOfEquations,
-        fw_time_lim: float = 5.0,
-        bw_time_lim: float = -5.0,
+        fw_time_lim: float = 20.0,
+        bw_time_lim: float = -20.0,
         axes_limits: tuple = ((-5, 5), (-5, 5)),
         max_trajectories: int = 10,
         quiver_expansion_factor: float = 0.2,
@@ -537,7 +516,7 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.draw_quiver()
 
-    def draw_quiver(self) -> None:
+    def set_quiver_data(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
         R, Rprime = self.generate_meshes()
         quiver_data = {}
@@ -550,6 +529,7 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.quiver_data = quiver_data
 
+    def draw_quiver(self) -> None:
         # Display vars are the system variables to be plotted.
         # Given a system with coords [x, y], display_vars can take 4 forms:
         # 1. ["x"], 2. ["y"], 3. ["x", "y"], 4. ["y", "x"]
@@ -557,14 +537,13 @@ class PhaseSpace2D(PhaseSpaceParent):
         # In the two-dimensional cases, the variables plotted on a given axis depend on the order of display_vars.
         # If display_vars = ["y", "x"] the y variable is plotted on the x-axis, and x on the y-axis. Trippy, I know.
 
+        self.set_quiver_data()
+
         X, U, xmin, xmax = self.quiver_data[self.display_vars[0]]
         Y, V, ymin, ymax = self.quiver_data[self.display_vars[1]]
 
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
-
-        # log-transform the vectors' lengths
-        U, V = log_transform(U, V)
 
         # Sets up quiver plot
         self.quiver = self.ax.quiver(
@@ -575,8 +554,6 @@ class PhaseSpace2D(PhaseSpaceParent):
             pivot="middle",
             angles="xy",
         )
-
-        self.trajectory = self.ax.plot(0, 0)  # Need an initial 'trajectory'
 
         self.draw()
 
@@ -602,10 +579,9 @@ class PhaseSpace2D(PhaseSpaceParent):
             for sol in (solution_f, solution_r):
                 if sol.success:
                     # sol.y has shape (2, n_points) for a 2-D system
-                    # print(len(sol.t))
                     x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
                     y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
-                    self.trajectory = self.ax.plot(x, y, c="#0066FF")
+                    self.ax.plot(x, y, c="#0066FF")
                     self.fig.canvas.draw()
                 else:
                     print(sol.message)

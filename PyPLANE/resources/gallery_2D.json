@@ -7,7 +7,8 @@
             "params": {"a": 2, "b": 3, "c": 3, "d": 3},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-10, 10], [-10, 10]]
+            "axes_limits": [[-10, 10], [-10, 10]],
+            "solve_method": "LSODA"
         },
         {
             "system_name": "Linear system",
@@ -16,7 +17,9 @@
             "params": {"a": 1, "b": -1, "c": 1, "d": 1},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-5, 5], [-5, 5]]
+            "axes_limits": [[-5, 5], [-5, 5]],
+            "solve_method": "LSODA"
+
         },
         {
             "system_name":"Vibrating string",
@@ -25,7 +28,9 @@
             "params": {"k": 3, "d": 0, "m": 1},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-5, 5], [-5, 5]]
+            "axes_limits": [[-5, 5], [-5, 5]],
+            "solve_method": "LSODA"
+
         },
         {
             "system_name":"Pendulum",
@@ -34,7 +39,9 @@
             "params": {"g": 9.8, "l": 9.8, "m": 1, "c": 0},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-10, 10], [-4, 4]]
+            "axes_limits": [[-10, 10], [-4, 4]],
+            "solve_method": "LSODA"
+
         },
 
         {
@@ -44,7 +51,9 @@
             "params": {"a": 0.4, "b": 0.01, "c": 0.3, "d": 0.005},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[0, 120], [0, 80]]
+            "axes_limits": [[0, 120], [0, 80]],
+            "solve_method": "LSODA"
+
         },
         {
             "system_name":"Competing Species",
@@ -53,7 +62,9 @@
             "params": {"a": 4, "b": 2, "c": 7},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[0, 1], [0, 1]]
+            "axes_limits": [[0, 1], [0, 1]],
+            "solve_method": "RK45"
+
         },
         {
             "system_name":"Van der Pol's Equation",
@@ -62,7 +73,9 @@
             "params": {"m": 2},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-5, 5], [-5, 5]]
+            "axes_limits": [[-5, 5], [-5, 5]],
+            "solve_method": "LSODA"
+
         },
         {
             "system_name":"Duffing Equation",
@@ -71,7 +84,9 @@
             "params": {"k": -1, "c": 0, "l": 1, "m": 1},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[-5, 5], [-5, 5]]
+            "axes_limits": [[-5, 5], [-5, 5]],
+            "solve_method": "LSODA"
+
         },
         {
             "system_name":"Milonni-Eberly laser model",
@@ -80,7 +95,9 @@
             "params": {"g": 2, "k": 1, "f": 1, "p": 1},
             "t_f": 10,
             "t_r": -10,
-            "axes_limits": [[0, 4], [0, 4]]
+            "axes_limits": [[0, 4], [0, 4]],
+            "solve_method": "LSODA"
+
         }
     ]
 }

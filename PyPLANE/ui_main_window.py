@@ -63,6 +63,8 @@ class MainWindow(QMainWindow):
         self.show_2D()
         self.draw_window()
 
+        self.set_solver("LSODA")
+
     def load_gallery(self, filename: str, gallery_name: str, num_dims: int) -> None:
         setattr(self, gallery_name, Gallery(filename, num_dims))
 
@@ -71,11 +73,8 @@ class MainWindow(QMainWindow):
         self.show()
 
     def basic_popup(
-            self, 
-            icon=QMessageBox.Information, 
-            button=QMessageBox.Ok,
-            text="Pop-Up"
-        ):
+        self, icon=QMessageBox.Information, button=QMessageBox.Ok, text="Pop-Up"
+    ):
         """
         Basic pop-up window facility. Displays pop-up which grabs screen's attention.
 
@@ -103,13 +102,13 @@ class MainWindow(QMainWindow):
         msg = QMessageBox()
         msg.setWindowTitle("PyPLANE")
         msg.setText(text)
-        
+
         # If a non-permitted icon value passed -> default to info
         try:
             msg.setIcon(icon)
         except:
             msg.setIcon(QMessageBox.Information)
-            
+
         # If a non-permitted button value passed -> default to OK
         try:
             msg.setStandardButtons(button)
@@ -151,6 +150,9 @@ class MainWindow(QMainWindow):
         self.menu_edit.addAction(self.action_fixed_points)
         self.action_fixed_points.changed.connect(self.phase_plot.toggle_fixed_points)
 
+        # Edit > Set Solver
+        self.create_solver_menu()
+
         # Dimensions > 1D
         self.action_1D = QAction("One-Dimensional PyPLANE", self)
         self.menu_dims.addAction(self.action_1D)
@@ -169,6 +171,30 @@ class MainWindow(QMainWindow):
         # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
+
+    def set_solver(self, solver) -> None:
+        self.solve_method = solver
+        self.phase_plot.system.set_solve_method(self.solve_method)
+        print(f"Set solve method to {solver}")
+
+    def solve_method_changed(self) -> None:
+        self.solve_method = self.solve_method_combo.currentText()
+
+    def create_solver_menu(self) -> None:
+        solvers = ("RK23", "RK45", "DOP853", "Radau", "BDF", "LSODA")
+        solver_menu = self.menu_edit.addMenu("Set Solver Method")
+        solver_menu_actions = []
+
+        for solver in solvers:
+            solv_menu_item_action = QAction(solver, self)
+            solv_func = functools.partial(self.set_solver, solver)
+            solv_menu_item_action.triggered.connect(solv_func)
+
+            solver_menu.addAction(solv_menu_item_action)
+            solver_menu_actions.append(solv_menu_item_action)
+
+        self.solver_menu = solver_menu
+        self.solver_menu_actions = solver_menu_actions
 
     def create_gallery_menu(
         self, gallery_name: str, submenu_name: str, num_dims: int
@@ -195,45 +221,39 @@ class MainWindow(QMainWindow):
 
         self.phase_plot.toggle_annotation()
 
-        #if self.tca_window is None:
+        # if self.tca_window is None:
         self.tca_window = TCAWindow(self.phase_plot.trajectories)
         self.tca_window.show()
 
-        #self.phase_plot.toggle_annotation()
+        # self.phase_plot.toggle_annotation()
 
     def handle_tca_dim_error(self) -> None:
         self.basic_popup(
             icon=QMessageBox.Warning,
             button=QMessageBox.Ok,
-            text="Trajectory component analysis only available for 2D systems"
+            text="Trajectory component analysis only available for 2D systems",
         )
 
     def handle_tca_null_error(self) -> None:
         self.basic_popup(
             icon=QMessageBox.Warning,
             button=QMessageBox.Ok,
-            text="Trajectories must be plotted before TCA can occur"
+            text="Trajectories must be plotted before TCA can occur",
         )
 
     def handle_empty_entry(self, phase_coords: list, passed_params: dict) -> None:
         self.basic_popup(
-            icon=QMessageBox.Warning,
-            button=QMessageBox.Ok,
-            text="Blank detected"
+            icon=QMessageBox.Warning, button=QMessageBox.Ok, text="Blank detected"
         )
 
     def handle_invalid_eqns(self) -> None:
-        
+
         warning = """
             Equation string should not contain the following symbols:
              I, E, S, N, C, O, or Q
         """
 
-        self.basic_popup(
-            icon=QMessageBox.Warning,
-            button=QMessageBox.Ok,
-            text=warning
-        )
+        self.basic_popup(icon=QMessageBox.Warning, button=QMessageBox.Ok, text=warning)
 
     def required_fields_full(self, phase_coords: list, passed_params: dict) -> bool:
         """
@@ -529,12 +549,12 @@ class MainWindow(QMainWindow):
         """
         Parses equation inputs and checks for invalid/disallowed symbols.
         Returns True if equation contains no offending characters.
-        
+
         List of disallowed symbols can be found in the SymPy docs:
         https://docs.sympy.org/latest/gotchas.html
         """
-        disallowed_symbols = ("I","E","S","N","C","O","Q")
-        
+        disallowed_symbols = ("I", "E", "S", "N", "C", "O", "Q")
+
         for eqn in equations:
             for sym in disallowed_symbols:
                 if eqn.find(sym) != -1:
@@ -605,10 +625,6 @@ class MainWindow(QMainWindow):
         else:
             self.update_psp(phase_coords, passed_params)
 
-    def solve_method_changed(self) -> None:
-        self.solve_method = self.solve_method_combo.currentText()
-        self.phase_plot.system.set_solve_method(self.solve_method)
-
     def update_psp(self, phase_coords: list, passed_params: dict) -> None:
         """
         Gathers entry information from GUI and updates phase plot
@@ -621,7 +637,9 @@ class MainWindow(QMainWindow):
             f_2 = self.y_prime_entry.text()
             eqns.append(f_2)
 
-        system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
+        system_of_eqns = SystemOfEquations(
+            phase_coords, eqns, solve_method=self.solve_method, params=passed_params
+        )
 
         self.action_nullclines.setChecked(False)
         lim_floats = [float(lim) for lim in self.lim_entries]
@@ -696,6 +714,9 @@ class MainWindow(QMainWindow):
         sys_params = system["params"]
         param_names = list(sys_params.keys())
         num_sys_params = len(param_names)
+
+        # Solver
+        self.solve_method = system["solve_method"]
 
         for param_num in range(num_sys_params):
             param_name = str(param_names[param_num])
