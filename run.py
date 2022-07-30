@@ -4,7 +4,7 @@ This file should be used to run PyPLANE from the project folder while testing.
 eg. `python3 ./run`
 
 It is also to be used to build the Windows binary
-ie. `pyinstaller.exe --onefile --noconsole .\run`
+ie. `pyinstaller.exe --onefile --noconsole .\run` (DEPRICATED)
 """
 
 import sys
