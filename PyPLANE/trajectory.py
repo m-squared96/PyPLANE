@@ -42,6 +42,24 @@ class PhaseSpaceParent(FigCanvas):
         NavigationToolbar2.home = self.handle_home
         # self.fig.canvas.mpl_connect('home_event', self.handle_home)
 
+    def generate_meshes(self) -> (np.ndarray, np.ndarray):
+        """
+        Returns R and Rprime, lists of mesh grids for coordinate positions and phase
+        space slopes respectively.
+        Must be implemented by subclasses.
+        """
+        raise NotImplementedError
+
+    def derivative_expression_resolve(
+        self, display_vars: list, dimensions: int, positions: list
+    ) -> np.ndarray:
+        """
+        Function to resolve the coordinates of an argument to the order of
+        coordinates in an equations.SystemOfEquations object.
+        Must be implemented by subclasses.
+        """
+        raise NotImplementedError
+
     def get_calc_limits(self, lims: list) -> (float, float):
         """
         Returns the limits to be used in the mesh grid generation expanded with the
@@ -52,28 +70,6 @@ class PhaseSpaceParent(FigCanvas):
         max_lim = lims[1] + extension
 
         return min_lim, max_lim
-
-    def derivative_expression_resolve(
-        self, display_vars: list, dimensions: int, positions: list
-    ) -> np.ndarray:
-        """
-        Function to resolve the coordinates of an argument to the order of
-        coordinates in an equations.SystemOfEquations object
-        """
-        eval_seq = []
-
-        if dimensions in (2, 3):
-            for var in self.system.system_coords:
-                if not (var in display_vars):
-                    eval_seq.append(0)
-
-                elif var in display_vars:
-                    eval_seq.append(positions[display_vars.index(var)])
-
-        elif dimensions == 1:
-            eval_seq.append(self.system.system_coords[0])
-
-        return np.array(eval_seq)
 
     def plot_nullclines(self) -> list:
         """
@@ -289,6 +285,11 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.display_vars = display_vars
         self.draw_quiver()
 
+    def derivative_expression_resolve(self, display_vars: list, dimensions: int,
+                                      positions: list) -> np.ndarray:
+        eval_seq = [self.system.system_coords[0]]
+        return np.array(eval_seq)
+
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         tmin, tmax = self.get_calc_limits(self.axes_limits[0])
         xmin, xmax = self.get_calc_limits(self.axes_limits[1])
@@ -304,6 +305,15 @@ class PhaseSpace1D(PhaseSpaceParent):
         ]
         Rprime = [np.ones(R[0].shape), dependent_primes]
         return R, Rprime
+
+    def plot_nullclines(self) -> list:
+        """
+        Plots the nullclines for the current 2-D system.
+        """
+        X, *_ = self.quiver_data["t"]
+        Y, V, *_ = self.quiver_data[self.system.system_coords[0]]
+        contours_y = self.ax.contour(X, Y, V, levels=[0], colors="yellow")
+        return [contours_y]
 
     def draw_quiver(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
@@ -508,6 +518,22 @@ class PhaseSpace2D(PhaseSpaceParent):
 
         self.draw_quiver()
 
+    def derivative_expression_resolve(
+        self, display_vars: list, dimensions: int, positions: list
+    ) -> np.ndarray:
+        """
+        Function to resolve the coordinates of an argument to the order of
+        coordinates in an equations.SystemOfEquations object
+        """
+        eval_seq = []
+        for var in self.system.system_coords:
+            if not (var in display_vars):
+                eval_seq.append(0)
+
+            elif var in display_vars:
+                eval_seq.append(positions[display_vars.index(var)])
+        return np.array(eval_seq)
+
     def generate_meshes(self) -> (np.ndarray, np.ndarray):
         xmin, xmax = self.get_calc_limits(self.axes_limits[0])
         ymin, ymax = self.get_calc_limits(self.axes_limits[1])
@@ -518,6 +544,16 @@ class PhaseSpace2D(PhaseSpaceParent):
         )
         Rprime = self.system.phasespace_eval(t=None, r=R)
         return R, Rprime
+
+    def plot_nullclines(self) -> list:
+        """
+        Plots the nullclines for the current 2-D system.
+        """
+        X, U, *_ = self.quiver_data[self.system.system_coords[0]]
+        Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
+        contours_x = self.ax.contour(X, Y, U, levels=[0], colors="red")
+        contours_y = self.ax.contour(X, Y, V, levels=[0], colors="yellow")
+        return [contours_x, contours_y]
 
     def draw_quiver(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
