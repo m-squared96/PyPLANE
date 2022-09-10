@@ -154,11 +154,7 @@ class PhaseSpace1D(PhaseSpaceParent):
         super().__init__(1, fw_time_lim, bw_time_lim)
 
         self.annotate_plots = False
-
-        # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        # Initialise button release event on local figure object -> adapt quiver to FOV
         self.release_cid = self.fig.canvas.mpl_connect(
             "button_release_event", self.regen_quiver
         )
@@ -192,12 +188,9 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.fig.tight_layout()
         self.system = system
 
-        # # Time at which to stop forward trajectory evaluation
-        # self.time_f = fw_time_lim
-        # # Time at which to stop backward trajectory evaluation
-        # self.time_r = bw_time_lim
+        self.time_f = fw_time_lim
+        self.time_r = bw_time_lim
 
-        # Factor to expand quiverplot to ensure all visible regions plotted
         self.quiver_expansion_factor = quiver_expansion_factor
 
         # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
@@ -220,22 +213,13 @@ class PhaseSpace1D(PhaseSpaceParent):
         # TODO: explain
         self.mesh_density = mesh_density
 
-        self.max_trajectories = (
-            max_trajectories  # Maximum number of trajectories that can be visualised
-        )
-        self.trajectory_count = 0  # Trajectory increment variable
+        self.max_trajectories = max_trajectories
+        self.trajectory_count = 0
         self.trajectories = {}
 
-        # Set to True only by toggle_nullclines method
         self.nullclines_init = False
-
-        # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
-
-        # Set to True only by toggle_fixed_points method
         self.fixed_points_init = False
-
-        # list of references to fixed point markers
         self.fixed_point_markers = None
 
         display_vars = self.system.system_coords
@@ -261,7 +245,6 @@ class PhaseSpace1D(PhaseSpaceParent):
             np.linspace(xmin, xmax, self.mesh_density),
         )
 
-        # Split the Rprime declaration into two lines for clarity
         dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[
             0
         ]
@@ -278,7 +261,6 @@ class PhaseSpace1D(PhaseSpaceParent):
         return [contours_y]
 
     def draw_quiver(self) -> None:
-        # Returns R (coordinate grids) and Rprime (slope grids)
         R, Rprime = self.generate_meshes()
         quiver_data = {}
 
@@ -310,10 +292,7 @@ class PhaseSpace1D(PhaseSpaceParent):
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
 
-        # log-transform the vectors' lengths
         U, V = log_transform(U, V)
-
-        # Sets up quiver plot
         self.quiver = self.ax.quiver(
             self.reduce_array_density(X, self.axes_points),
             self.reduce_array_density(Y, self.axes_points),
@@ -329,7 +308,6 @@ class PhaseSpace1D(PhaseSpaceParent):
 
     def add_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
-        # Mouse click coordinates
         x_event = event.xdata
         y_event = event.ydata
 
@@ -361,7 +339,6 @@ class PhaseSpace1D(PhaseSpaceParent):
             solution_f = traj_dict["sol_f"]
             solution_r = traj_dict["sol_r"]
 
-            # Plots a red "x" on the position of the user's click
             self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
             for sol, t in zip((solution_f, solution_r), (self.time_f, self.time_r)):
@@ -428,12 +405,9 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.fig.tight_layout()
         self.system = system
 
-        # Time at which to stop forward trajectory evaluation
         self.time_f = fw_time_lim
-        # Time at which to stop backward trajectory evaluation
         self.time_r = bw_time_lim
 
-        # Factor to expand quiverplot to ensure all visible regions plotted
         self.quiver_expansion_factor = quiver_expansion_factor
 
         # Two-dimensional array in the form [[x1min, x1max], [x2min, x2max], ...] etc
@@ -506,7 +480,6 @@ class PhaseSpace2D(PhaseSpaceParent):
         return [contours_x, contours_y]
 
     def draw_quiver(self) -> None:
-        # Returns R (coordinate grids) and Rprime (slope grids)
         R, Rprime = self.generate_meshes()
         quiver_data = {}
 
