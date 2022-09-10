@@ -42,39 +42,6 @@ class PhaseSpaceParent(FigCanvas):
         NavigationToolbar2.home = self.handle_home
         # self.fig.canvas.mpl_connect('home_event', self.handle_home)
 
-    def generate_meshes(self) -> (np.ndarray, np.ndarray):
-        """
-        Returns R and Rprime, lists of mesh grids for coordinate positions and phase
-        space slopes respectively
-        """
-        raise NotImplementedError
-        if self.system.dims == 1:
-            pass
-        elif self.system.dims == 2:
-            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
-            ymin, ymax = self.get_calc_limits(self.axes_limits[1])
-
-            R = np.meshgrid(
-                np.linspace(xmin, xmax, self.mesh_density),
-                np.linspace(ymin, ymax, self.mesh_density),
-            )
-
-        elif self.system.dims == 3:
-            xmin, xmax = self.get_calc_limits(self.axes_limits[0])
-            ymin, ymax = self.get_calc_limits(self.axes_limits[1])
-            zmin, zmax = self.get_calc_limits(self.axes_limits[2])
-
-            R = np.meshgrid(
-                np.linspace(xmin, xmax, self.mesh_density),
-                np.linspace(ymin, ymax, self.mesh_density),
-                np.linspace(zmin, zmax, self.mesh_density),
-            )
-
-        if self.system.dims in (2, 3):
-            Rprime = self.system.phasespace_eval(t=None, r=R)
-
-        return R, Rprime
-
     def get_calc_limits(self, lims: list) -> (float, float):
         """
         Returns the limits to be used in the mesh grid generation expanded with the
@@ -540,6 +507,16 @@ class PhaseSpace2D(PhaseSpaceParent):
                 return
 
         self.draw_quiver()
+
+    def generate_meshes(self) -> (np.ndarray, np.ndarray):
+        xmin, xmax = self.get_calc_limits(self.axes_limits[0])
+        ymin, ymax = self.get_calc_limits(self.axes_limits[1])
+
+        R = np.meshgrid(
+            np.linspace(xmin, xmax, self.mesh_density),
+            np.linspace(ymin, ymax, self.mesh_density),
+        )
+        return R, Rprime
 
     def draw_quiver(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
