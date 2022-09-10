@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 import numpy as np
-import matplotlib  # Imported seperately for type hinting in onclick function signature
+import matplotlib 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backend_bases import NavigationToolbar2, Event
@@ -40,25 +40,6 @@ class PhaseSpaceParent(FigCanvas):
         self.time_r = bw_time_lim
 
         NavigationToolbar2.home = self.handle_home
-        # self.fig.canvas.mpl_connect('home_event', self.handle_home)
-
-    def generate_meshes(self) -> (np.ndarray, np.ndarray):
-        """
-        Returns R and Rprime, lists of mesh grids for coordinate positions and phase
-        space slopes respectively.
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError
-
-    def derivative_expression_resolve(
-        self, display_vars: list, dimensions: int, positions: list
-    ) -> np.ndarray:
-        """
-        Function to resolve the coordinates of an argument to the order of
-        coordinates in an equations.SystemOfEquations object.
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError
 
     def get_calc_limits(self, lims: list) -> (float, float):
         """
@@ -70,24 +51,6 @@ class PhaseSpaceParent(FigCanvas):
         max_lim = lims[1] + extension
 
         return min_lim, max_lim
-
-    def plot_nullclines(self) -> list:
-        """
-        Plots the nullclines for the current 2-D system.
-        """
-
-        if self.dimensions == 1:
-            X, *_ = self.quiver_data["t"]
-            Y, V, *_ = self.quiver_data[self.system.system_coords[0]]
-            contours_y = self.ax.contour(X, Y, V, levels=[0], colors="yellow")
-            return [contours_y]
-
-        elif self.dimensions == 2:
-            X, U, *_ = self.quiver_data[self.system.system_coords[0]]
-            Y, V, *_ = self.quiver_data[self.system.system_coords[1]]
-            contours_x = self.ax.contour(X, Y, U, levels=[0], colors="red")
-            contours_y = self.ax.contour(X, Y, V, levels=[0], colors="yellow")
-            return [contours_x, contours_y]
 
     def toggle_nullclines(self) -> None:
         """
@@ -135,7 +98,6 @@ class PhaseSpaceParent(FigCanvas):
         """
         Function called upon mouse click event
         """
-        # Only works if mouse click is on axis and the maximum number of trajectories has not been reached
         if not event.inaxes == self.ax:
             return
 
@@ -433,15 +395,10 @@ class PhaseSpace2D(PhaseSpaceParent):
         super().__init__(2)
 
         self.annotate_plots = False
-
-        # Initialise button click event on local figure object
         self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
-        # Initialise button release event on local figure object -> adapt quiver to FOV
         self.release_cid = self.fig.canvas.mpl_connect(
             "button_release_event", self.regen_quiver
         )
-
         self.original_axes_limits = axes_limits
 
         self.init_space(
@@ -494,21 +451,14 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.mesh_density = mesh_density
 
         self.max_trajectories = (
-            max_trajectories  # Maximum number of trajectories that can be visualised
+            max_trajectories
         )
-        self.trajectory_count = 0  # Trajectory increment variable
+        self.trajectory_count = 0
         self.trajectories = {}
 
-        # Set to True only by toggle_nullclines method
         self.nullclines_init = False
-
-        # List of references to the contour sets returned by plt.contour
         self.nullcline_contour_sets = None
-
-        # Set to True only by toggle_fixed_points method
         self.fixed_points_init = False
-
-        # list of references to fixed point markers
         self.fixed_point_markers = None
 
         self.display_vars = self.system.system_coords
@@ -581,10 +531,8 @@ class PhaseSpace2D(PhaseSpaceParent):
         self.ax.set_xlim(xmin, xmax)
         self.ax.set_ylim(ymin, ymax)
 
-        # log-transform the vectors' lengths
         U, V = log_transform(U, V)
 
-        # Sets up quiver plot
         self.quiver = self.ax.quiver(
             self.reduce_array_density(X, self.axes_points),
             self.reduce_array_density(Y, self.axes_points),
@@ -611,7 +559,6 @@ class PhaseSpace2D(PhaseSpaceParent):
             solution_f = traj_dict["sol_f"]
             solution_r = traj_dict["sol_r"]
 
-            # Plots a red "x" on the position of the user's click
             self.ax.plot(x_event, y_event, ls="", marker="x", c="#FF0000")
 
             if self.annotate_plots:
@@ -620,7 +567,6 @@ class PhaseSpace2D(PhaseSpaceParent):
             for sol in (solution_f, solution_r):
                 if sol.success:
                     # sol.y has shape (2, n_points) for a 2-D system
-                    # print(len(sol.t))
                     x = sol.y[self.system.system_coords.index(self.display_vars[0]), :]
                     y = sol.y[self.system.system_coords.index(self.display_vars[1]), :]
                     self.trajectory = self.ax.plot(x, y, c="#0066FF")
@@ -632,7 +578,6 @@ class PhaseSpace2D(PhaseSpaceParent):
 
     def add_trajectory(self, event: matplotlib.backend_bases.MouseEvent) -> None:
 
-        # Mouse click coordinates
         x_event = event.xdata
         y_event = event.ydata
 
