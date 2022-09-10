@@ -47,21 +47,9 @@ class PhaseSpaceParent(FigCanvas):
         Returns R and Rprime, lists of mesh grids for coordinate positions and phase
         space slopes respectively
         """
+        raise NotImplementedError
         if self.system.dims == 1:
-            tmin, tmax = self.get_calc_limits(self.axes_limits[0])
-            xmin, xmax = self.get_calc_limits(self.axes_limits[1])
-
-            R = np.meshgrid(
-                np.linspace(tmin, tmax, self.mesh_density),
-                np.linspace(xmin, xmax, self.mesh_density),
-            )
-
-            # Split the Rprime declaration into two lines for clarity
-            dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[
-                0
-            ]
-            Rprime = [np.ones(R[0].shape), dependent_primes]
-
+            pass
         elif self.system.dims == 2:
             xmin, xmax = self.get_calc_limits(self.axes_limits[0])
             ymin, ymax = self.get_calc_limits(self.axes_limits[1])
@@ -333,6 +321,22 @@ class PhaseSpace1D(PhaseSpaceParent):
 
         self.display_vars = display_vars
         self.draw_quiver()
+
+    def generate_meshes(self) -> (np.ndarray, np.ndarray):
+        tmin, tmax = self.get_calc_limits(self.axes_limits[0])
+        xmin, xmax = self.get_calc_limits(self.axes_limits[1])
+
+        R = np.meshgrid(
+            np.linspace(tmin, tmax, self.mesh_density),
+            np.linspace(xmin, xmax, self.mesh_density),
+        )
+
+        # Split the Rprime declaration into two lines for clarity
+        dependent_primes = self.system.phasespace_eval(t=None, r=np.array([R[1]]))[
+            0
+        ]
+        Rprime = [np.ones(R[0].shape), dependent_primes]
+        return R, Rprime
 
     def draw_quiver(self) -> None:
         # Returns R (coordinate grids) and Rprime (slope grids)
