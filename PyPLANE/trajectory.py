@@ -516,6 +516,7 @@ class PhaseSpace2D(PhaseSpaceParent):
             np.linspace(xmin, xmax, self.mesh_density),
             np.linspace(ymin, ymax, self.mesh_density),
         )
+        Rprime = self.system.phasespace_eval(t=None, r=R)
         return R, Rprime
 
     def draw_quiver(self) -> None:
