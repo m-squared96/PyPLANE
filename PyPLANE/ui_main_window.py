@@ -54,6 +54,22 @@ class EquationEntryLayout(QHBoxLayout):
         return self.eqn_rhs_line_edit.text()
 
 
+class ParameterEntryLayout(QHBoxLayout):
+    def __init__(self, param_name, param_val):
+        self.param_name_line_edit = LineEdit(param_name)
+        self.param_val_line_edit = LineEdit(param_val)
+
+        self.addWidget(self.param_name_line_edit)
+        self.addWidget(QLabel("=")
+        self.addWidget(self.param_val_line_edit)
+
+    def param_name_text(self):
+        return self.param_name_line_edit.text()
+
+    def param_val_text(self):
+        return self.param_val_line_edit.text()
+
+
 class MainWindow(QMainWindow):
     """
     The application's main window.
