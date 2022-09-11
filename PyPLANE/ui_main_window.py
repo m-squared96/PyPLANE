@@ -43,11 +43,8 @@ from PyPLANE.analysis import TCAWindow
 class EquationEntryLayout(QHBoxLayout):
     def __init__(self, dep_var, equation_rhs):
         self.dep_var = dep_var
-        self.equation_rhs = equation_rhs
-        self.eqn_lhs_label = Qlabel(dep_var + "' =")
         self.eqn_rhs_line_edit = QLineEdit(equation_rhs)
-
-        self.addWidget(self.eqn_lhs_label)
+        self.addWidget(Qlabel(dep_var + "' ="))
         self.addWidget(self.eqn_rhs_line_edit)
 
     def text(self):
@@ -57,10 +54,10 @@ class EquationEntryLayout(QHBoxLayout):
 class ParameterEntryLayout(QHBoxLayout):
     def __init__(self, param_name, param_val):
         self.param_name_line_edit = LineEdit(param_name)
-        self.param_val_line_edit = LineEdit(param_val)
+        self.param_val_line_edit = LineEdit(str(param_val))
 
         self.addWidget(self.param_name_line_edit)
-        self.addWidget(QLabel("=")
+        self.addWidget(QLabel("="))
         self.addWidget(self.param_val_line_edit)
 
     def param_name_text(self):
@@ -68,6 +65,23 @@ class ParameterEntryLayout(QHBoxLayout):
 
     def param_val_text(self):
         return self.param_val_line_edit.text()
+
+
+class AxisLimitEntry(QHBoxLayout):
+    def __init__(self, var_name, var_min_val, var_max_val):
+        self.var_name = var_name
+        self.min_val_line_edit = LineEdit(str(var_min_val))
+        self.max_val_line_edit = LineEdit(str(var_max_val))
+        self.addWidget(QLabel(f"Max {var_name} ="))
+        self.addWidget(self.max_val_line_edit)
+        self.addWidget(QLabel(f"Min {var_name} ="))
+        self.addWidget(self.min_val_line_edit)
+
+    def max_val_text(self):
+        return self.max_val_line_edit.text()
+
+    def min_val_text(self):
+        return self.min_val_line_edit.text()
 
 
 class MainWindow(QMainWindow):
