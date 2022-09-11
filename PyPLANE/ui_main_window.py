@@ -40,6 +40,20 @@ from PyPLANE.defaults import psp_by_dimensions
 from PyPLANE.analysis import TCAWindow
 
 
+class EquationEntryLayout(QHBoxLayout):
+    def __init__(self, dep_var, equation_rhs):
+        self.dep_var = dep_var
+        self.equation_rhs = equation_rhs
+        self.eqn_lhs_label = Qlabel(dep_var + "' =")
+        self.eqn_rhs_line_edit = QLineEdit(equation_rhs)
+
+        self.addWidget(self.eqn_lhs_label)
+        self.addWidget(self.eqn_rhs_line_edit)
+
+    def text(self):
+        return self.eqn_rhs_line_edit.text()
+
+
 class MainWindow(QMainWindow):
     """
     The application's main window.
