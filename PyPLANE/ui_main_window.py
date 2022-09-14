@@ -42,6 +42,7 @@ from PyPLANE.analysis import TCAWindow
 
 class EquationEntryLayout(QHBoxLayout):
     def __init__(self, dep_var, equation_rhs):
+        QHBoxLayout.__init__(self)
         self.dep_var = dep_var
         self.eqn_rhs_line_edit = QLineEdit(equation_rhs)
         self.addWidget(Qlabel(dep_var + "' ="))
@@ -52,9 +53,10 @@ class EquationEntryLayout(QHBoxLayout):
 
 
 class ParameterEntryLayout(QHBoxLayout):
-    def __init__(self, param_name, param_val):
-        self.param_name_line_edit = LineEdit(param_name)
-        self.param_val_line_edit = LineEdit(str(param_val))
+    def __init__(self, param_name="", param_val=""):
+        QHBoxLayout.__init__(self)
+        self.param_name_line_edit = QLineEdit(param_name)
+        self.param_val_line_edit = QLineEdit(str(param_val))
 
         self.addWidget(self.param_name_line_edit)
         self.addWidget(QLabel("="))
@@ -67,11 +69,13 @@ class ParameterEntryLayout(QHBoxLayout):
         return self.param_val_line_edit.text()
 
 
-class AxisLimitEntry(QHBoxLayout):
+class AxisLimitEntryLayout(QHBoxLayout):
     def __init__(self, var_name, var_min_val, var_max_val):
+        QHBoxLayout.__init__(self)
         self.var_name = var_name
         self.min_val_line_edit = LineEdit(str(var_min_val))
         self.max_val_line_edit = LineEdit(str(var_max_val))
+
         self.addWidget(QLabel(f"Max {var_name} ="))
         self.addWidget(self.max_val_line_edit)
         self.addWidget(QLabel(f"Min {var_name} ="))
@@ -387,6 +391,22 @@ class MainWindow(QMainWindow):
                     "param_" + str(param_num) + "_val"
                 ] = QLineEdit()
 
+    def init_param_layouts(self) -> None:
+        self.parameters_layout = QVBoxLayout()
+        soe_params = self.setup_dict["params"]
+        min_num_param_inputs = 5
+        num_params = len(soe_params)
+
+        self.parameters_layout = QVBoxLayout()
+        self.parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
+        for name, val in self.setup_dict["params"].items():
+            self.parameters_layout.addLayout(ParameterEntryLayout(name, val))
+        # A non-positive value indicates that no more param layouts are needed
+        # and the range created below is empty
+        num_empty_param_inputs = min_num_param_inputs - num_params
+        for i in range(num_empty_param_inputs):
+            self.parameters_layout.addLayout(ParameterEntryLayout())
+
     def setup_equation_inputs(self) -> None:
         """
         Draw the labels and widgets to allow inputing
@@ -497,31 +517,7 @@ class MainWindow(QMainWindow):
             ylim_layout.addWidget(self.y_min_label)
             ylim_layout.addWidget(self.y_min_input)
 
-        # Layouts for user-definable parameters
-        self.parameter_layouts = (
-            {}
-        )  # Each layout contains two input boxes (parameter name and value) and an equals sign
-        for param_num in range(self.no_of_params):
-            self.parameter_layouts[
-                "param_" + str(param_num) + "_layout"
-            ] = QHBoxLayout()
-            self.equals_sign = QLabel("=")
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_name"]
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.equals_sign
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_val"]
-            )
-
-        parameters_layout = QVBoxLayout()  # Inputs for all parameters
-        parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
-        for param_num in range(self.no_of_params):
-            parameters_layout.addLayout(
-                self.parameter_layouts["param_" + str(param_num) + "_layout"]
-            )
+        self.init_param_layouts()
 
         # Combine the system input area into one layout
         inputs_layout = QVBoxLayout()  # All input boxes
@@ -533,7 +529,7 @@ class MainWindow(QMainWindow):
         if self.active_dims == 2:
             inputs_layout.addLayout(ylim_layout)
 
-        inputs_layout.addLayout(parameters_layout)
+        inputs_layout.addLayout(self.parameters_layout)
         inputs_layout.addStretch()
 
         # Create a laout to hold the canvas (phase plot) and matplotlib toolbar
