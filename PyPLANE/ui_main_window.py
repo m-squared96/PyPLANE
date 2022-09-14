@@ -364,33 +364,6 @@ class MainWindow(QMainWindow):
         except KeyError:
             raise ValueError("Trying to set to an unsupported number of dimensions")
 
-    def setup_parameter_inputs(self) -> None:
-        """
-        Allow user to enter a number of parameters
-        """
-        param_names = list(self.setup_dict["params"].keys())
-        param_vals = list(self.setup_dict["params"].values())
-
-        self.parameter_input_boxes = {}
-        self.no_of_params = 5  # Number of user defined parameters
-        for param_num in range(self.no_of_params):
-            # Fills parameter input boxes with parameter vars and corresponding vals
-            if param_num < len(self.setup_dict["params"].keys()):
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit(param_names[param_num])
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit(str(param_vals[param_num]))
-            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
-            else:
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit()
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit()
-
     def init_param_layouts(self) -> None:
         self.parameters_layout = QVBoxLayout()
         soe_params = self.setup_dict["params"]
@@ -473,9 +446,6 @@ class MainWindow(QMainWindow):
 
         # Where the user enter limits for the plot's x and y axes
         self.setup_limit_inputs()
-
-        # These take parameters which can be used in x' and y'
-        self.setup_parameter_inputs()
 
         # Generate layots to arrange UI elements on the window
         # Begin with the equatiom entry boxes
