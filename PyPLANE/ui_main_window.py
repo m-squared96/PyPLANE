@@ -40,6 +40,88 @@ from PyPLANE.defaults import psp_by_dimensions
 from PyPLANE.analysis import TCAWindow
 
 
+class EquationEntryLayout(QHBoxLayout):
+    def __init__(self, dep_var, equation_rhs):
+        QHBoxLayout.__init__(self)
+        self.dep_var = dep_var
+        self.eqn_rhs_line_edit = QLineEdit(equation_rhs)
+        self.addWidget(QLabel(dep_var + "' ="))
+        self.addWidget(self.eqn_rhs_line_edit)
+
+    def text(self):
+        return self.eqn_rhs_line_edit.text()
+
+    def set_text(self, text):
+        self.eqn_rhs_line_edit.setText(text)
+
+    def clear(self):
+        self.eqn_rhs_line_edit.clear()
+
+
+class ParameterEntryLayout(QHBoxLayout):
+    def __init__(self, param_name="", param_val=""):
+        QHBoxLayout.__init__(self)
+        self.param_name_line_edit = QLineEdit(param_name)
+        self.param_val_line_edit = QLineEdit(str(param_val))
+
+        self.addWidget(self.param_name_line_edit)
+        self.addWidget(QLabel("="))
+        self.addWidget(self.param_val_line_edit)
+
+    def param_name_text(self):
+        return self.param_name_line_edit.text()
+
+    def param_val_text(self):
+        return self.param_val_line_edit.text()
+
+    def set_param_name_text(self, name):
+        self.param_name_line_edit.setText(name)
+
+    def set_param_val_text(self, val):
+        self.param_val_line_edit.setText(str(val))
+
+    def set_name_val_text(self, name, val):
+        self.set_param_name_text(name)
+        self.set_param_val_text(str(val))
+
+    def clear(self):
+        self.param_name_line_edit.clear()
+        self.param_val_line_edit.clear()
+
+
+class AxisLimitEntryLayout(QHBoxLayout):
+    def __init__(self, var_name, var_min_val, var_max_val):
+        QHBoxLayout.__init__(self)
+        self.var_name = var_name
+        self.min_val_line_edit = QLineEdit(str(var_min_val))
+        self.max_val_line_edit = QLineEdit(str(var_max_val))
+
+        self.addWidget(QLabel(f"Max {var_name} ="))
+        self.addWidget(self.max_val_line_edit)
+        self.addWidget(QLabel(f"Min {var_name} ="))
+        self.addWidget(self.min_val_line_edit)
+
+    def max_val_text(self):
+        return self.max_val_line_edit.text()
+
+    def min_val_text(self):
+        return self.min_val_line_edit.text()
+
+    def set_min_val_text(self, val):
+        self.min_val_line_edit.setText(str(val))
+
+    def set_max_val_text(self, val):
+        self.max_val_line_edit.setText(str(val))
+
+    def set_min_max_text(self, min_val, max_val):
+        self.set_min_val_text(min_val)
+        self.set_max_val_text(max_val)
+
+    def clear(self):
+        self.min_val_line_edit.clear()
+        self.max_val_line_edit.clear()
+
+
 class MainWindow(QMainWindow):
     """
     The application's main window.
@@ -316,183 +398,97 @@ class MainWindow(QMainWindow):
         except KeyError:
             raise ValueError("Trying to set to an unsupported number of dimensions")
 
-    def setup_parameter_inputs(self) -> None:
-        """
-        Allow user to enter a number of parameters
-        """
-        param_names = list(self.setup_dict["params"].keys())
-        param_vals = list(self.setup_dict["params"].values())
-
-        self.parameter_input_boxes = {}
-        self.no_of_params = 5  # Number of user defined parameters
-        for param_num in range(self.no_of_params):
-            # Fills parameter input boxes with parameter vars and corresponding vals
-            if param_num < len(self.setup_dict["params"].keys()):
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit(param_names[param_num])
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit(str(param_vals[param_num]))
-            # Allows for the situation where self.no_of_params > len(self.setup_dict["params"].keys())
-            else:
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_name"
-                ] = QLineEdit()
-                self.parameter_input_boxes[
-                    "param_" + str(param_num) + "_val"
-                ] = QLineEdit()
-
-    def setup_equation_inputs(self) -> None:
+    def init_equation_layouts(self) -> None:
         """
         Draw the labels and widgets to allow inputing
         of equations (Including the plot button)
         """
-        self.x_prime_label = QLabel(self.phase_plot.system.system_coords[0] + "' =")
-        self.x_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[0])
+        self.equation_entry_layout = QVBoxLayout()
+
+        var1_name = self.phase_plot.system.system_coords[0]
+        var1_equation = self.phase_plot.system.ode_expr_strings[0]
+        self.var1_equation_layout = EquationEntryLayout(var1_name, var1_equation)
+        self.equation_entry_layout.addLayout(self.var1_equation_layout)
 
         if self.active_dims == 2:
-            self.y_prime_label = QLabel(self.phase_plot.system.system_coords[1] + "' =")
-            self.y_prime_entry = QLineEdit(self.phase_plot.system.ode_expr_strings[1])
+            var2_name = self.phase_plot.system.system_coords[1]
+            var2_equation = self.phase_plot.system.ode_expr_strings[1]
+            self.var2_equation_layout = EquationEntryLayout(var2_name, var2_equation)
+            self.equation_entry_layout.addLayout(self.var2_equation_layout)
 
+    def init_plot_button_layout(self) -> None:
         self.plot_button = QPushButton("Plot")
-
-        # Action on clicking plot button
         self.plot_button.clicked.connect(self.plot_button_clicked)
+        self.button_layout = QHBoxLayout()
+        self.button_layout.addStretch()
+        self.button_layout.addWidget(self.plot_button)
+        self.button_layout.addStretch()
 
-    def setup_limit_inputs(self) -> None:
+    def init_limit_layouts(self) -> None:
         """
         Entry boxes for the max and min values to be plotted
         on the x and y axes of the phase plot
         """
-        self.limits_heading = QLabel("Limits of Axes:")
-
-        # The x axis
-        self.x_max_label = QLabel(
-            "Max " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_max_input = QLineEdit(str(self.phase_plot.axes_limits[0][1]))
-        self.x_min_label = QLabel(
-            "Min " + self.phase_plot.system.system_coords[0] + " ="
-        )
-        self.x_min_input = QLineEdit(str(self.phase_plot.axes_limits[0][0]))
-
+        self.lim_layout = QVBoxLayout()
+        self.lim_layout.addWidget(QLabel("Limits of Axes:"))
+        
+        var1_name = self.phase_plot.system.system_coords[0]
+        var1_max_val = self.phase_plot.axes_limits[0][1]
+        var1_min_val = self.phase_plot.axes_limits[0][0]
+        self.var1_lim_layout = AxisLimitEntryLayout(var1_name, var1_min_val,
+                                                    var1_max_val)
+        self.lim_layout.addLayout(self.var1_lim_layout)
+        
         if self.active_dims == 2:
-            # And the y axis
-            self.y_max_label = QLabel(
-                "Max " + self.phase_plot.system.system_coords[1] + " ="
-            )
-            self.y_max_input = QLineEdit(str(self.phase_plot.axes_limits[1][1]))
-            self.y_min_label = QLabel(
-                "Min " + self.phase_plot.system.system_coords[1] + " ="
-            )
-            self.y_min_input = QLineEdit(str(self.phase_plot.axes_limits[1][0]))
+            var2_name = self.phase_plot.system.system_coords[1]
+            var2_max_val = self.phase_plot.axes_limits[1][1]
+            var2_min_val = self.phase_plot.axes_limits[1][0]
+            self.var2_lim_layout = AxisLimitEntryLayout(var2_name, var2_min_val,
+                                                        var2_max_val)
+            self.lim_layout.addLayout(self.var2_lim_layout)
+
+    def init_param_layouts(self) -> None:
+        """
+        Entry boxes for the names and values of the SOE parameters.
+        """
+        soe_params = self.setup_dict["params"]
+        min_num_param_inputs = 5
+        num_params = len(soe_params)
+        self.num_param_inputs = max(min_num_param_inputs, num_params)
+
+        self.parameters_layout = QVBoxLayout()
+        self.parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
+        for name, val in soe_params.items():
+            self.parameters_layout.addLayout(ParameterEntryLayout(name, val))
+
+        num_empty_param_inputs = max(0, min_num_param_inputs - num_params)
+        for i in range(num_empty_param_inputs):
+            self.parameters_layout.addLayout(ParameterEntryLayout())
+
+    def combine_input_layouts(self) -> None:
+        self.inputs_layout = QVBoxLayout()  # All input boxes
+        self.inputs_layout.addLayout(self.equation_entry_layout)
+        self.inputs_layout.addLayout(self.button_layout)
+        self.inputs_layout.addLayout(self.lim_layout)
+        self.inputs_layout.addLayout(self.parameters_layout)
+        self.inputs_layout.addStretch()
 
     def init_ui(self) -> None:
         """
         Puts together various compnents of the UI
         """
-
-        # Define central widget
         # This will hold all UI elements apart from the menu bar
-        cent_widget = QWidget(self)
-        self.setCentralWidget(cent_widget)
-
-        # matplotlib canvas which shows the plot
+        self.cent_widget = QWidget(self)
+        self.setCentralWidget(self.cent_widget)
         self.psp_canvas_default()
-
-        # Menu bar at the top of the window
         self.draw_menubar()
 
-        # Fields to enter values for x' and y' (and a plot button)
-        self.setup_equation_inputs()
+        self.init_equation_layouts()
+        self.init_plot_button_layout()
+        self.init_limit_layouts()
+        self.init_param_layouts()
+        self.combine_input_layouts()
 
-        # Where the user enter limits for the plot's x and y axes
-        self.setup_limit_inputs()
-
-        # These take parameters which can be used in x' and y'
-        self.setup_parameter_inputs()
-
-        # Generate layots to arrange UI elements on the window
-        # Begin with the equatiom entry boxes
-        x_prime_layout = QHBoxLayout()
-        x_prime_layout.addWidget(self.x_prime_label)
-        x_prime_layout.addWidget(self.x_prime_entry)
-
-        if self.active_dims == 2:
-            y_prime_layout = QHBoxLayout()
-            y_prime_layout.addWidget(self.y_prime_label)
-            y_prime_layout.addWidget(self.y_prime_entry)
-
-        # Then do the plot button
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(self.plot_button)
-        button_layout.addStretch()
-
-        # Combine these into one layout
-        equation_entry_layout = QVBoxLayout()
-        equation_entry_layout.addLayout(x_prime_layout)
-
-        if self.active_dims == 2:
-            equation_entry_layout.addLayout(y_prime_layout)
-
-        equation_entry_layout.addLayout(button_layout)
-
-        # And the axes limit inputs
-        xlim_layout = QHBoxLayout()
-        xlim_layout.addWidget(self.x_max_label)
-        xlim_layout.addWidget(self.x_max_input)
-        xlim_layout.addWidget(self.x_min_label)
-        xlim_layout.addWidget(self.x_min_input)
-
-        if self.active_dims == 2:
-            ylim_layout = QHBoxLayout()
-            ylim_layout.addWidget(self.y_max_label)
-            ylim_layout.addWidget(self.y_max_input)
-            ylim_layout.addWidget(self.y_min_label)
-            ylim_layout.addWidget(self.y_min_input)
-
-        # Layouts for user-definable parameters
-        self.parameter_layouts = (
-            {}
-        )  # Each layout contains two input boxes (parameter name and value) and an equals sign
-        for param_num in range(self.no_of_params):
-            self.parameter_layouts[
-                "param_" + str(param_num) + "_layout"
-            ] = QHBoxLayout()
-            self.equals_sign = QLabel("=")
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_name"]
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.equals_sign
-            )
-            self.parameter_layouts["param_" + str(param_num) + "_layout"].addWidget(
-                self.parameter_input_boxes["param_" + str(param_num) + "_val"]
-            )
-
-        parameters_layout = QVBoxLayout()  # Inputs for all parameters
-        parameters_layout.addWidget(QLabel("Parameters (Optional) :"))
-        for param_num in range(self.no_of_params):
-            parameters_layout.addLayout(
-                self.parameter_layouts["param_" + str(param_num) + "_layout"]
-            )
-
-        # Combine the system input area into one layout
-        inputs_layout = QVBoxLayout()  # All input boxes
-        inputs_layout.addLayout(equation_entry_layout)
-
-        inputs_layout.addWidget(self.limits_heading)
-        inputs_layout.addLayout(xlim_layout)
-
-        if self.active_dims == 2:
-            inputs_layout.addLayout(ylim_layout)
-
-        inputs_layout.addLayout(parameters_layout)
-        inputs_layout.addStretch()
-
-        # Create a laout to hold the canvas (phase plot) and matplotlib toolbar
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(NavigationToolbar(self.phase_plot, self))
 
@@ -503,12 +499,11 @@ class MainWindow(QMainWindow):
 
         plot_layout.addWidget(self.phase_plot)
 
-        # Create the final laout, and place on the central widget
-        self.overall_layout = QHBoxLayout()  # Input boxes and phase plot
-        self.overall_layout.addLayout(inputs_layout)
+        self.overall_layout = QHBoxLayout()
+        self.overall_layout.addLayout(self.inputs_layout)
         self.overall_layout.addLayout(plot_layout)
 
-        cent_widget.setLayout(self.overall_layout)
+        self.cent_widget.setLayout(self.overall_layout)
 
     def psp_canvas_default(self) -> None:
         """
@@ -556,45 +551,31 @@ class MainWindow(QMainWindow):
 
         # Grab parameters
         passed_params = {}
-        for param_num in range(self.no_of_params):
-            if self.parameter_input_boxes["param_" + str(param_num) + "_name"].text():
-                # For scenario where parameter label is entered but given no value
-                # Cannot convert empty string to float
+        for param_layout in self.parameters_layout.children():
+            param_name = param_layout.param_name_text()
+            param_val = param_layout.param_val_text()
+            if param_name:
                 try:
-                    passed_params[
-                        self.parameter_input_boxes[
-                            "param_" + str(param_num) + "_name"
-                        ].text()
-                    ] = float(
-                        self.parameter_input_boxes[
-                            "param_" + str(param_num) + "_val"
-                        ].text()
-                    )
-
+                    # For scenario where parameter label is entered but given no value
+                    # Cannot convert empty string to float
+                    param_val = float(param_val)
+                except ValueError:
+                    pass
                 # This will then be passed to DE object and rejected gracefully
-                except:
-                    passed_params[
-                        self.parameter_input_boxes[
-                            "param_" + str(param_num) + "_name"
-                        ].text()
-                    ] = str(
-                        self.parameter_input_boxes[
-                            "param_" + str(param_num) + "_val"
-                        ].text()
-                    )
+                passed_params[param_name] = param_val
 
-        if self.active_dims == 1:
-            self.eqn_entries = [self.x_prime_entry.text()]
-            self.lim_entries = [self.x_min_input.text(), self.x_max_input.text()]
+        self.eqn_entries = [self.var1_equation_layout.text()]
+        self.lim_entries = [
+            self.var1_lim_layout.min_val_text(),
+            self.var1_lim_layout.max_val_text()
+        ]
 
-        elif self.active_dims == 2:
-            self.eqn_entries = [self.x_prime_entry.text(), self.y_prime_entry.text()]
-            self.lim_entries = [
-                self.x_min_input.text(),
-                self.x_max_input.text(),
-                self.y_min_input.text(),
-                self.y_max_input.text(),
-            ]
+        if self.active_dims == 2:
+            self.eqn_entries.append(self.var2_equation_layout.text())
+            self.lim_entries.extend([
+                self.var2_lim_layout.min_val_text(),
+                self.var2_lim_layout.max_val_text()
+            ])
 
         if not self.required_fields_full(phase_coords, passed_params):
             self.handle_empty_entry(phase_coords, passed_params)
@@ -613,12 +594,11 @@ class MainWindow(QMainWindow):
         """
         Gathers entry information from GUI and updates phase plot
         """
-        f_1 = self.x_prime_entry.text()
-        f_2 = None
+        f_1 = self.var1_equation_layout.text()
         eqns = [f_1]
 
         if self.active_dims == 2:
-            f_2 = self.y_prime_entry.text()
+            f_2 = self.var2_equation_layout.text()
             eqns.append(f_2)
 
         system_of_eqns = SystemOfEquations(phase_coords, eqns, params=passed_params)
@@ -640,24 +620,18 @@ class MainWindow(QMainWindow):
         )
 
     def clear_param_inputs(self) -> None:
-        for i in range(self.no_of_params):
-            param_name_key = "param_{}_name".format(i)
-            param_val_key = "param_{}_val".format(i)
-            self.parameter_input_boxes[param_name_key].setText("")
-            self.parameter_input_boxes[param_val_key].setText("")
+        for param_layout in self.parameters_layout.children():
+            param_layout.clear()
 
     def clear_equation_inputs(self) -> None:
-        self.x_prime_entry.setText("")
+        self.var1_equation_layout.clear()
         if self.active_dims == 2:
-            self.y_prime_entry.setText("")
+            self.var2_equation_layout.clear()
 
     def clear_limits_inputs(self) -> None:
-        self.x_max_input.setText("")
-        self.x_min_input.setText("")
-
+        self.var1_lim_layout.clear()
         if self.active_dims == 2:
-            self.y_max_input.setText("")
-            self.y_min_input.setText("")
+            self.var2_lim_layout.clear()
 
     def clear_all_inputs(self) -> None:
         self.clear_equation_inputs()
@@ -673,22 +647,18 @@ class MainWindow(QMainWindow):
 
         # Equations
         system_equations = system["ode_expr_strings"]
-        x_prime_equation = system_equations[0]
-        self.x_prime_entry.setText(x_prime_equation)
+        var1_equation = system_equations[0]
+        self.var1_equation_layout.set_text(var1_equation)
         if self.active_dims == 2:
-            y_prime_equation = system_equations[1]
-            self.y_prime_entry.setText(y_prime_equation)
+            var2_equation = system_equations[1]
+            self.var2_equation_layout.set_text(var2_equation)
 
         # Limits
         axes_limits = system["axes_limits"]
-        x_min, x_max = [str(lim) for lim in axes_limits[0]]
-        y_min, y_max = [str(lim) for lim in axes_limits[1]]
-        self.x_max_input.setText(x_max)
-        self.x_min_input.setText(x_min)
+        self.var1_lim_layout.set_min_max_text(*axes_limits[0])
 
         if self.active_dims == 2:
-            self.y_max_input.setText(y_max)
-            self.y_min_input.setText(y_min)
+            self.var2_lim_layout.set_min_max_text(*axes_limits[1])
 
         # Parameters
         sys_name = system["system_name"]
@@ -697,14 +667,13 @@ class MainWindow(QMainWindow):
         param_names = list(sys_params.keys())
         num_sys_params = len(param_names)
 
+        # This loop assumes that the number of system params is fewer than
+        # the number of parameter layouts. TODO: fix that.
         for param_num in range(num_sys_params):
             param_name = str(param_names[param_num])
             param_val = str(sys_params[param_name])
-
-            param_name_key = "param_{}_name".format(param_num)
-            param_val_key = "param_{}_val".format(param_num)
-            self.parameter_input_boxes[param_name_key].setText(param_name)
-            self.parameter_input_boxes[param_val_key].setText(param_val)
+            param_layout = self.parameters_layout.children()[param_num]
+            param_layout.set_name_val_text(param_name, param_val)
 
         self.plot_button_clicked()
 
