@@ -2,8 +2,9 @@
 
 An open source replacement to the traditional DFIELD and PPLANE applications for solving systems of ODEs
 
-![Alt Text](Screenshot_1.png)
-![Alt Text](Screenshot_2.png)
+![Default 2D system](screenshot_1.png)
+![2D system with trajectories](screenshot_2.png)
+![1D system with trajectories](screenshot_3.png)
 
 ## About
 
