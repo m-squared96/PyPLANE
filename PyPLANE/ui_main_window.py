@@ -74,9 +74,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(app_name + " " + app_version)
         self.show()
 
+
+    # TODO: Propose seperate file - ui_popups.py
     def basic_popup(
-            self, 
-            icon=QMessageBox.Information, 
+            self,
+            window_title="PyPLANE",
+            icon=QMessageBox.Information,
             button=QMessageBox.Ok,
             text="Pop-Up"
         ):
@@ -105,7 +108,7 @@ class MainWindow(QMainWindow):
         """
 
         msg = QMessageBox()
-        msg.setWindowTitle("PyPLANE")
+        msg.setWindowTitle(window_title)
         msg.setText(text)
         
         # If a non-permitted icon value passed -> default to info
@@ -123,6 +126,17 @@ class MainWindow(QMainWindow):
         # Show pop-up
         msg.exec_()
 
+    def about_popup(self):
+        """
+        Popup to display version / build information
+        """
+        about_text = "PyPLANE Version " + VERSION\
+            + "\nA graphing calculator for differential equations."\
+            + "\nDocumentation available at"\
+            +  "\nhttps://github.com/m-squared96/PyPLANE/wiki."
+        
+        self.basic_popup(window_title="About PyPLANE", text=about_text)
+
     def draw_menubar(self) -> None:
         """
         Draws the menu bar that appears at the top of the window. If method is recalled, existing menu bar
@@ -139,6 +153,7 @@ class MainWindow(QMainWindow):
         self.menu_dims = menu_bar.addMenu("Dimensions")
         self.menu_analysis = menu_bar.addMenu("Analysis")
         self.menu_gallery = menu_bar.addMenu("Gallery")
+        self.menu_help = menu_bar.addMenu("Help")
 
         # File > Quit
         self.action_quit = QAction("Quit", self)
@@ -173,6 +188,11 @@ class MainWindow(QMainWindow):
         # Gallery
         self.create_gallery_menu("gallery_1D", "One-Dimensional", 1)
         self.create_gallery_menu("gallery_2D", "Two-Dimensional", 2)
+
+        # Help Menu
+        self.action_about = QAction("About")
+        self.menu_help.addAction(self.action_about)
+        self.action_about.triggered.connect(self.about_popup)
 
     def create_gallery_menu(
         self, gallery_name: str, submenu_name: str, num_dims: int
