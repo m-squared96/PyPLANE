@@ -19,7 +19,7 @@ PyPLANE is available on the Snap Store for Linux
 
 ## Quick Start
 
-If you are using Linux and have installed via the Snap store PyPLANE should appear in your application. If you use
+If you are using Linux and have installed via the Snap store PyPLANE should appear in your application launcher. If you use
 Windows or Mac instead, or don't use the Snap store on Linux, you can clone the repository from GitHub and run the top-level
 run.py file using Python 3. Note that you will need to have installed the following Python libraries for this method:
 * NumPy
