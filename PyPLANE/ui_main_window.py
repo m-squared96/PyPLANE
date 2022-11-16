@@ -42,7 +42,7 @@ from PyPLANE.ui_layouts import (
     ParameterEntryLayout,
     AxisLimitEntryLayout,
 )
-
+from PyPLANE.ui_popups import display_test_popup
 
 class MainWindow(QMainWindow):
     """
@@ -192,7 +192,7 @@ class MainWindow(QMainWindow):
         # Help Menu
         self.action_about = QAction("About")
         self.menu_help.addAction(self.action_about)
-        self.action_about.triggered.connect(self.about_popup)
+        self.action_about.triggered.connect(display_test_popup)
 
     def create_gallery_menu(
         self, gallery_name: str, submenu_name: str, num_dims: int
