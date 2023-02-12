@@ -20,3 +20,8 @@ env/
 
 # Kde Advanced Text Editor (Kate) Project file
 .kateproject
+
+# pyinstaller files
+build/
+dist/
+*.spec
